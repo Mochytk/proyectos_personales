@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { SymbolView } from '@/components/AppIcon';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -90,5 +90,3 @@ export default function TabLayout() {
   );
 }
 
-// Ensure the View component used in the header is imported or handled natively
-import { View } from 'react-native';

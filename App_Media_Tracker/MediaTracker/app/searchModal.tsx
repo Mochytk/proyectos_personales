@@ -2,20 +2,11 @@ import { useState, useMemo } from 'react';
 import { StyleSheet, TextInput, Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
-import { router, Link } from 'expo-router';
+import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
-
-const mediaTypeIcons: Record<string, any> = {
-  software: { ios: 'desktopcomputer', android: 'computer', web: 'computer' },
-  task: { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' },
-  movie: { ios: 'film', android: 'movie', web: 'movie' },
-  tv_show: { ios: 'tv', android: 'tv', web: 'tv' },
-  book: { ios: 'book.closed', android: 'book', web: 'book' },
-  video_game: { ios: 'gamecontroller', android: 'gamepad', web: 'gamepad' },
-  event: { ios: 'calendar', android: 'event', web: 'event' }
-};
+import { iconForType } from '@/constants/mediaTypes';
 
 export default function SearchModalScreen() {
   const allItems = useStore(state => state.items);
@@ -66,7 +57,7 @@ export default function SearchModalScreen() {
           </View>
         ) : results.length === 0 ? (
           <View style={styles.emptyStateContainer}>
-            <Text style={[styles.emptyStateText, { color: colors.text + '80' }]}>No se encontraron resultados para "{query}"</Text>
+            <Text style={[styles.emptyStateText, { color: colors.text + '80' }]}>No se encontraron resultados para &quot;{query}&quot;</Text>
           </View>
         ) : (
           <View style={styles.listContainer}>
@@ -81,7 +72,7 @@ export default function SearchModalScreen() {
                 }}
               >
                 <View style={[styles.itemIcon, { backgroundColor: colors.tint + '15' }]}>
-                  <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={20} tintColor={colors.tint} />
+                  <SymbolView name={iconForType(item.type)} size={20} tintColor={colors.tint} />
                 </View>
                 <View style={styles.itemContent}>
                   <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>

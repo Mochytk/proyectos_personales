@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, Pressable, ScrollView, Switch } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore, MediaType } from '@/store/useStore';
-import { useNavigation, router } from 'expo-router';
+import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';

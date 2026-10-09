@@ -1,22 +1,14 @@
-import { useLocalSearchParams, router, Stack, Link, useNavigation } from 'expo-router';
+import { useLocalSearchParams, router, Link, useNavigation } from 'expo-router';
 import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { useStore, MediaItem, MediaType } from '@/store/useStore';
+import { useStore, MediaItem } from '@/store/useStore';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
+import { iconForType } from '@/constants/mediaTypes';
 import { useMemo, useEffect } from 'react';
 
 const { width } = Dimensions.get('window');
-
-const mediaTypeIcons: Record<string, any> = {
-  software: { ios: 'desktopcomputer', android: 'computer', web: 'computer' },
-  task: { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' },
-  movie: { ios: 'film', android: 'movie', web: 'movie' },
-  tv_show: { ios: 'tv', android: 'tv', web: 'tv' },
-  book: { ios: 'book.closed', android: 'book', web: 'book' },
-  video_game: { ios: 'gamecontroller', android: 'gamepad', web: 'gamepad' },
-};
 
 export default function ListDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,7 +69,7 @@ export default function ListDetailScreen() {
     } else {
       navigation.setOptions({ title: 'No Encontrado' });
     }
-  }, [navigation, list?.name, list?.id, colors]);
+  }, [navigation, list, colors]);
 
   if (!list) {
     return (
@@ -114,7 +106,7 @@ export default function ListDetailScreen() {
           { backgroundColor: colors.surface, width: itemWidth }
         ])}>
           <View style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio(), backgroundColor: colors.tint + '15' }]}>
-            <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={32} tintColor={colors.tint} />
+            <SymbolView name={iconForType(item.type)} size={32} tintColor={colors.tint} />
           </View>
           <View style={styles.gridCardContent}>
             <Text style={[styles.gridTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
@@ -129,7 +121,7 @@ export default function ListDetailScreen() {
     <Link key={item.id} href={`/item/${item.id}`} asChild>
       <Pressable style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
         <View style={[styles.itemIcon, { backgroundColor: colors.tint + '15' }]}>
-          <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={20} tintColor={colors.tint} />
+          <SymbolView name={iconForType(item.type)} size={20} tintColor={colors.tint} />
         </View>
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>

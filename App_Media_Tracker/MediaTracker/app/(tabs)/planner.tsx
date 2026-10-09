@@ -4,7 +4,7 @@ import { SymbolView } from '@/components/AppIcon';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useStore, MediaItem } from '@/store/useStore';
 import { DayBucket, bucketFor } from '@/store/dates';
 
@@ -24,6 +24,13 @@ export default function PlannerScreen() {
 
   const allItems = useStore(state => state.items);
   const updateItem = useStore(state => state.updateItem);
+
+  // Re-group every minute so items move to "Vencidos" / "Hoy" without reopening the app.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(timer);
+  }, []);
   
   const upcomingItems = useMemo(() => {
     return allItems
@@ -32,11 +39,10 @@ export default function PlannerScreen() {
   }, [allItems]);
 
   const groups = useMemo(() => {
-    const now = Date.now();
     return BUCKETS
       .map(({ key, label }) => ({ key, label, items: upcomingItems.filter(item => bucketFor(item, now) === key) }))
       .filter(group => group.items.length > 0);
-  }, [upcomingItems]);
+  }, [upcomingItems, now]);
 
   useEffect(() => {
     navigation.setOptions({

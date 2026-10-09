@@ -1,38 +1,14 @@
 import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
+import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
 import Colors from '@/constants/Colors';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useMemo } from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useStore, MediaItem, MediaType, MediaList } from '@/store/useStore';
+import { useStore, MediaItem, MediaType } from '@/store/useStore';
 
 const { width } = Dimensions.get('window');
-
-export const mediaTypeLabelsES: Record<MediaType, string> = {
-  software: 'Software',
-  task: 'Tareas',
-  movie: 'Películas',
-  tv_show: 'Series',
-  book: 'Libros',
-  audiobook: 'Audiolibros',
-  video_game: 'Videojuegos',
-  board_game: 'Juegos de Mesa',
-  music_album: 'Música',
-  app: 'Apps',
-  event: 'Eventos',
-  note: 'Notas'
-};
-
-const mediaTypeIcons: Record<string, any> = {
-  software: { ios: 'desktopcomputer', android: 'computer', web: 'computer' },
-  task: { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' },
-  movie: { ios: 'film', android: 'movie', web: 'movie' },
-  tv_show: { ios: 'tv', android: 'tv', web: 'tv' },
-  book: { ios: 'book.closed', android: 'book', web: 'book' },
-  video_game: { ios: 'gamecontroller', android: 'gamepad', web: 'gamepad' },
-  event: { ios: 'calendar', android: 'event', web: 'event' }
-};
 
 export default function ListsScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -72,7 +48,7 @@ export default function ListsScreen() {
           { backgroundColor: colors.surface, width: itemWidth }
         ])}>
           <View style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio(), backgroundColor: colors.tint + '15' }]}>
-            <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={32} tintColor={colors.tint} />
+            <SymbolView name={iconForType(item.type)} size={32} tintColor={colors.tint} />
           </View>
           <View style={styles.gridCardContent}>
             <Text style={[styles.gridTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
@@ -87,7 +63,7 @@ export default function ListsScreen() {
     <Link key={item.id} href={`/item/${item.id}`} asChild>
       <Pressable style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
         <View style={[styles.itemIcon, { backgroundColor: colors.tint + '15' }]}>
-          <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={20} tintColor={colors.tint} />
+          <SymbolView name={iconForType(item.type)} size={20} tintColor={colors.tint} />
         </View>
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
