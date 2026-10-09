@@ -1,20 +1,12 @@
 import { StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
+import { iconForType } from '@/constants/mediaTypes';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { useStore, MediaType } from '@/store/useStore';
-
-const mediaTypeIcons: Record<string, any> = {
-  software: { ios: 'desktopcomputer', android: 'computer', web: 'computer' },
-  task: { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' },
-  movie: { ios: 'film', android: 'movie', web: 'movie' },
-  tv_show: { ios: 'tv', android: 'tv', web: 'tv' },
-  book: { ios: 'book.closed', android: 'book', web: 'book' },
-  video_game: { ios: 'gamecontroller', android: 'gamepad', web: 'gamepad' },
-};
+import { useStore } from '@/store/useStore';
 
 export default function EnjoyingScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -93,7 +85,7 @@ export default function EnjoyingScreen() {
                   <Image source={{ uri: item.posterUrl }} style={styles.poster} />
                 ) : (
                   <View style={[styles.iconContainer, { backgroundColor: colors.tint + '15' }]}>
-                    <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={24} tintColor={colors.tint} />
+                    <SymbolView name={iconForType(item.type)} size={24} tintColor={colors.tint} />
                   </View>
                 )}
                 <View style={styles.cardContent}>

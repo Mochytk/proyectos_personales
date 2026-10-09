@@ -5,7 +5,7 @@ import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
 
@@ -23,9 +23,12 @@ export default function ItemDetailScreen() {
   const [dueDate, setDueDate] = useState(toDateInput(item?.dueDate));
   const [dueTime, setDueTime] = useState(toTimeInput(item?.dueDate, item?.dueHasTime));
 
-  useEffect(() => {
-    if (item) setNotes(item.notes || '');
-  }, [item?.notes]);
+  // Keep the field in sync if the note changes elsewhere (or arrives after the store hydrates).
+  const [syncedNotes, setSyncedNotes] = useState(item?.notes);
+  if (item?.notes !== syncedNotes) {
+    setSyncedNotes(item?.notes);
+    setNotes(item?.notes || '');
+  }
 
   if (!item) {
     return (

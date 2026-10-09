@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, TextInput, Pressable, ScrollView, Platform, Image, ActivityIndicator, Switch } from 'react-native';
+import { StyleSheet, TextInput, Pressable, ScrollView, Image, ActivityIndicator, Switch } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore, MediaType } from '@/store/useStore';
-import { useNavigation, router } from 'expo-router';
+import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
@@ -71,16 +71,15 @@ export default function ModalScreen() {
   const [tmdbError, setTmdbError] = useState('');
   const [picked, setPicked] = useState<TmdbResult | null>(null);
 
+  const searchActive = !!tmdbKind && !!tmdbApiKey && tmdbQuery.trim().length >= 2;
+
   useEffect(() => {
-    setTmdbError('');
-    if (!tmdbKind || !tmdbApiKey || tmdbQuery.trim().length < 2) {
-      setTmdbResults([]);
-      setTmdbLoading(false);
-      return;
-    }
+    if (!searchActive || !tmdbKind || !tmdbApiKey) return;
     const controller = new AbortController();
-    setTmdbLoading(true);
+    // Debounced: nothing is requested (or shown) until the user pauses typing.
     const timer = setTimeout(() => {
+      setTmdbLoading(true);
+      setTmdbError('');
       searchTmdb(tmdbKind, tmdbQuery.trim(), tmdbApiKey, controller.signal)
         .then(setTmdbResults)
         .catch((e) => {
@@ -91,7 +90,7 @@ export default function ModalScreen() {
         .finally(() => { if (!controller.signal.aborted) setTmdbLoading(false); });
     }, 400);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [tmdbQuery, tmdbKind, tmdbApiKey]);
+  }, [searchActive, tmdbQuery, tmdbKind, tmdbApiKey]);
 
   const handlePick = (result: TmdbResult) => {
     setPicked(result);
@@ -223,9 +222,9 @@ export default function ModalScreen() {
                 placeholder={tmdbKind === 'movie' ? 'Busca una película...' : 'Busca una serie...'}
                 placeholderTextColor={colors.text + '80'}
               />
-              {tmdbLoading && <ActivityIndicator style={{ marginTop: 12 }} color={colors.tint} />}
-              {tmdbError !== '' && <Text style={[styles.helpText, { color: '#ff3b30' }]}>{tmdbError}</Text>}
-              {tmdbResults.map((r) => (
+              {searchActive && tmdbLoading && <ActivityIndicator style={{ marginTop: 12 }} color={colors.tint} />}
+              {searchActive && tmdbError !== '' && <Text style={[styles.helpText, { color: '#ff3b30' }]}>{tmdbError}</Text>}
+              {(searchActive ? tmdbResults : []).map((r) => (
                 <Pressable key={r.externalId} style={[styles.result, { backgroundColor: colors.cardBackground }]} onPress={() => handlePick(r)}>
                   {r.posterUrl ? (
                     <Image source={{ uri: r.posterUrl }} style={styles.resultPoster} />

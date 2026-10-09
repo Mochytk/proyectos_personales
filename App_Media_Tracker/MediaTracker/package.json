@@ -27,18 +27,25 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@types/node": "^26.6.5",
     "@types/react": "~19.2.2",
     "@types/uuid": "^10.0.0",
     "electron": "^44.5.1",
     "electron-builder": "^26.15.3",
-    "typescript": "~6.0.3"
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.3"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "electron:build": "npx expo export -p web && electron-builder --mac --arm64"
+    "electron:build": "npx expo export -p web && electron-builder --mac --arm64",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "private": true,
   "build": {

@@ -105,7 +105,7 @@ export const useStore = create<AppState>()(
             id: uuidv4(), 
             createdAt: Date.now(), 
             updatedAt: Date.now(),
-            tags: [],
+            tags: itemData.tags ?? [],
           }
         ]
       })),

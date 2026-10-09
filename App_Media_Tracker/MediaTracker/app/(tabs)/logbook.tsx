@@ -1,24 +1,12 @@
-import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
+import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { useStore, MediaType } from '@/store/useStore';
-import { mediaTypeLabelsES } from './index'; // import spanish labels
-
-const { width } = Dimensions.get('window');
-
-const mediaTypeIcons: Record<string, any> = {
-  software: { ios: 'desktopcomputer', android: 'computer', web: 'computer' },
-  task: { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' },
-  movie: { ios: 'film', android: 'movie', web: 'movie' },
-  tv_show: { ios: 'tv', android: 'tv', web: 'tv' },
-  book: { ios: 'book.closed', android: 'book', web: 'book' },
-  video_game: { ios: 'gamecontroller', android: 'gamepad', web: 'gamepad' },
-  event: { ios: 'calendar', android: 'event', web: 'event' }
-};
 
 export default function LogbookScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -96,7 +84,7 @@ export default function LogbookScreen() {
               {stats.topTypes.map(([type, count], index) => (
                 <View key={type} style={[styles.breakdownRow, { borderTopColor: index > 0 ? colors.cardBackground : 'transparent', borderTopWidth: index > 0 ? 1 : 0 }]}>
                   <View style={styles.breakdownLeft}>
-                    <SymbolView name={mediaTypeIcons[type] || mediaTypeIcons['software']} size={16} tintColor={colors.text} style={{ marginRight: 10 }} />
+                    <SymbolView name={iconForType(type)} size={16} tintColor={colors.text} style={{ marginRight: 10 }} />
                     <Text style={[styles.breakdownLabel, { color: colors.text }]}>{mediaTypeLabelsES[type as MediaType] || type}</Text>
                   </View>
                   <Text style={[styles.breakdownCount, { color: colors.tint }]}>{count}</Text>
@@ -124,7 +112,7 @@ export default function LogbookScreen() {
             <Link key={item.id} href={`/item/${item.id}`} asChild>
               <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.tint + '15' }]}>
-                  <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={24} tintColor={colors.tint} />
+                  <SymbolView name={iconForType(item.type)} size={24} tintColor={colors.tint} />
                 </View>
                 <View style={styles.cardContent}>
                   <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
