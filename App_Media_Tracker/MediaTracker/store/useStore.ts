@@ -3,6 +3,10 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
+import { DEFAULT_SETTINGS, StoreData, dropOrphanListRefs, mergeData, normalizeData } from './backup';
+
+// Bump this whenever the persisted shape changes, and handle the old version in `migrate` below.
+export const STORE_VERSION = 1;
 
 export type MediaType = 'software' | 'task' | 'movie' | 'tv_show' | 'book' | 'audiobook' | 'video_game' | 'board_game' | 'music_album' | 'app' | 'event' | 'note';
 
@@ -70,20 +74,17 @@ interface AppState {
   removeList: (id: string) => void;
 
   updateSettings: (updates: Partial<AppSettings>) => void;
+
+  /** Merges backup data into the current data (newest `updatedAt` wins, nothing is deleted). */
+  importData: (incoming: StoreData) => { added: number; updated: number };
 }
 
 export const useStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
       lists: [],
-      settings: {
-        showEnjoying: true,
-        showPlanner: true,
-        showLogbook: true,
-        pileLayoutStyle: 'simple_list',
-        pileItemShape: 'square',
-      },
+      settings: DEFAULT_SETTINGS,
       
       addItem: (itemData) => set((state) => ({
         items: [
@@ -134,10 +135,30 @@ export const useStore = create<AppState>()(
       updateSettings: (updates) => set((state) => ({
         settings: { ...state.settings, ...updates }
       })),
+
+      importData: (incoming) => {
+        const { items, lists, settings } = get();
+        const { added, updated, ...merged } = mergeData({ items, lists, settings }, incoming);
+        set(merged);
+        return { added, updated };
+      },
     }),
     {
       name: 'media-tracker-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      version: STORE_VERSION,
+      // Data saved before versioning existed arrives as version 0. Add a `if (version < N)` step
+      // here for each future shape change instead of discarding what the user already saved.
+      migrate: (persisted) => {
+        const data = normalizeData(persisted);
+        return { ...data, items: dropOrphanListRefs(data.items, data.lists) } as unknown as AppState;
+      },
+      // Default merge is shallow: without this, settings added in a later release would be
+      // missing for users whose stored `settings` object predates them.
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        return { ...current, ...p, settings: { ...current.settings, ...(p.settings ?? {}) } };
+      },
     }
   )
 );
