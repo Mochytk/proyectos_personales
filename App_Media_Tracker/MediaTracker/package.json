@@ -53,7 +53,8 @@
     "productName": "Media Tracker V3",
     "mac": {
       "category": "public.app-category.productivity",
-      "identity": null
+      "identity": null,
+      "icon": "build/icon.png"
     },
     "directories": {
       "output": "release"

@@ -113,6 +113,8 @@ if (!gotLock) {
 
 app.whenReady().then(() => {
   if (!gotLock) return;
+  // The packaged app gets its icon from the bundle; when running from source, set it by hand.
+  if (process.platform === 'darwin' && !app.isPackaged) app.dock?.setIcon(path.join(__dirname, 'build', 'icon.png'));
   registerAppProtocol();
   registerStorageHandlers();
   registerMenu();
