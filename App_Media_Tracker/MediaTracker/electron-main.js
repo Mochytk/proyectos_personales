@@ -1,8 +1,9 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, net, protocol, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, nativeTheme, net, protocol, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createFileStorage } = require('./electron-storage');
+const { ACTIONS, buildMenuTemplate } = require('./electron-menu');
 
 nativeTheme.themeSource = 'system';
 
@@ -40,6 +41,14 @@ function registerStorageHandlers() {
   ipcMain.handle('storage:remove', (_event, key) => storage.removeItem(key));
 }
 
+function registerMenu() {
+  const send = (action) => {
+    if (ACTIONS.includes(action) && mainWindow) mainWindow.webContents.send('menu:action', action);
+  };
+  const template = buildMenuTemplate({ isMac: process.platform === 'darwin', appName: app.name, send });
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -68,6 +77,7 @@ function createWindow() {
 app.whenReady().then(() => {
   registerAppProtocol();
   registerStorageHandlers();
+  registerMenu();
   createWindow();
 
   app.on('activate', () => {
