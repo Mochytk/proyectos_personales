@@ -1,1 +1,0 @@
-# App Media Tracker como reemplazo de Sofa
