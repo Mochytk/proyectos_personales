@@ -9,7 +9,8 @@ Es una app Expo (React Native Web) empaquetada con Electron para macOS. Los dato
 ```bash
 npm install
 npm run web          # versión web con recarga (expo start --web)
-npm run electron:build   # genera el .dmg en release/ (arm64, sin firmar)
+npm run electron:build            # .dmg para Apple Silicon (arm64) en release/
+npm run electron:build:universal  # .dmg que sirve en Apple Silicon e Intel
 ```
 
 Antes de abrir una PR:
@@ -46,3 +47,23 @@ Para buscar películas y series necesitas una clave gratuita de [themoviedb.org]
 ## Recordatorios
 
 Las notificaciones de escritorio suenan solo con la app abierta. Sin hora, avisan a las 9:00 del día.
+
+## Distribución en macOS
+
+- El icono está en `build/icon.png` (1024×1024); electron-builder genera el `.icns`. También se usa para el favicon y la pantalla de arranque.
+- El empaquetado solo incluye `dist/` y los `electron-*.js` (unos 8 MB de `app.asar`): las dependencias de Expo ya van dentro del bundle web y se excluyen con `!node_modules` en `build.files`.
+- **Sin firmar (por defecto):** funciona en tu Mac. En otro Mac, macOS bloqueará la primera apertura: clic derecho → Abrir, o `xattr -dr com.apple.quarantine "/Applications/Media Tracker V3.app"`.
+- **Firmada y notarizada** (necesita cuenta de Apple Developer, 99 USD/año): quita `"identity": null` de `build.mac`, añade `"hardenedRuntime": true` y define `CSC_LINK`, `CSC_KEY_PASSWORD`, `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD` y `APPLE_TEAM_ID` antes de compilar. Detalles: <https://www.electron.build/code-signing-mac>.
+- El build universal necesita compilarse en macOS; aquí solo se verificó el empaquetado arm64 sin firmar.
+
+## Atajos
+
+| Atajo | Acción |
+| --- | --- |
+| ⌘N / ⇧⌘N | Nuevo elemento / nueva lista |
+| ⌘F | Buscar |
+| ⌘, | Ajustes |
+| ⌘1 – ⌘4 | Listas, Disfrutando, Planificador, Bitácora |
+| ⇧⌘E / ⇧⌘I | Exportar / importar respaldo |
+
+La ventana recuerda su tamaño y posición, y solo se puede abrir una copia de la app a la vez.

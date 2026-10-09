@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useMenuActions } from '@/hooks/useMenuActions';
 import { useReminders } from '@/hooks/useReminders';
 
 export {
@@ -42,6 +43,7 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   useReminders();
+  useMenuActions();
   
   const PastelDarkTheme = {
     ...DarkTheme,

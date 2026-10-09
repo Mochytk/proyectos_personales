@@ -45,7 +45,8 @@
     "electron:build": "npx expo export -p web && electron-builder --mac --arm64",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "electron:build:universal": "npx expo export -p web && electron-builder --mac --universal"
   },
   "private": true,
   "build": {
@@ -53,7 +54,8 @@
     "productName": "Media Tracker V3",
     "mac": {
       "category": "public.app-category.productivity",
-      "identity": null
+      "identity": null,
+      "icon": "build/icon.png"
     },
     "directories": {
       "output": "release"
@@ -63,10 +65,16 @@
       "electron-main.js",
       "electron-preload.js",
       "electron-storage.js",
-      "package.json"
+      "electron-menu.js",
+      "electron-window-state.js",
+      "package.json",
+      "!node_modules"
     ],
     "extraMetadata": {
       "main": "electron-main.js"
+    },
+    "dmg": {
+      "title": "${productName}"
     }
   }
 }

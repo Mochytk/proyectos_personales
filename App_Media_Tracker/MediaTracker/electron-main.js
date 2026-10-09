@@ -1,8 +1,10 @@
-const { app, BrowserWindow, ipcMain, nativeTheme, net, protocol, shell } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, nativeTheme, net, protocol, screen, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createFileStorage } = require('./electron-storage');
+const { ACTIONS, buildMenuTemplate } = require('./electron-menu');
+const { MIN_SIZE, loadWindowState, restoreBounds, saveWindowState } = require('./electron-window-state');
 
 nativeTheme.themeSource = 'system';
 
@@ -40,10 +42,23 @@ function registerStorageHandlers() {
   ipcMain.handle('storage:remove', (_event, key) => storage.removeItem(key));
 }
 
+function registerMenu() {
+  const send = (action) => {
+    if (ACTIONS.includes(action) && mainWindow) mainWindow.webContents.send('menu:action', action);
+  };
+  const template = buildMenuTemplate({ isMac: process.platform === 'darwin', appName: app.name, send });
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 function createWindow() {
+  const stateFile = path.join(app.getPath('userData'), 'window-state.json');
+  const saved = loadWindowState(stateFile);
+  const bounds = restoreBounds(saved, screen.getAllDisplays().map((d) => d.workArea));
+
   mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 800,
+    ...bounds,
+    minWidth: MIN_SIZE.width,
+    minHeight: MIN_SIZE.height,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
       preload: path.join(__dirname, 'electron-preload.js'),
@@ -51,6 +66,25 @@ function createWindow() {
       contextIsolation: true,
       sandbox: true,
     },
+  });
+  if (saved?.isMaximized) mainWindow.maximize();
+
+  // Remember size and position (debounced, because resize and move fire continuously).
+  const win = mainWindow;
+  let timer = null;
+  const remember = () => {
+    if (win.isDestroyed() || win.isMinimized() || win.isFullScreen()) return;
+    saveWindowState(stateFile, { ...win.getNormalBounds(), isMaximized: win.isMaximized() });
+  };
+  const rememberSoon = () => {
+    clearTimeout(timer);
+    timer = setTimeout(remember, 500);
+  };
+  win.on('resize', rememberSoon);
+  win.on('move', rememberSoon);
+  win.on('close', () => {
+    clearTimeout(timer);
+    remember();
   });
 
   // Links to other sites open in the default browser, never inside the app window.
@@ -65,9 +99,25 @@ function createWindow() {
   });
 }
 
+// A second copy would fight over the data file; focus the open window instead.
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  });
+}
+
 app.whenReady().then(() => {
+  if (!gotLock) return;
+  // The packaged app gets its icon from the bundle; when running from source, set it by hand.
+  if (process.platform === 'darwin' && !app.isPackaged) app.dock?.setIcon(path.join(__dirname, 'build', 'icon.png'));
   registerAppProtocol();
   registerStorageHandlers();
+  registerMenu();
   createWindow();
 
   app.on('activate', () => {
