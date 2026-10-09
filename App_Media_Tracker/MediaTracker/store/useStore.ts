@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { appStorage } from './storage';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SETTINGS, StoreData, dropOrphanListRefs, mergeData, normalizeData } from './backup';
@@ -145,7 +145,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'media-tracker-storage',
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => appStorage),
       version: STORE_VERSION,
       // Data saved before versioning existed arrives as version 0. Add a `if (version < N)` step
       // here for each future shape change instead of discarding what the user already saved.
