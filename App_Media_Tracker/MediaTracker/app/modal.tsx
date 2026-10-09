@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { StyleSheet, TextInput, Pressable, ScrollView, Platform } from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, TextInput, Pressable, ScrollView, Platform, Image, ActivityIndicator } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore, MediaType } from '@/store/useStore';
 import { useNavigation, router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
+import { TmdbResult, getTvEpisodeCount, searchTmdb } from '@/services/tmdb';
 
 const mediaTypes: { label: string; value: MediaType; icon: string }[] = [
   { label: 'Software', value: 'software', icon: 'desktopcomputer' },
@@ -41,6 +42,7 @@ const getDefaultProgressType = (type: MediaType) => {
 export default function ModalScreen() {
   const addItem = useStore(state => state.addItem);
   const lists = useStore(state => state.lists);
+  const tmdbApiKey = useStore(state => state.settings.tmdbApiKey)?.trim();
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   
@@ -57,10 +59,58 @@ export default function ModalScreen() {
   // Reminders
   const [dueDateString, setDueDateString] = useState(''); // YYYY-MM-DD format
 
+  // TMDB metadata (movies and TV shows only)
+  const tmdbKind = type === 'movie' ? 'movie' : type === 'tv_show' ? 'tv' : null;
+  const [tmdbQuery, setTmdbQuery] = useState('');
+  const [tmdbResults, setTmdbResults] = useState<TmdbResult[]>([]);
+  const [tmdbLoading, setTmdbLoading] = useState(false);
+  const [tmdbError, setTmdbError] = useState('');
+  const [picked, setPicked] = useState<TmdbResult | null>(null);
+
+  useEffect(() => {
+    setTmdbError('');
+    if (!tmdbKind || !tmdbApiKey || tmdbQuery.trim().length < 2) {
+      setTmdbResults([]);
+      setTmdbLoading(false);
+      return;
+    }
+    const controller = new AbortController();
+    setTmdbLoading(true);
+    const timer = setTimeout(() => {
+      searchTmdb(tmdbKind, tmdbQuery.trim(), tmdbApiKey, controller.signal)
+        .then(setTmdbResults)
+        .catch((e) => {
+          if (e?.name === 'AbortError') return;
+          setTmdbResults([]);
+          setTmdbError(e instanceof Error ? e.message : 'No se pudo buscar en TMDB.');
+        })
+        .finally(() => { if (!controller.signal.aborted) setTmdbLoading(false); });
+    }, 400);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [tmdbQuery, tmdbKind, tmdbApiKey]);
+
+  const handlePick = (result: TmdbResult) => {
+    setPicked(result);
+    setTitle(result.title);
+    setSubtitle(result.year ?? '');
+    setTmdbQuery('');
+    setTmdbResults([]);
+    if (result.kind === 'tv' && tmdbApiKey) {
+      // Pre-fill episode tracking; if this fails the user can still type the total by hand.
+      setProgressType('episodes');
+      getTvEpisodeCount(result.externalId, tmdbApiKey)
+        .then((n) => { if (n) setTotalCheckpoints(String(n)); })
+        .catch(() => {});
+    }
+  };
+
   const handleTypeChange = (newType: MediaType) => {
     setType(newType);
     setProgressType(getDefaultProgressType(newType));
     setTotalCheckpoints('');
+    setPicked(null);
+    setTmdbQuery('');
+    setTmdbResults([]);
   };
 
   const handleSave = () => {
@@ -101,6 +151,10 @@ export default function ModalScreen() {
       checkpointType: finalCheckpointType as any,
       listId: selectedListId || undefined,
       dueDate: parsedDueDate,
+      externalId: picked?.externalId,
+      posterUrl: picked?.posterUrl,
+      overview: picked?.overview,
+      releaseDate: picked?.releaseDate,
     });
     
     router.back();
@@ -153,6 +207,45 @@ export default function ModalScreen() {
           </Pressable>
         ))}
       </ScrollView>
+
+      {tmdbKind && (
+        <View>
+          <Text style={[styles.label, { color: colors.text }]}>Buscar en TMDB</Text>
+          {!tmdbApiKey ? (
+            <Text style={[styles.helpText, { color: colors.text + '80', marginTop: 0 }]}>
+              Añade tu clave gratuita de TMDB en Ajustes Globales para rellenar título, portada y episodios automáticamente.
+            </Text>
+          ) : (
+            <>
+              <TextInput
+                style={[styles.input, { color: colors.text, borderColor: colors.text + '40' }]}
+                value={tmdbQuery}
+                onChangeText={setTmdbQuery}
+                placeholder={tmdbKind === 'movie' ? 'Busca una película...' : 'Busca una serie...'}
+                placeholderTextColor={colors.text + '80'}
+              />
+              {tmdbLoading && <ActivityIndicator style={{ marginTop: 12 }} color={colors.tint} />}
+              {tmdbError !== '' && <Text style={[styles.helpText, { color: '#ff3b30' }]}>{tmdbError}</Text>}
+              {tmdbResults.map((r) => (
+                <Pressable key={r.externalId} style={[styles.result, { backgroundColor: colors.cardBackground }]} onPress={() => handlePick(r)}>
+                  {r.posterUrl ? (
+                    <Image source={{ uri: r.posterUrl }} style={styles.resultPoster} />
+                  ) : (
+                    <View style={[styles.resultPoster, { backgroundColor: colors.tint + '15' }]} />
+                  )}
+                  <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+                    <Text style={{ color: colors.text, fontWeight: '600' }} numberOfLines={2}>{r.title}</Text>
+                    {r.year ? <Text style={{ color: colors.text + '80', marginTop: 2 }}>{r.year}</Text> : null}
+                  </View>
+                </Pressable>
+              ))}
+              {picked && (
+                <Text style={[styles.helpText, { color: colors.text + '80' }]}>Seleccionado: {picked.title}{picked.year ? ` (${picked.year})` : ''}</Text>
+              )}
+            </>
+          )}
+        </View>
+      )}
 
       {/* Date / Reminder Options */}
       <Text style={[styles.label, { color: colors.text, marginTop: 30 }]}>Fecha Programada (Opcional)</Text>
@@ -262,6 +355,8 @@ const styles = StyleSheet.create({
   horizontalScroll: { flexDirection: 'row', maxHeight: 50 },
   pill: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, marginRight: 10 },
   pillText: { marginLeft: 6, fontWeight: '500' },
+  result: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 12, marginTop: 8 },
+  resultPoster: { width: 40, height: 60, borderRadius: 6 },
   saveButton: { marginTop: 40, padding: 16, borderRadius: 25, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

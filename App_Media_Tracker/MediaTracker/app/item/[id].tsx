@@ -1,5 +1,5 @@
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { StyleSheet, Pressable, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, TextInput, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
@@ -153,8 +153,10 @@ export default function ItemDetailScreen() {
       }} />
       <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
+          {item.posterUrl ? <Image source={{ uri: item.posterUrl }} style={styles.poster} /> : null}
           <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.subtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
+          {item.overview ? <Text style={[styles.overview, { color: colors.text + '90' }]}>{item.overview}</Text> : null}
         </View>
 
         {/* Rating Section */}
@@ -241,6 +243,8 @@ const styles = StyleSheet.create({
   header: { padding: 20, paddingBottom: 10 },
   title: { fontSize: 24, fontWeight: 'bold' },
   subtitle: { fontSize: 16, marginTop: 4 },
+  poster: { width: 140, height: 210, borderRadius: 12, marginBottom: 16, backgroundColor: '#00000010' },
+  overview: { fontSize: 15, lineHeight: 22, marginTop: 12 },
   sectionContainer: { marginTop: 20, paddingHorizontal: 20, paddingVertical: 20, borderRadius: 16, marginHorizontal: 20 },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 15 },
   

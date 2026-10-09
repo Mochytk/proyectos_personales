@@ -46,6 +46,10 @@ export function sanitizeItem(raw: unknown): MediaItem | null {
     createdAt: isNum(raw.createdAt) ? raw.createdAt : now,
     updatedAt: isNum(raw.updatedAt) ? raw.updatedAt : now,
     listId: optStr(raw.listId),
+    externalId: optStr(raw.externalId),
+    posterUrl: optStr(raw.posterUrl),
+    overview: optStr(raw.overview),
+    releaseDate: optStr(raw.releaseDate),
   };
 }
 
@@ -83,12 +87,14 @@ export function normalizeData(raw: unknown): StoreData {
 }
 
 export function buildBackup(data: StoreData, schemaVersion: number): string {
+  // Credentials stay on this device; a backup file may be shared or synced.
+  const { tmdbApiKey: _omit, ...settings } = data.settings;
   return JSON.stringify(
     {
       format: BACKUP_FORMAT,
       schemaVersion,
       exportedAt: new Date().toISOString(),
-      data: { items: data.items, lists: data.lists, settings: data.settings },
+      data: { items: data.items, lists: data.lists, settings },
     },
     null,
     2,

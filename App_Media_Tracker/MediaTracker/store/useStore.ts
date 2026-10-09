@@ -37,6 +37,12 @@ export interface MediaItem {
   updatedAt: number;
   
   listId?: string;
+
+  // Filled when the item was picked from a metadata search (TMDB).
+  externalId?: string;
+  posterUrl?: string;
+  overview?: string;
+  releaseDate?: string;
 }
 
 export interface MediaList {
@@ -58,6 +64,8 @@ export interface AppSettings {
   showLogbook: boolean;
   pileLayoutStyle?: 'simple_list' | 'large_grid';
   pileItemShape?: 'short' | 'square' | 'tall';
+  /** TMDB credential. Local to this device: never included in backups. */
+  tmdbApiKey?: string;
 }
 
 interface AppState {
