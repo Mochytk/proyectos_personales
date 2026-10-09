@@ -5,7 +5,6 @@
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
     "@react-native-async-storage/async-storage": "^3.1.1",
-    "electron-serve": "^3.0.1",
     "expo": "~57.0.26",
     "expo-constants": "~57.0.20",
     "expo-font": "~57.0.4",
@@ -15,7 +14,6 @@
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
     "expo-web-browser": "~57.0.3",
-    "express": "^5.2.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
@@ -56,6 +54,8 @@
     "files": [
       "dist/**/*",
       "electron-main.js",
+      "electron-preload.js",
+      "electron-storage.js",
       "package.json"
     ],
     "extraMetadata": {
