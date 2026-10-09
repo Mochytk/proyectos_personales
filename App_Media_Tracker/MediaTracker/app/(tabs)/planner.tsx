@@ -5,7 +5,17 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { useStore, MediaType } from '@/store/useStore';
+import { useStore, MediaItem } from '@/store/useStore';
+import { DayBucket, bucketFor } from '@/store/dates';
+
+const BUCKETS: { key: DayBucket; label: string }[] = [
+  { key: 'overdue', label: 'Vencidos' },
+  { key: 'today', label: 'Hoy' },
+  { key: 'tomorrow', label: 'Mañana' },
+  { key: 'week', label: 'Esta semana' },
+  { key: 'later', label: 'Más adelante' },
+  { key: 'undated', label: 'Sin fecha' },
+];
 
 export default function PlannerScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -13,16 +23,20 @@ export default function PlannerScreen() {
   const navigation = useNavigation();
 
   const allItems = useStore(state => state.items);
+  const updateItem = useStore(state => state.updateItem);
   
   const upcomingItems = useMemo(() => {
     return allItems
       .filter(item => item.status !== 'completed' && (item.dueDate !== undefined || item.type === 'event' || item.type === 'task'))
-      .sort((a, b) => {
-        const aTime = a.dueDate || a.updatedAt;
-        const bTime = b.dueDate || b.updatedAt;
-        return aTime - bTime;
-      });
+      .sort((a, b) => (a.dueDate ?? Infinity) - (b.dueDate ?? Infinity) || a.updatedAt - b.updatedAt);
   }, [allItems]);
+
+  const groups = useMemo(() => {
+    const now = Date.now();
+    return BUCKETS
+      .map(({ key, label }) => ({ key, label, items: upcomingItems.filter(item => bucketFor(item, now) === key) }))
+      .filter(group => group.items.length > 0);
+  }, [upcomingItems]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -46,10 +60,10 @@ export default function PlannerScreen() {
     });
   }, [navigation, colors]);
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    // Use es-ES locale for Spanish formatting
-    return date.toLocaleDateString('es-ES', { weekday: 'short', month: 'short', day: 'numeric' });
+  const formatDue = (item: MediaItem) => {
+    const date = new Date(item.dueDate!);
+    const day = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    return item.dueHasTime ? `${day}, ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : day;
   };
 
   return (
@@ -71,25 +85,28 @@ export default function PlannerScreen() {
         </View>
       ) : (
         <View style={styles.listContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Próximos Lanzamientos y Tareas</Text>
-          {upcomingItems.map(item => (
-            <Link key={item.id} href={`/item/${item.id}`} asChild>
-              <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
-                <View style={[styles.iconContainer, { backgroundColor: (item.type === 'event' || item.dueDate) ? '#FF950020' : colors.tint + '15' }]}>
-                  <SymbolView 
-                    name={(item.type === 'event' || item.dueDate) ? { ios: 'calendar', android: 'event', web: 'event' } : { ios: 'checkmark.circle', android: 'check-circle', web: 'check-circle' }} 
-                    size={24} 
-                    tintColor={(item.type === 'event' || item.dueDate) ? '#FF9500' : colors.tint} 
+          {groups.map(group => (
+            <View key={group.key}>
+              <Text style={[styles.sectionTitle, { color: group.key === 'overdue' ? '#ff3b30' : colors.text }]}>{group.label}</Text>
+              {group.items.map(item => (
+                <View key={item.id} style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
+                  <Pressable
+                    accessibilityLabel="Marcar como terminado"
+                    style={[styles.checkButton, { borderColor: colors.tint }]}
+                    onPress={() => updateItem(item.id, { status: 'completed' })}
                   />
+                  <Link href={`/item/${item.id}`} asChild>
+                    <Pressable style={styles.cardContent}>
+                      <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
+                      <Text style={[styles.cardSubtitle, { color: group.key === 'overdue' ? '#ff3b30' : colors.text + '90' }]}>
+                        {item.dueDate !== undefined ? formatDue(item) : (item.subtitle || 'Sin fecha')}
+                        {item.remind ? '  🔔' : ''}
+                      </Text>
+                    </Pressable>
+                  </Link>
                 </View>
-                <View style={styles.cardContent}>
-                  <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
-                  <Text style={[styles.cardSubtitle, { color: colors.text + '90' }]}>
-                    {item.dueDate ? `Programado para el ${formatDate(item.dueDate)}` : (item.subtitle || 'Sin fecha')}
-                  </Text>
-                </View>
-              </Pressable>
-            </Link>
+              ))}
+            </View>
           ))}
         </View>
       )}
@@ -109,7 +126,8 @@ const styles = StyleSheet.create({
   createButton: { paddingHorizontal: 30, paddingVertical: 12, borderRadius: 25 },
   createButtonText: { fontSize: 16, fontWeight: '600' },
   listContainer: { marginTop: 20 },
-  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15 },
+  sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, marginTop: 10 },
+  checkButton: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, marginRight: 15 },
   card: { flexDirection: 'row', borderRadius: 20, padding: 16, marginBottom: 12, alignItems: 'center' },
   iconContainer: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   cardContent: { flex: 1, backgroundColor: 'transparent' },

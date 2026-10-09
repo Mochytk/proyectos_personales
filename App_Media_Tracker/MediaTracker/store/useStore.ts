@@ -31,7 +31,10 @@ export interface MediaItem {
   tags?: string[];
   notes?: string;
   
-  dueDate?: number; // timestamp for reminders / planner
+  dueDate?: number; // timestamp for reminders / planner (local midnight when there is no time)
+  dueHasTime?: boolean; // false/undefined: date only
+  remind?: boolean; // show a notification when the item is due
+  notifiedAt?: number; // set once the reminder has fired
 
   createdAt: number;
   updatedAt: number;

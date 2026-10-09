@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, TextInput, Pressable, ScrollView, Platform, Image, ActivityIndicator } from 'react-native';
+import { StyleSheet, TextInput, Pressable, ScrollView, Platform, Image, ActivityIndicator, Switch } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore, MediaType } from '@/store/useStore';
 import { useNavigation, router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
+import DateField from '@/components/DateField';
+import { fromInputs } from '@/store/dates';
 import { TmdbResult, getTvEpisodeCount, searchTmdb } from '@/services/tmdb';
 
 const mediaTypes: { label: string; value: MediaType; icon: string }[] = [
@@ -57,7 +59,9 @@ export default function ModalScreen() {
   const [totalCheckpoints, setTotalCheckpoints] = useState('');
   
   // Reminders
-  const [dueDateString, setDueDateString] = useState(''); // YYYY-MM-DD format
+  const [dueDateString, setDueDateString] = useState(''); // YYYY-MM-DD
+  const [dueTimeString, setDueTimeString] = useState(''); // HH:MM (optional)
+  const [remind, setRemind] = useState(false);
 
   // TMDB metadata (movies and TV shows only)
   const tmdbKind = type === 'movie' ? 'movie' : type === 'tv_show' ? 'tv' : null;
@@ -123,14 +127,7 @@ export default function ModalScreen() {
       finalCheckpointType = progressType === 'custom' ? customProgressLabel || 'steps' : progressType;
     }
     
-    // Parse YYYY-MM-DD as a LOCAL date. Date.parse() treats it as UTC midnight,
-    // which shows up as the previous day in negative-offset timezones (e.g. Chile).
-    let parsedDueDate = undefined;
-    const dateMatch = dueDateString.trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-    if (dateMatch) {
-      const d = new Date(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3]));
-      if (!isNaN(d.getTime())) parsedDueDate = d.getTime();
-    }
+    const due = fromInputs(dueDateString, dueTimeString);
 
     let parsedTotal: number | undefined = undefined;
     if (progressType === 'percentage') {
@@ -150,7 +147,9 @@ export default function ModalScreen() {
       currentCheckpoint: 0,
       checkpointType: finalCheckpointType as any,
       listId: selectedListId || undefined,
-      dueDate: parsedDueDate,
+      dueDate: due?.dueDate,
+      dueHasTime: due?.dueHasTime,
+      remind: due && remind ? true : undefined,
       externalId: picked?.externalId,
       posterUrl: picked?.posterUrl,
       overview: picked?.overview,
@@ -249,16 +248,20 @@ export default function ModalScreen() {
 
       {/* Date / Reminder Options */}
       <Text style={[styles.label, { color: colors.text, marginTop: 30 }]}>Fecha Programada (Opcional)</Text>
-      <TextInput
-        style={[styles.input, { color: colors.text, borderColor: colors.text + '40' }]}
-        value={dueDateString}
-        onChangeText={setDueDateString}
-        placeholder="YYYY-MM-DD"
-        placeholderTextColor={colors.text + '80'}
+      <DateField
+        date={dueDateString}
+        time={dueTimeString}
+        onChange={({ date, time }) => { setDueDateString(date); setDueTimeString(time); }}
       />
       <Text style={[styles.helpText, { color: colors.text + '80' }]}>
-        Añadir una fecha enviará este elemento a tu Planificador.
+        Añadir una fecha enviará este elemento a tu Planificador. La hora es opcional.
       </Text>
+      {dueDateString !== '' && (
+        <View style={styles.remindRow}>
+          <Text style={{ color: colors.text, fontSize: 16 }}>Recordarme</Text>
+          <Switch value={remind} onValueChange={setRemind} trackColor={{ true: colors.tint }} />
+        </View>
+      )}
 
       {/* Progress Tracking Options */}
       <Text style={[styles.label, { color: colors.text, marginTop: 30 }]}>¿Cómo mides tu progreso?</Text>
@@ -357,6 +360,7 @@ const styles = StyleSheet.create({
   pillText: { marginLeft: 6, fontWeight: '500' },
   result: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 10, borderRadius: 12, marginTop: 8 },
   resultPoster: { width: 40, height: 60, borderRadius: 6 },
+  remindRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, backgroundColor: 'transparent' },
   saveButton: { marginTop: 40, padding: 16, borderRadius: 25, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });

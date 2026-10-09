@@ -1,11 +1,13 @@
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { StyleSheet, Pressable, ScrollView, TextInput, Image } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, TextInput, Image, Switch } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
 import { useState, useEffect } from 'react';
+import DateField from '@/components/DateField';
+import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,6 +20,8 @@ export default function ItemDetailScreen() {
 
   const [newTag, setNewTag] = useState('');
   const [notes, setNotes] = useState(item?.notes || '');
+  const [dueDate, setDueDate] = useState(toDateInput(item?.dueDate));
+  const [dueTime, setDueTime] = useState(toTimeInput(item?.dueDate, item?.dueHasTime));
 
   useEffect(() => {
     if (item) setNotes(item.notes || '');
@@ -61,6 +65,20 @@ export default function ItemDetailScreen() {
     if (notes !== item.notes) {
       updateItem(item.id, { notes });
     }
+  };
+
+  // Changing the date or the reminder re-arms it, so it can notify again at the new time.
+  const saveDue = (date: string, time: string, remind = item.remind) => {
+    setDueDate(date);
+    setDueTime(time);
+    const due = fromInputs(date, time);
+    if (due) {
+      updateItem(item.id, { ...due, remind, notifiedAt: undefined });
+    } else if (date === '') {
+      updateItem(item.id, { dueDate: undefined, dueHasTime: undefined, remind: undefined, notifiedAt: undefined });
+      setDueTime('');
+    }
+    // A partially typed date (native text fields) is kept in the field and saved once it is valid.
   };
 
   const hasCheckpoints = item.totalCheckpoints && item.totalCheckpoints > 0;
@@ -175,6 +193,23 @@ export default function ItemDetailScreen() {
           </View>
         </View>
 
+        {/* Due date / reminder */}
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Fecha y recordatorio</Text>
+          <DateField date={dueDate} time={dueTime} onChange={({ date, time }) => saveDue(date, time)} />
+          {dueDate !== '' && (
+            <>
+              <View style={styles.dueRow}>
+                <Text style={{ color: colors.text, fontSize: 16 }}>Recordarme</Text>
+                <Switch value={item.remind === true} onValueChange={(v) => saveDue(dueDate, dueTime, v)} trackColor={{ true: colors.tint }} />
+              </View>
+              <Pressable onPress={() => saveDue('', '')} style={styles.dueRow}>
+                <Text style={{ color: '#ff3b30', fontSize: 15 }}>Quitar fecha</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+
         {/* Sticky Notes Section */}
         <View style={[styles.sectionContainer, { backgroundColor: '#FDF1D0' }]}>
           <View style={styles.notesHeader}>
@@ -248,6 +283,8 @@ const styles = StyleSheet.create({
   sectionContainer: { marginTop: 20, paddingHorizontal: 20, paddingVertical: 20, borderRadius: 16, marginHorizontal: 20 },
   sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 15 },
   
+  dueRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 14, backgroundColor: 'transparent' },
+
   // Rating
   starsContainer: { flexDirection: 'row', gap: 10 },
   star: { padding: 5 },
