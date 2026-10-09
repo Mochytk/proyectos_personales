@@ -1,4 +1,6 @@
 import { StyleSheet, Pressable, ScrollView, Switch } from 'react-native';
+import { useState } from 'react';
+import { backupSupported, exportBackup, importBackup } from '@/store/backupFiles';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
@@ -10,6 +12,26 @@ export default function GlobalSettingsScreen() {
   
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+  const [backupMessage, setBackupMessage] = useState('');
+
+  const handleExport = () => {
+    try {
+      setBackupMessage(`Respaldo guardado: ${exportBackup()}`);
+    } catch {
+      setBackupMessage('No se pudo exportar el respaldo.');
+    }
+  };
+
+  const handleImport = async () => {
+    try {
+      const result = await importBackup();
+      if (result) {
+        setBackupMessage(`Importado: ${result.added} nuevos, ${result.updated} actualizados. No se borró nada.`);
+      }
+    } catch (e) {
+      setBackupMessage(e instanceof Error ? e.message : 'No se pudo importar el respaldo.');
+    }
+  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -59,6 +81,29 @@ export default function GlobalSettingsScreen() {
 
         </View>
       </View>
+
+      {backupSupported && (
+        <View style={[styles.section, { marginTop: 30 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Respaldo</Text>
+          <View style={[styles.cardGroup, { backgroundColor: colors.surface }]}>
+            <Pressable style={[styles.optionRow, { borderBottomColor: colors.cardBackground, borderBottomWidth: 1 }]} onPress={handleExport}>
+              <View style={styles.optionLeft}>
+                <Text style={[styles.optionLabel, { color: colors.tint }]}>Exportar respaldo</Text>
+                <Text style={[styles.optionDescription, { color: colors.text + '80' }]}>Guarda todos tus elementos y listas en un archivo JSON.</Text>
+              </View>
+            </Pressable>
+            <Pressable style={styles.optionRow} onPress={handleImport}>
+              <View style={styles.optionLeft}>
+                <Text style={[styles.optionLabel, { color: colors.tint }]}>Importar respaldo</Text>
+                <Text style={[styles.optionDescription, { color: colors.text + '80' }]}>Combina un respaldo con tus datos actuales. Si un elemento existe en ambos, se queda el más reciente.</Text>
+              </View>
+            </Pressable>
+          </View>
+          {backupMessage !== '' && (
+            <Text style={[styles.optionDescription, { color: colors.text + '99', marginTop: 12, marginLeft: 10 }]}>{backupMessage}</Text>
+          )}
+        </View>
+      )}
     </ScrollView>
   );
 }
