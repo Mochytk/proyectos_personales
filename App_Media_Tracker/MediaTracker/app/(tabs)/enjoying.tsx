@@ -1,4 +1,4 @@
-import { StyleSheet, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import Colors from '@/constants/Colors';
@@ -89,9 +89,13 @@ export default function EnjoyingScreen() {
           return (
             <Link key={item.id} href={`/item/${item.id}`} asChild>
               <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
-                <View style={[styles.iconContainer, { backgroundColor: colors.tint + '15' }]}>
-                  <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={24} tintColor={colors.tint} />
-                </View>
+                {item.posterUrl ? (
+                  <Image source={{ uri: item.posterUrl }} style={styles.poster} />
+                ) : (
+                  <View style={[styles.iconContainer, { backgroundColor: colors.tint + '15' }]}>
+                    <SymbolView name={mediaTypeIcons[item.type] || mediaTypeIcons['software']} size={24} tintColor={colors.tint} />
+                  </View>
+                )}
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{item.title}</Text>
                   <Text style={[styles.cardSubtitle, { color: colors.text + '99' }]}>{getSubtitle(item)}</Text>
@@ -120,6 +124,7 @@ const styles = StyleSheet.create({
   emptyContainer: { padding: 30, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
   emptyText: { fontSize: 16, textAlign: 'center', lineHeight: 24 },
   card: { flexDirection: 'row', borderRadius: 20, padding: 16, marginBottom: 15, alignItems: 'center' },
+  poster: { width: 50, height: 70, borderRadius: 12, marginRight: 15 },
   iconContainer: { width: 50, height: 70, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   cardContent: { flex: 1, backgroundColor: 'transparent' },
   cardTitle: { fontSize: 17, fontWeight: '600', marginBottom: 4 },

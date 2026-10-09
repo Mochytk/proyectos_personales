@@ -1,4 +1,4 @@
-import { StyleSheet, Pressable, ScrollView, Switch } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, Switch, TextInput } from 'react-native';
 import { useState } from 'react';
 import { backupSupported, exportBackup, importBackup } from '@/store/backupFiles';
 import { Text, View } from '@/components/Themed';
@@ -82,6 +82,26 @@ export default function GlobalSettingsScreen() {
         </View>
       </View>
 
+      <View style={[styles.section, { marginTop: 30 }]}>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Metadatos (TMDB)</Text>
+        <View style={[styles.cardGroup, { backgroundColor: colors.surface, padding: 16 }]}>
+          <Text style={[styles.optionLabel, { color: colors.text }]}>Clave de API de TMDB</Text>
+          <TextInput
+            style={[styles.keyInput, { color: colors.text, borderColor: colors.text + '40' }]}
+            value={settings?.tmdbApiKey ?? ''}
+            onChangeText={(val) => updateSettings({ tmdbApiKey: val })}
+            placeholder="Pega aquí tu clave o token"
+            placeholderTextColor={colors.text + '80'}
+            autoCapitalize="none"
+            autoCorrect={false}
+            secureTextEntry
+          />
+          <Text style={[styles.optionDescription, { color: colors.text + '80', marginTop: 10 }]}>
+            Permite buscar películas y series al añadir un elemento, con portada y total de episodios. Es gratis: crea una cuenta en themoviedb.org y copia la clave desde Ajustes → API. Se guarda solo en este dispositivo y no se incluye en los respaldos.
+          </Text>
+        </View>
+      </View>
+
       {backupSupported && (
         <View style={[styles.section, { marginTop: 30 }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Respaldo</Text>
@@ -118,4 +138,5 @@ const styles = StyleSheet.create({
   optionLeft: { flex: 1, paddingRight: 20 },
   optionLabel: { fontSize: 16, fontWeight: '500', marginBottom: 4 },
   optionDescription: { fontSize: 13 },
+  keyInput: { borderWidth: 1, borderRadius: 12, padding: 12, fontSize: 15, marginTop: 8 },
 });
