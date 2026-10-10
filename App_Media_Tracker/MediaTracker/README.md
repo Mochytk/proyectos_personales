@@ -29,7 +29,7 @@ npm test             # vitest
 | `components/` | Componentes compartidos (`DateField`, `AppIcon`, `Themed`) |
 | `constants/` | Colores, nombres e iconos de tipos de medio |
 | `store/` | Estado (Zustand), respaldo, fechas y almacenamiento |
-| `services/` | Clientes de APIs externas (TMDB) |
+| `services/` | Clientes de APIs externas (TMDB, Open Library, RAWG) y proveedores de metadatos |
 | `hooks/` | Hooks (`useColorScheme`, `useReminders`) |
 | `electron-*.js` | Proceso principal de Electron, preload y almacenamiento en archivo |
 | `tests/` | Pruebas unitarias |
@@ -40,9 +40,17 @@ npm test             # vitest
 - **Ajustes Globales → Respaldo** exporta e importa un JSON. Importar fusiona (gana lo más reciente) y nunca borra.
 - Si cambias la forma de los datos, sube `STORE_VERSION` en `store/useStore.ts` y añade el paso en `migrate`.
 
-## TMDB
+## Metadatos
 
-Para buscar películas y series necesitas una clave gratuita de [themoviedb.org](https://www.themoviedb.org) (Ajustes → API). Pégala en Ajustes Globales; queda solo en el dispositivo y no se incluye en los respaldos.
+Al añadir un elemento, el formulario busca y rellena título, portada y progreso según el tipo:
+
+| Tipo | Fuente | Clave | Rellena |
+| --- | --- | --- | --- |
+| Película, serie | [TMDB](https://www.themoviedb.org) | Sí (gratis) | Título, año, portada, sinopsis y total de episodios |
+| Libro | [Open Library](https://openlibrary.org) | No | Título, autor, año, portada y total de páginas |
+| Videojuego | [RAWG](https://rawg.io/apidocs) | Sí (gratis) | Título, año y portada |
+
+Las claves se pegan en Ajustes Globales; quedan solo en el dispositivo y no se incluyen en los respaldos (`SECRET_SETTINGS` en `store/backup.ts`). Para añadir otra fuente, crea un cliente en `services/` y regístralo en `services/metadata.ts`.
 
 ## Recordatorios
 

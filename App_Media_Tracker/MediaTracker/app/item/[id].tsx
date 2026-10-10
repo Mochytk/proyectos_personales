@@ -8,6 +8,7 @@ import { SymbolView } from '@/components/AppIcon';
 import { useState } from 'react';
 import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
+import { clampProgress, usesCounter } from '@/store/progress';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -125,6 +126,42 @@ export default function ItemDetailScreen() {
       );
     }
     
+    if (usesCounter(item.checkpointType, item.totalCheckpoints || 0)) {
+      const current = item.currentCheckpoint || 0;
+      const total = item.totalCheckpoints || 0;
+      const setCurrent = (next: number) =>
+        updateItem(item.id, { currentCheckpoint: next, status: next > 0 ? 'in_progress' : 'unstarted' });
+      return (
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Progreso</Text>
+          <View style={styles.counterRow}>
+            <TextInput
+              style={[styles.counterInput, { color: colors.text, borderColor: colors.text + '40' }]}
+              value={String(current)}
+              onChangeText={(text) => setCurrent(clampProgress(parseInt(text, 10), 0, total))}
+              keyboardType="numeric"
+              accessibilityLabel={`${unit} actual`}
+            />
+            <Text style={{ color: colors.text + '90', fontSize: 16 }}>de {total} · {unit}s</Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${Math.round((current / total) * 100)}%` }]} />
+          </View>
+          <View style={styles.counterRow}>
+            {[-10, -1, 1, 10].map((delta) => (
+              <Pressable
+                key={delta}
+                style={[styles.actionButton, { flex: 1, padding: 12, backgroundColor: delta > 0 ? colors.tint : colors.cardBackground }]}
+                onPress={() => setCurrent(clampProgress(current, delta, total))}
+              >
+                <Text style={{ color: delta > 0 ? '#fff' : colors.text, fontWeight: 'bold' }}>{delta > 0 ? `+${delta}` : delta}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      );
+    }
+
     const checkboxes = [];
     for (let i = 1; i <= (item.totalCheckpoints || 0); i++) {
       const isChecked = (item.currentCheckpoint || 0) >= i;
@@ -305,6 +342,10 @@ const styles = StyleSheet.create({
   addTagButton: { justifyContent: 'center', paddingHorizontal: 20, borderRadius: 12 },
   addTagButtonText: { fontWeight: '600' },
 
+  counterRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12, backgroundColor: 'transparent' },
+  counterInput: { width: 90, borderWidth: 1, borderRadius: 12, padding: 10, fontSize: 18, fontWeight: '600', textAlign: 'center' },
+  progressTrack: { height: 8, borderRadius: 4, backgroundColor: '#8884', overflow: 'hidden', marginTop: 14 },
+  progressFill: { height: 8, borderRadius: 4 },
   checklistItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },
   checkbox: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, marginRight: 15, alignItems: 'center', justifyContent: 'center' },
   checklistText: { fontSize: 16 },

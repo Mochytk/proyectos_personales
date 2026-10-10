@@ -17,9 +17,10 @@ describe('backup file', () => {
     expect(parsed.lists[0].name).toBe('Lista');
   });
 
-  it('never writes the TMDB key', () => {
-    const text = buildBackup({ ...data(), settings: { ...DEFAULT_SETTINGS, tmdbApiKey: 'SECRET' } }, 1);
+  it('never writes API keys', () => {
+    const text = buildBackup({ ...data(), settings: { ...DEFAULT_SETTINGS, tmdbApiKey: 'SECRET1', rawgApiKey: 'SECRET2' } }, 1);
     expect(text).not.toContain('SECRET');
+    expect(text).toContain('showPlanner');
   });
 
   it('rejects invalid JSON, other formats and newer versions', () => {
