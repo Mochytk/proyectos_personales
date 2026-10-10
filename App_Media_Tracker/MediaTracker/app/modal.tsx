@@ -8,7 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
 import DateField from '@/components/DateField';
 import { fromInputs } from '@/store/dates';
-import { TmdbResult, getTvEpisodeCount, searchTmdb } from '@/services/tmdb';
+import { MetadataResult, providerFor } from '@/services/metadata';
 
 const mediaTypes: { label: string; value: MediaType; icon: string }[] = [
   { label: 'Software', value: 'software', icon: 'desktopcomputer' },
@@ -44,7 +44,7 @@ const getDefaultProgressType = (type: MediaType) => {
 export default function ModalScreen() {
   const addItem = useStore(state => state.addItem);
   const lists = useStore(state => state.lists);
-  const tmdbApiKey = useStore(state => state.settings.tmdbApiKey)?.trim();
+  const settings = useStore(state => state.settings);
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
   
@@ -63,46 +63,53 @@ export default function ModalScreen() {
   const [dueTimeString, setDueTimeString] = useState(''); // HH:MM (optional)
   const [remind, setRemind] = useState(false);
 
-  // TMDB metadata (movies and TV shows only)
-  const tmdbKind = type === 'movie' ? 'movie' : type === 'tv_show' ? 'tv' : null;
-  const [tmdbQuery, setTmdbQuery] = useState('');
-  const [tmdbResults, setTmdbResults] = useState<TmdbResult[]>([]);
-  const [tmdbLoading, setTmdbLoading] = useState(false);
-  const [tmdbError, setTmdbError] = useState('');
-  const [picked, setPicked] = useState<TmdbResult | null>(null);
+  // Metadata search (TMDB, ...), for the media types that have a provider
+  const provider = providerFor(type);
+  const apiKey = (provider?.keySetting ? settings[provider.keySetting] : undefined)?.trim() ?? '';
+  const needsKey = !!provider?.keySetting && !apiKey;
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<MetadataResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [picked, setPicked] = useState<MetadataResult | null>(null);
 
-  const searchActive = !!tmdbKind && !!tmdbApiKey && tmdbQuery.trim().length >= 2;
+  const searchActive = !!provider && !needsKey && query.trim().length >= 2;
 
   useEffect(() => {
-    if (!searchActive || !tmdbKind || !tmdbApiKey) return;
+    if (!searchActive || !provider) return;
     const controller = new AbortController();
     // Debounced: nothing is requested (or shown) until the user pauses typing.
     const timer = setTimeout(() => {
-      setTmdbLoading(true);
-      setTmdbError('');
-      searchTmdb(tmdbKind, tmdbQuery.trim(), tmdbApiKey, controller.signal)
-        .then(setTmdbResults)
+      setSearching(true);
+      setSearchError('');
+      provider.search(query.trim(), apiKey, controller.signal)
+        .then(setResults)
         .catch((e) => {
           if (e?.name === 'AbortError') return;
-          setTmdbResults([]);
-          setTmdbError(e instanceof Error ? e.message : 'No se pudo buscar en TMDB.');
+          setResults([]);
+          setSearchError(e instanceof Error ? e.message : `No se pudo buscar en ${provider.label}.`);
         })
-        .finally(() => { if (!controller.signal.aborted) setTmdbLoading(false); });
+        .finally(() => { if (!controller.signal.aborted) setSearching(false); });
     }, 400);
     return () => { clearTimeout(timer); controller.abort(); };
-  }, [searchActive, tmdbQuery, tmdbKind, tmdbApiKey]);
+  }, [searchActive, query, provider, apiKey]);
 
-  const handlePick = (result: TmdbResult) => {
+  const applyProgress = (progress: NonNullable<MetadataResult['progress']>) => {
+    setProgressType(progress.type);
+    if (progress.total) setTotalCheckpoints(String(progress.total));
+  };
+
+  const handlePick = (result: MetadataResult) => {
     setPicked(result);
     setTitle(result.title);
-    setSubtitle(result.year ?? '');
-    setTmdbQuery('');
-    setTmdbResults([]);
-    if (result.kind === 'tv' && tmdbApiKey) {
-      // Pre-fill episode tracking; if this fails the user can still type the total by hand.
-      setProgressType('episodes');
-      getTvEpisodeCount(result.externalId, tmdbApiKey)
-        .then((n) => { if (n) setTotalCheckpoints(String(n)); })
+    setSubtitle(result.subtitle ?? '');
+    setQuery('');
+    setResults([]);
+    if (result.progress) applyProgress(result.progress);
+    if (provider?.details) {
+      // A second request fills in what the search does not return; if it fails the user can type it.
+      provider.details(result, apiKey)
+        .then((extra) => { if (extra.progress) applyProgress(extra.progress); })
         .catch(() => {});
     }
   };
@@ -112,8 +119,8 @@ export default function ModalScreen() {
     setProgressType(getDefaultProgressType(newType));
     setTotalCheckpoints('');
     setPicked(null);
-    setTmdbQuery('');
-    setTmdbResults([]);
+    setQuery('');
+    setResults([]);
   };
 
   const handleSave = () => {
@@ -206,25 +213,23 @@ export default function ModalScreen() {
         ))}
       </ScrollView>
 
-      {tmdbKind && (
+      {provider && (
         <View>
-          <Text style={[styles.label, { color: colors.text }]}>Buscar en TMDB</Text>
-          {!tmdbApiKey ? (
-            <Text style={[styles.helpText, { color: colors.text + '80', marginTop: 0 }]}>
-              Añade tu clave gratuita de TMDB en Ajustes Globales para rellenar título, portada y episodios automáticamente.
-            </Text>
+          <Text style={[styles.label, { color: colors.text }]}>Buscar en {provider.label}</Text>
+          {needsKey ? (
+            <Text style={[styles.helpText, { color: colors.text + '80', marginTop: 0 }]}>{provider.keyHelp}</Text>
           ) : (
             <>
               <TextInput
                 style={[styles.input, { color: colors.text, borderColor: colors.text + '40' }]}
-                value={tmdbQuery}
-                onChangeText={setTmdbQuery}
-                placeholder={tmdbKind === 'movie' ? 'Busca una película...' : 'Busca una serie...'}
+                value={query}
+                onChangeText={setQuery}
+                placeholder={provider.placeholder}
                 placeholderTextColor={colors.text + '80'}
               />
-              {searchActive && tmdbLoading && <ActivityIndicator style={{ marginTop: 12 }} color={colors.tint} />}
-              {searchActive && tmdbError !== '' && <Text style={[styles.helpText, { color: '#ff3b30' }]}>{tmdbError}</Text>}
-              {(searchActive ? tmdbResults : []).map((r) => (
+              {searchActive && searching && <ActivityIndicator style={{ marginTop: 12 }} color={colors.tint} />}
+              {searchActive && searchError !== '' && <Text style={[styles.helpText, { color: '#ff3b30' }]}>{searchError}</Text>}
+              {(searchActive ? results : []).map((r) => (
                 <Pressable key={r.externalId} style={[styles.result, { backgroundColor: colors.cardBackground }]} onPress={() => handlePick(r)}>
                   {r.posterUrl ? (
                     <Image source={{ uri: r.posterUrl }} style={styles.resultPoster} />
@@ -233,12 +238,12 @@ export default function ModalScreen() {
                   )}
                   <View style={{ flex: 1, backgroundColor: 'transparent' }}>
                     <Text style={{ color: colors.text, fontWeight: '600' }} numberOfLines={2}>{r.title}</Text>
-                    {r.year ? <Text style={{ color: colors.text + '80', marginTop: 2 }}>{r.year}</Text> : null}
+                    {r.subtitle ? <Text style={{ color: colors.text + '80', marginTop: 2 }}>{r.subtitle}</Text> : null}
                   </View>
                 </Pressable>
               ))}
               {picked && (
-                <Text style={[styles.helpText, { color: colors.text + '80' }]}>Seleccionado: {picked.title}{picked.year ? ` (${picked.year})` : ''}</Text>
+                <Text style={[styles.helpText, { color: colors.text + '80' }]}>Seleccionado: {picked.title}{picked.subtitle ? ` (${picked.subtitle})` : ''}</Text>
               )}
             </>
           )}
