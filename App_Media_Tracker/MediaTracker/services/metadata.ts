@@ -1,5 +1,6 @@
 import type { MediaType } from '@/store/useStore';
 import { searchOpenLibrary } from './openlibrary';
+import { searchRawg } from './rawg';
 import { getTvEpisodeCount, searchTmdb } from './tmdb';
 
 /** One search hit from any provider, in the shape the add-item form needs. */
@@ -22,7 +23,7 @@ export interface MetadataProvider {
   label: string;
   placeholder: string;
   /** Setting that holds the provider's API key; omitted when no key is needed. */
-  keySetting?: 'tmdbApiKey';
+  keySetting?: 'tmdbApiKey' | 'rawgApiKey';
   keyHelp?: string;
   search(query: string, apiKey: string, signal?: AbortSignal): Promise<MetadataResult[]>;
   /** Optional second request made after the user picks a result (e.g. episode count). */
@@ -74,10 +75,29 @@ const openLibraryProvider: MetadataProvider = {
   },
 };
 
+const rawgProvider: MetadataProvider = {
+  id: 'rawg',
+  label: 'RAWG',
+  placeholder: 'Busca un videojuego...',
+  keySetting: 'rawgApiKey',
+  keyHelp: 'Añade tu clave gratuita de RAWG en Ajustes Globales para rellenar título, año y portada automáticamente.',
+  async search(query, apiKey, signal) {
+    const results = await searchRawg(query, apiKey, signal);
+    return results.map((r) => ({
+      externalId: r.externalId,
+      title: r.title,
+      subtitle: r.year,
+      releaseDate: r.releaseDate,
+      posterUrl: r.posterUrl,
+    }));
+  },
+};
+
 const PROVIDERS: Partial<Record<MediaType, MetadataProvider>> = {
   movie: tmdbProvider('movie'),
   tv_show: tmdbProvider('tv'),
   book: openLibraryProvider,
+  video_game: rawgProvider,
 };
 
 /** The metadata source for a media type, or undefined when it has none. */

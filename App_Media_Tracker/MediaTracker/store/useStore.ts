@@ -41,7 +41,7 @@ export interface MediaItem {
   
   listId?: string;
 
-  // Filled when the item was picked from a metadata search (TMDB).
+  // Filled when the item was picked from a metadata search (TMDB, Open Library, RAWG).
   externalId?: string;
   posterUrl?: string;
   overview?: string;
@@ -67,8 +67,9 @@ export interface AppSettings {
   showLogbook: boolean;
   pileLayoutStyle?: 'simple_list' | 'large_grid';
   pileItemShape?: 'short' | 'square' | 'tall';
-  /** TMDB credential. Local to this device: never included in backups. */
+  /** API credentials. Local to this device: never included in backups (see SECRET_SETTINGS). */
   tmdbApiKey?: string;
+  rawgApiKey?: string;
 }
 
 interface AppState {
