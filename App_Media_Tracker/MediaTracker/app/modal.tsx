@@ -238,7 +238,7 @@ export default function ModalScreen() {
                   )}
                   <View style={{ flex: 1, backgroundColor: 'transparent' }}>
                     <Text style={{ color: colors.text, fontWeight: '600' }} numberOfLines={2}>{r.title}</Text>
-                    {r.subtitle ? <Text style={{ color: colors.text + '80', marginTop: 2 }}>{r.subtitle}</Text> : null}
+                    {r.hint ?? r.subtitle ? <Text style={{ color: colors.text + '80', marginTop: 2 }}>{r.hint ?? r.subtitle}</Text> : null}
                   </View>
                 </Pressable>
               ))}

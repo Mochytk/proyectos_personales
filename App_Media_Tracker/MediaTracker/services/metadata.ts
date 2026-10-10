@@ -1,11 +1,14 @@
 import type { MediaType } from '@/store/useStore';
+import { searchOpenLibrary } from './openlibrary';
 import { getTvEpisodeCount, searchTmdb } from './tmdb';
 
 /** One search hit from any provider, in the shape the add-item form needs. */
 export interface MetadataResult {
   externalId: string; // "tmdb:movie:603"
   title: string;
-  subtitle?: string; // year, author...
+  subtitle?: string; // saved on the item: year, author...
+  /** Line shown in the results list; defaults to `subtitle`. */
+  hint?: string;
   releaseDate?: string;
   overview?: string;
   posterUrl?: string;
@@ -53,9 +56,28 @@ const tmdbProvider = (kind: 'movie' | 'tv'): MetadataProvider => ({
       : undefined,
 });
 
+const openLibraryProvider: MetadataProvider = {
+  id: 'openlibrary',
+  label: 'Open Library',
+  placeholder: 'Busca un libro o un autor...',
+  async search(query, _apiKey, signal) {
+    const results = await searchOpenLibrary(query, signal);
+    return results.map((r) => ({
+      externalId: r.externalId,
+      title: r.title,
+      subtitle: r.authors,
+      hint: [r.authors, r.year].filter(Boolean).join(' · ') || undefined,
+      releaseDate: r.year,
+      posterUrl: r.posterUrl,
+      progress: r.pages ? { type: 'pages' as const, total: r.pages } : undefined,
+    }));
+  },
+};
+
 const PROVIDERS: Partial<Record<MediaType, MetadataProvider>> = {
   movie: tmdbProvider('movie'),
   tv_show: tmdbProvider('tv'),
+  book: openLibraryProvider,
 };
 
 /** The metadata source for a media type, or undefined when it has none. */
