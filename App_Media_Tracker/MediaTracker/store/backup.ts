@@ -89,9 +89,13 @@ export function normalizeData(raw: unknown): StoreData {
   return { items, lists, settings: sanitizeSettings(src.settings) };
 }
 
+/** Settings that must never leave this device. */
+export const SECRET_SETTINGS = ['tmdbApiKey', 'rawgApiKey'] as const;
+
 export function buildBackup(data: StoreData, schemaVersion: number): string {
   // Credentials stay on this device; a backup file may be shared or synced.
-  const { tmdbApiKey: _omit, ...settings } = data.settings;
+  const settings: Record<string, unknown> = { ...data.settings };
+  for (const key of SECRET_SETTINGS) delete settings[key];
   return JSON.stringify(
     {
       format: BACKUP_FORMAT,

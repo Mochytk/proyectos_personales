@@ -6,6 +6,19 @@ import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
+const API_KEYS = [
+  {
+    setting: 'tmdbApiKey',
+    label: 'Clave de API de TMDB (películas y series)',
+    help: 'Gratis: crea una cuenta en themoviedb.org y copia la clave desde Ajustes → API.',
+  },
+  {
+    setting: 'rawgApiKey',
+    label: 'Clave de API de RAWG (videojuegos)',
+    help: 'Gratis: crea una cuenta en rawg.io/apidocs y copia tu clave.',
+  },
+] as const;
+
 export default function GlobalSettingsScreen() {
   const settings = useStore(state => state.settings);
   const updateSettings = useStore(state => state.updateSettings);
@@ -83,21 +96,26 @@ export default function GlobalSettingsScreen() {
       </View>
 
       <View style={[styles.section, { marginTop: 30 }]}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Metadatos (TMDB)</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>Metadatos</Text>
         <View style={[styles.cardGroup, { backgroundColor: colors.surface, padding: 16 }]}>
-          <Text style={[styles.optionLabel, { color: colors.text }]}>Clave de API de TMDB</Text>
-          <TextInput
-            style={[styles.keyInput, { color: colors.text, borderColor: colors.text + '40' }]}
-            value={settings?.tmdbApiKey ?? ''}
-            onChangeText={(val) => updateSettings({ tmdbApiKey: val })}
-            placeholder="Pega aquí tu clave o token"
-            placeholderTextColor={colors.text + '80'}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-          />
-          <Text style={[styles.optionDescription, { color: colors.text + '80', marginTop: 10 }]}>
-            Permite buscar películas y series al añadir un elemento, con portada y total de episodios. Es gratis: crea una cuenta en themoviedb.org y copia la clave desde Ajustes → API. Se guarda solo en este dispositivo y no se incluye en los respaldos.
+          {API_KEYS.map(({ setting, label, help }, index) => (
+            <View key={setting} style={index > 0 ? { marginTop: 20 } : undefined}>
+              <Text style={[styles.optionLabel, { color: colors.text }]}>{label}</Text>
+              <TextInput
+                style={[styles.keyInput, { color: colors.text, borderColor: colors.text + '40' }]}
+                value={settings?.[setting] ?? ''}
+                onChangeText={(val) => updateSettings({ [setting]: val })}
+                placeholder="Pega aquí tu clave o token"
+                placeholderTextColor={colors.text + '80'}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+              />
+              <Text style={[styles.optionDescription, { color: colors.text + '80', marginTop: 10 }]}>{help}</Text>
+            </View>
+          ))}
+          <Text style={[styles.optionDescription, { color: colors.text + '80', marginTop: 20 }]}>
+            Los libros se buscan en Open Library y no necesitan clave. Las claves se guardan solo en este dispositivo y no se incluyen en los respaldos.
           </Text>
         </View>
       </View>
