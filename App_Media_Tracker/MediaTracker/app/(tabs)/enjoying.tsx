@@ -7,7 +7,7 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { useStore } from '@/store/useStore';
+import { useStore, MediaItem } from '@/store/useStore';
 
 export default function EnjoyingScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -49,7 +49,7 @@ export default function EnjoyingScreen() {
     return item.progress || 0;
   };
 
-  const getSubtitle = (item: any) => {
+  const getSubtitle = (item: MediaItem) => {
     if (item.checkpointType === 'percentage') {
       return `${item.subtitle ? item.subtitle + ' · ' : ''}${item.currentCheckpoint || 0}% Completado`;
     }
