@@ -8,7 +8,9 @@ import { SymbolView } from '@/components/AppIcon';
 import { useState } from 'react';
 import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
+import SeasonTracker from '@/components/SeasonTracker';
 import { clampProgress, usesCounter } from '@/store/progress';
+import { totalEpisodes } from '@/store/seasons';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -126,6 +128,17 @@ export default function ItemDetailScreen() {
       );
     }
     
+    // Series with seasons: only when the split still adds up to the total, otherwise use the plain counter.
+    if (item.seasons && item.checkpointType === 'episodes' && totalEpisodes(item.seasons) === item.totalCheckpoints) {
+      return (
+        <SeasonTracker
+          seasons={item.seasons}
+          watched={item.currentCheckpoint || 0}
+          onChange={(next) => updateItem(item.id, { currentCheckpoint: next, status: next > 0 ? 'in_progress' : 'unstarted' })}
+        />
+      );
+    }
+
     if (usesCounter(item.checkpointType, item.totalCheckpoints || 0)) {
       const current = item.currentCheckpoint || 0;
       const total = item.totalCheckpoints || 0;
