@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  airDateTimestamp, sanitizeNextEpisode, upcomingEpisode, describeProgress, formatPosition, hasSeasonSplit, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
+  refreshUpdates, airDateTimestamp, sanitizeNextEpisode, upcomingEpisode, describeProgress, formatPosition, hasSeasonSplit, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
 } from '../store/seasons';
 
 const seasons = [10, 8, 12]; // 30 episodes
@@ -108,5 +108,27 @@ describe('next episode', () => {
     expect(upcomingEpisode(next, noon(17))).toEqual(next);
     expect(upcomingEpisode(next, noon(18))).toBeUndefined();
     expect(upcomingEpisode(undefined, noon(10))).toBeUndefined();
+  });
+});
+
+describe('refreshUpdates', () => {
+  it('adopts the new seasons and keeps the progress', () => {
+    const next = { date: '2026-10-17', season: 4, episode: 1 };
+    expect(refreshUpdates({ currentCheckpoint: 25 }, { seasons: [10, 8, 12, 9], totalEpisodes: 39, nextEpisode: next })).toEqual({
+      seasons: [10, 8, 12, 9],
+      totalCheckpoints: 39,
+      checkpointType: 'episodes',
+      currentCheckpoint: 25,
+      nextEpisode: next,
+    });
+  });
+
+  it('never leaves progress beyond a smaller total', () => {
+    expect(refreshUpdates({ currentCheckpoint: 40 }, { totalEpisodes: 30 })!.currentCheckpoint).toBe(30);
+    expect(refreshUpdates({}, { totalEpisodes: 30 })!.currentCheckpoint).toBe(0);
+  });
+
+  it('does nothing when TMDB gave no episode count', () => {
+    expect(refreshUpdates({ currentCheckpoint: 5 }, {})).toBeNull();
   });
 });

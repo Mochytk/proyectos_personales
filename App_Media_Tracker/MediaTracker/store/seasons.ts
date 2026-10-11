@@ -110,3 +110,29 @@ export function upcomingEpisode(next: NextEpisodeInfo | undefined, now: number =
   today.setHours(0, 0, 0, 0);
   return at !== undefined && at >= today.getTime() ? next : undefined;
 }
+
+export interface RefreshUpdates {
+  seasons?: number[];
+  totalCheckpoints: number;
+  checkpointType: 'episodes';
+  currentCheckpoint: number;
+  nextEpisode?: NextEpisodeInfo;
+}
+
+/**
+ * Builds the item changes for a refresh from TMDB: new season data and total, the next episode,
+ * and progress kept (never beyond the new total). Returns null when TMDB gave no episode count.
+ */
+export function refreshUpdates(
+  item: { currentCheckpoint?: number },
+  details: { seasons?: number[]; totalEpisodes?: number; nextEpisode?: NextEpisodeInfo },
+): RefreshUpdates | null {
+  if (!details.totalEpisodes) return null;
+  return {
+    seasons: details.seasons,
+    totalCheckpoints: details.totalEpisodes,
+    checkpointType: 'episodes',
+    currentCheckpoint: Math.min(Math.max(0, item.currentCheckpoint ?? 0), details.totalEpisodes),
+    nextEpisode: details.nextEpisode,
+  };
+}

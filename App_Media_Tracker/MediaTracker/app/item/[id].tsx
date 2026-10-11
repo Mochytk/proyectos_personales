@@ -10,18 +10,22 @@ import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
 import SeasonTracker from '@/components/SeasonTracker';
 import { clampProgress, usesCounter } from '@/store/progress';
-import { hasSeasonSplit } from '@/store/seasons';
+import { formatPosition, hasSeasonSplit, refreshUpdates, upcomingEpisode, airDateTimestamp } from '@/store/seasons';
+import { getTvDetails } from '@/services/tmdb';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const item = useStore(state => state.items.find(i => i.id === id));
   const updateItem = useStore(state => state.updateItem);
   const removeItem = useStore(state => state.removeItem);
+  const tmdbApiKey = useStore(state => state.settings.tmdbApiKey)?.trim();
   
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   const [newTag, setNewTag] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState('');
   const [notes, setNotes] = useState(item?.notes || '');
   const [dueDate, setDueDate] = useState(toDateInput(item?.dueDate));
   const [dueTime, setDueTime] = useState(toTimeInput(item?.dueDate, item?.dueHasTime));
@@ -85,6 +89,31 @@ export default function ItemDetailScreen() {
       setDueTime('');
     }
     // A partially typed date (native text fields) is kept in the field and saved once it is valid.
+  };
+
+  // Series picked from TMDB can be refreshed: new seasons/episodes and the next air date.
+  const canRefresh = item.externalId?.startsWith('tmdb:tv:') && !!tmdbApiKey;
+  const upcoming = upcomingEpisode(item.nextEpisode);
+
+  const handleRefresh = async () => {
+    if (!tmdbApiKey) return;
+    setRefreshing(true);
+    setRefreshMessage('');
+    try {
+      const details = await getTvDetails(item.externalId!, tmdbApiKey);
+      const updates = refreshUpdates(item, details);
+      if (!updates) {
+        setRefreshMessage('TMDB no devolvió datos de episodios para esta serie.');
+        return;
+      }
+      const added = updates.totalCheckpoints - (item.totalCheckpoints ?? 0);
+      updateItem(item.id, updates);
+      setRefreshMessage(added > 0 ? `Se añadieron ${added} ${added === 1 ? 'episodio' : 'episodios'}.` : 'Ya estaba al día.');
+    } catch (e) {
+      setRefreshMessage(e instanceof Error ? e.message : 'No se pudo actualizar desde TMDB.');
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const hasCheckpoints = item.totalCheckpoints && item.totalCheckpoints > 0;
@@ -307,6 +336,31 @@ export default function ItemDetailScreen() {
         </View>
         
         {renderChecklist()}
+
+        {(canRefresh || upcoming) && (
+          <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+            {upcoming && (
+              <>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Próximo episodio</Text>
+                <Text style={{ color: colors.text, fontSize: 16 }}>
+                  {formatPosition(upcoming)} · {new Date(airDateTimestamp(upcoming.date)!).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}
+                </Text>
+              </>
+            )}
+            {canRefresh && (
+              <Pressable
+                disabled={refreshing}
+                style={[styles.actionButton, { backgroundColor: colors.cardBackground, marginTop: upcoming ? 16 : 0, opacity: refreshing ? 0.5 : 1 }]}
+                onPress={handleRefresh}
+              >
+                <Text style={[styles.actionButtonText, { color: colors.text, marginLeft: 0 }]}>
+                  {refreshing ? 'Actualizando…' : 'Actualizar desde TMDB'}
+                </Text>
+              </Pressable>
+            )}
+            {refreshMessage !== '' && <Text style={{ color: colors.text + '90', marginTop: 10 }}>{refreshMessage}</Text>}
+          </View>
+        )}
 
         <View style={styles.actions}>
           {item.status !== 'completed' && (
