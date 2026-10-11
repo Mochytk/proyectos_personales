@@ -28,6 +28,8 @@ export interface MediaItem {
   checkpointType?: 'episodes' | 'pages' | 'chapters' | 'levels' | 'percentage';
   /** Episodes per season (series). When set, `totalCheckpoints` is their sum. */
   seasons?: number[];
+  /** Next episode to air, as announced by TMDB the last time the item was refreshed. */
+  nextEpisode?: { date: string; season: number; episode: number };
   
   rating?: number; // 1-5 stars
   tags?: string[];

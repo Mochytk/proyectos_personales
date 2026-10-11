@@ -73,6 +73,21 @@ describe('getTvDetails', () => {
     expect(await getTvDetails('tmdb:tv:42', 'k')).toEqual({ seasons: [10, 8], totalEpisodes: 18 });
   });
 
+  it('includes the next episode to air when the show is still running', async () => {
+    mockFetch(() => respond({
+      seasons: [{ season_number: 1, episode_count: 10 }],
+      next_episode_to_air: { air_date: '2026-10-17', season_number: 1, episode_number: 11 },
+    }));
+    expect((await getTvDetails('tmdb:tv:42', 'k')).nextEpisode).toEqual({ date: '2026-10-17', season: 1, episode: 11 });
+  });
+
+  it('ignores a missing or malformed next episode', async () => {
+    mockFetch(() => respond({ seasons: [{ season_number: 1, episode_count: 10 }], next_episode_to_air: null }));
+    expect((await getTvDetails('tmdb:tv:42', 'k')).nextEpisode).toBeUndefined();
+    mockFetch(() => respond({ seasons: [{ season_number: 1, episode_count: 10 }], next_episode_to_air: { air_date: 'pronto' } }));
+    expect((await getTvDetails('tmdb:tv:42', 'k')).nextEpisode).toBeUndefined();
+  });
+
   it('falls back to the overall count when no seasons are listed', async () => {
     mockFetch(() => respond({ number_of_episodes: 62, seasons: [] }));
     expect(await getTvDetails('tmdb:tv:42', 'k')).toEqual({ totalEpisodes: 62 });

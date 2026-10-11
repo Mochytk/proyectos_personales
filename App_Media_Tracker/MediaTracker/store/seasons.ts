@@ -79,3 +79,34 @@ export function describeProgress(watched: number, seasons: number[]): string {
 export function hasSeasonSplit<T extends { seasons?: number[]; checkpointType?: string; totalCheckpoints?: number }>(item: T): item is T & { seasons: number[] } {
   return !!item.seasons && item.checkpointType === 'episodes' && totalEpisodes(item.seasons) === item.totalCheckpoints;
 }
+
+export interface NextEpisodeInfo {
+  date: string; // "YYYY-MM-DD"
+  season: number;
+  episode: number;
+}
+
+export function sanitizeNextEpisode(raw: unknown): NextEpisodeInfo | undefined {
+  if (typeof raw !== 'object' || raw === null) return undefined;
+  const { date, season, episode } = raw as Record<string, unknown>;
+  if (typeof date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return undefined;
+  if (!Number.isInteger(season) || !Number.isInteger(episode)) return undefined;
+  return { date, season: season as number, episode: episode as number };
+}
+
+/** Local midnight of the air date, or undefined if it is malformed. */
+export function airDateTimestamp(date: string): number | undefined {
+  const m = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return undefined;
+  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return isNaN(d.getTime()) || d.getMonth() !== Number(m[2]) - 1 ? undefined : d.getTime();
+}
+
+/** The announced next episode, only while it has not aired yet (today still counts). */
+export function upcomingEpisode(next: NextEpisodeInfo | undefined, now: number = Date.now()): NextEpisodeInfo | undefined {
+  if (!next) return undefined;
+  const at = airDateTimestamp(next.date);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  return at !== undefined && at >= today.getTime() ? next : undefined;
+}

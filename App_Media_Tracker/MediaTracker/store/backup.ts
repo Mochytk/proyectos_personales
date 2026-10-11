@@ -1,4 +1,4 @@
-import { sanitizeSeasons } from './seasons';
+import { sanitizeNextEpisode, sanitizeSeasons } from './seasons';
 import type { AppSettings, MediaItem, MediaList, MediaType } from './useStore';
 
 export const BACKUP_FORMAT = 'media-tracker-backup';
@@ -41,6 +41,7 @@ export function sanitizeItem(raw: unknown): MediaItem | null {
     currentCheckpoint: optNum(raw.currentCheckpoint),
     checkpointType: raw.checkpointType,
     seasons: sanitizeSeasons(raw.seasons),
+    nextEpisode: sanitizeNextEpisode(raw.nextEpisode),
     rating: optNum(raw.rating),
     tags: Array.isArray(raw.tags) ? raw.tags.filter((t: unknown): t is string => typeof t === 'string') : [],
     notes: optStr(raw.notes),

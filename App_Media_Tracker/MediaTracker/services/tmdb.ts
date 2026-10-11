@@ -49,10 +49,24 @@ export async function searchTmdb(kind: 'movie' | 'tv', query: string, apiKey: st
   });
 }
 
+export interface NextEpisode {
+  date: string; // "YYYY-MM-DD", as announced by TMDB
+  season: number;
+  episode: number;
+}
+
 export interface TvDetails {
   /** Episodes per season, in order, specials excluded. */
   seasons?: number[];
   totalEpisodes?: number;
+  /** The next episode to air, for shows that are still running. */
+  nextEpisode?: NextEpisode;
+}
+
+function nextEpisodeFromTmdb(raw: any): NextEpisode | undefined {
+  if (!raw || typeof raw.air_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.air_date)) return undefined;
+  if (!Number.isInteger(raw.season_number) || !Number.isInteger(raw.episode_number)) return undefined;
+  return { date: raw.air_date, season: raw.season_number, episode: raw.episode_number };
 }
 
 /**
@@ -78,9 +92,10 @@ export async function getTvDetails(externalId: string, apiKey: string, signal?: 
   const id = externalId.split(':')[2];
   if (!/^\d+$/.test(id ?? '')) return {};
   const data = await request(`/tv/${id}`, {}, apiKey, signal);
+  const nextEpisode = nextEpisodeFromTmdb(data.next_episode_to_air);
   const seasons = seasonsFromTmdb(data.seasons);
-  if (seasons) return { seasons, totalEpisodes: seasons.reduce((sum, n) => sum + n, 0) };
+  if (seasons) return { seasons, totalEpisodes: seasons.reduce((sum, n) => sum + n, 0), nextEpisode };
   // Some shows list no seasons; fall back to the overall count.
   const total = typeof data.number_of_episodes === 'number' && data.number_of_episodes > 0 ? data.number_of_episodes : undefined;
-  return { totalEpisodes: total };
+  return { totalEpisodes: total, nextEpisode };
 }

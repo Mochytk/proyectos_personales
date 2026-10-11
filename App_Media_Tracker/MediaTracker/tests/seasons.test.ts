@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  describeProgress, formatPosition, hasSeasonSplit, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
+  airDateTimestamp, sanitizeNextEpisode, upcomingEpisode, describeProgress, formatPosition, hasSeasonSplit, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
 } from '../store/seasons';
 
 const seasons = [10, 8, 12]; // 30 episodes
@@ -83,5 +83,30 @@ describe('hasSeasonSplit', () => {
     expect(hasSeasonSplit({ seasons, checkpointType: 'episodes', totalCheckpoints: 31 })).toBe(false);
     expect(hasSeasonSplit({ seasons, checkpointType: 'pages', totalCheckpoints: 30 })).toBe(false);
     expect(hasSeasonSplit({ checkpointType: 'episodes', totalCheckpoints: 30 })).toBe(false);
+  });
+});
+
+describe('next episode', () => {
+  it('sanitizes the announced episode', () => {
+    expect(sanitizeNextEpisode({ date: '2026-10-17', season: 3, episode: 5 })).toEqual({ date: '2026-10-17', season: 3, episode: 5 });
+    expect(sanitizeNextEpisode({ date: '17/10/2026', season: 3, episode: 5 })).toBeUndefined();
+    expect(sanitizeNextEpisode({ date: '2026-10-17', season: '3', episode: 5 })).toBeUndefined();
+    expect(sanitizeNextEpisode(null)).toBeUndefined();
+  });
+
+  it('parses the air date as a local date and rejects impossible ones', () => {
+    const at = airDateTimestamp('2026-10-17')!;
+    expect(new Date(at).getDate()).toBe(17);
+    expect(airDateTimestamp('2026-02-31')).toBeUndefined();
+    expect(airDateTimestamp('x')).toBeUndefined();
+  });
+
+  it('only reports an episode that has not aired yet; today still counts', () => {
+    const next = { date: '2026-10-17', season: 3, episode: 5 };
+    const noon = (day: number) => new Date(2026, 9, day, 12, 0).getTime();
+    expect(upcomingEpisode(next, noon(10))).toEqual(next);
+    expect(upcomingEpisode(next, noon(17))).toEqual(next);
+    expect(upcomingEpisode(next, noon(18))).toBeUndefined();
+    expect(upcomingEpisode(undefined, noon(10))).toBeUndefined();
   });
 });
