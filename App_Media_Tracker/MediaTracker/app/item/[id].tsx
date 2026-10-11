@@ -10,7 +10,7 @@ import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
 import SeasonTracker from '@/components/SeasonTracker';
 import { clampProgress, usesCounter } from '@/store/progress';
-import { totalEpisodes } from '@/store/seasons';
+import { hasSeasonSplit } from '@/store/seasons';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -129,7 +129,7 @@ export default function ItemDetailScreen() {
     }
     
     // Series with seasons: only when the split still adds up to the total, otherwise use the plain counter.
-    if (item.seasons && item.checkpointType === 'episodes' && totalEpisodes(item.seasons) === item.totalCheckpoints) {
+    if (hasSeasonSplit(item)) {
       return (
         <SeasonTracker
           seasons={item.seasons}

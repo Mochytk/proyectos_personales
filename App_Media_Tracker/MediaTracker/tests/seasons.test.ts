@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  formatPosition, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
+  describeProgress, formatPosition, hasSeasonSplit, lastWatched, nextToWatch, sanitizeSeasons, seasonEnd, seasonProgress, toggleSeason, totalEpisodes,
 } from '../store/seasons';
 
 const seasons = [10, 8, 12]; // 30 episodes
@@ -66,5 +66,22 @@ describe('toggleSeason', () => {
   it('goes back to the start of a finished season', () => {
     expect(toggleSeason(2, 18, seasons)).toBe(10);
     expect(toggleSeason(1, 25, seasons)).toBe(0);
+  });
+});
+
+describe('describeProgress', () => {
+  it('summarises the position for cards', () => {
+    expect(describeProgress(0, seasons)).toBe('Sin empezar');
+    expect(describeProgress(13, seasons)).toBe('T2 · E3 · 13 de 30');
+    expect(describeProgress(99, seasons)).toBe('T3 · E12 · 30 de 30');
+  });
+});
+
+describe('hasSeasonSplit', () => {
+  it('requires episode tracking and a split that adds up to the total', () => {
+    expect(hasSeasonSplit({ seasons, checkpointType: 'episodes', totalCheckpoints: 30 })).toBe(true);
+    expect(hasSeasonSplit({ seasons, checkpointType: 'episodes', totalCheckpoints: 31 })).toBe(false);
+    expect(hasSeasonSplit({ seasons, checkpointType: 'pages', totalCheckpoints: 30 })).toBe(false);
+    expect(hasSeasonSplit({ checkpointType: 'episodes', totalCheckpoints: 30 })).toBe(false);
   });
 });

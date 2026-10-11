@@ -67,3 +67,15 @@ export function toggleSeason(season: number, watched: number, seasons: number[])
   const end = seasonEnd(season, seasons);
   return watched >= end ? seasonEnd(season - 1, seasons) : end;
 }
+
+/** Short progress text for cards: "T2 · E3 · 13 de 30", or "Sin empezar". */
+export function describeProgress(watched: number, seasons: number[]): string {
+  const last = lastWatched(watched, seasons);
+  if (!last) return 'Sin empezar';
+  return `${formatPosition(last)} · ${Math.min(watched, totalEpisodes(seasons))} de ${totalEpisodes(seasons)}`;
+}
+
+/** True when `seasons` is usable for this item: episodes tracking and the split adds up to the total. */
+export function hasSeasonSplit<T extends { seasons?: number[]; checkpointType?: string; totalCheckpoints?: number }>(item: T): item is T & { seasons: number[] } {
+  return !!item.seasons && item.checkpointType === 'episodes' && totalEpisodes(item.seasons) === item.totalCheckpoints;
+}
