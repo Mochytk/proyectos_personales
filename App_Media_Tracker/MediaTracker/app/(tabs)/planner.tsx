@@ -5,17 +5,19 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { useStore, MediaItem } from '@/store/useStore';
-import { DayBucket, bucketFor } from '@/store/dates';
+import { useStore } from '@/store/useStore';
+import { DayBucket } from '@/store/dates';
+import { PlannerEntry, buildPlannerEntries, groupEntries } from '@/store/planner';
+import { formatPosition } from '@/store/seasons';
 
-const BUCKETS: { key: DayBucket; label: string }[] = [
-  { key: 'overdue', label: 'Vencidos' },
-  { key: 'today', label: 'Hoy' },
-  { key: 'tomorrow', label: 'Mañana' },
-  { key: 'week', label: 'Esta semana' },
-  { key: 'later', label: 'Más adelante' },
-  { key: 'undated', label: 'Sin fecha' },
-];
+const LABELS: Record<DayBucket, string> = {
+  overdue: 'Vencidos',
+  today: 'Hoy',
+  tomorrow: 'Mañana',
+  week: 'Esta semana',
+  later: 'Más adelante',
+  undated: 'Sin fecha',
+};
 
 export default function PlannerScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -32,17 +34,7 @@ export default function PlannerScreen() {
     return () => clearInterval(timer);
   }, []);
   
-  const upcomingItems = useMemo(() => {
-    return allItems
-      .filter(item => item.status !== 'completed' && (item.dueDate !== undefined || item.type === 'event' || item.type === 'task'))
-      .sort((a, b) => (a.dueDate ?? Infinity) - (b.dueDate ?? Infinity) || a.updatedAt - b.updatedAt);
-  }, [allItems]);
-
-  const groups = useMemo(() => {
-    return BUCKETS
-      .map(({ key, label }) => ({ key, label, items: upcomingItems.filter(item => bucketFor(item, now) === key) }))
-      .filter(group => group.items.length > 0);
-  }, [upcomingItems, now]);
+  const groups = useMemo(() => groupEntries(buildPlannerEntries(allItems, now), now), [allItems, now]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -66,15 +58,15 @@ export default function PlannerScreen() {
     });
   }, [navigation, colors]);
 
-  const formatDue = (item: MediaItem) => {
-    const date = new Date(item.dueDate!);
-    const day = date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-    return item.dueHasTime ? `${day}, ${date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : day;
+  const formatDue = ({ date, hasTime }: PlannerEntry) => {
+    const when = new Date(date!);
+    const day = when.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    return hasTime ? `${day}, ${when.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : day;
   };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
-      {upcomingItems.length === 0 ? (
+      {groups.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <View style={[styles.emptyStateIconContainer, { backgroundColor: colors.cardBackground }]}>
             <SymbolView name={{ ios: 'calendar', android: 'event', web: 'event' }} size={40} tintColor={colors.text + '80'} />
@@ -93,25 +85,31 @@ export default function PlannerScreen() {
         <View style={styles.listContainer}>
           {groups.map(group => (
             <View key={group.key}>
-              <Text style={[styles.sectionTitle, { color: group.key === 'overdue' ? '#ff3b30' : colors.text }]}>{group.label}</Text>
-              {group.items.map(item => (
+              <Text style={[styles.sectionTitle, { color: group.key === 'overdue' ? '#ff3b30' : colors.text }]}>{LABELS[group.key]}</Text>
+              {group.entries.map(entry => { const { item, premiere } = entry; return (
                 <View key={item.id} style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
-                  <Pressable
-                    accessibilityLabel="Marcar como terminado"
-                    style={[styles.checkButton, { borderColor: colors.tint }]}
-                    onPress={() => updateItem(item.id, { status: 'completed' })}
-                  />
+                  {premiere ? (
+                    // A series premiere is not something to tick off: the whole series would be marked finished.
+                    <SymbolView name={{ ios: 'play.circle', android: 'play-circle-outline', web: 'play-circle-outline' }} size={26} tintColor={colors.tint} style={styles.premiereIcon} />
+                  ) : (
+                    <Pressable
+                      accessibilityLabel="Marcar como terminado"
+                      style={[styles.checkButton, { borderColor: colors.tint }]}
+                      onPress={() => updateItem(item.id, { status: 'completed' })}
+                    />
+                  )}
                   <Link href={`/item/${item.id}`} asChild>
                     <Pressable style={styles.cardContent}>
                       <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
                       <Text style={[styles.cardSubtitle, { color: group.key === 'overdue' ? '#ff3b30' : colors.text + '90' }]}>
-                        {item.dueDate !== undefined ? formatDue(item) : (item.subtitle || 'Sin fecha')}
+                        {premiere ? `Estreno ${formatPosition(premiere)} · ` : ''}
+                        {entry.date !== undefined ? formatDue(entry) : (item.subtitle || 'Sin fecha')}
                         {item.remind ? '  🔔' : ''}
                       </Text>
                     </Pressable>
                   </Link>
                 </View>
-              ))}
+              ); })}
             </View>
           ))}
         </View>
@@ -133,6 +131,7 @@ const styles = StyleSheet.create({
   createButtonText: { fontSize: 16, fontWeight: '600' },
   listContainer: { marginTop: 20 },
   sectionTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 15, marginTop: 10 },
+  premiereIcon: { marginRight: 15 },
   checkButton: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, marginRight: 15 },
   card: { flexDirection: 'row', borderRadius: 20, padding: 16, marginBottom: 12, alignItems: 'center' },
   iconContainer: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
