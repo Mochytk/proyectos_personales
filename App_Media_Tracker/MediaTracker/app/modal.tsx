@@ -8,6 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
 import DateField from '@/components/DateField';
 import { fromInputs } from '@/store/dates';
+import { totalEpisodes } from '@/store/seasons';
 import { MetadataResult, providerFor } from '@/services/metadata';
 
 const mediaTypes: { label: string; value: MediaType; icon: string }[] = [
@@ -57,6 +58,7 @@ export default function ModalScreen() {
   const [progressType, setProgressType] = useState<string>('none');
   const [customProgressLabel, setCustomProgressLabel] = useState('');
   const [totalCheckpoints, setTotalCheckpoints] = useState('');
+  const [seasons, setSeasons] = useState<number[] | undefined>(undefined); // series picked from TMDB
   
   // Reminders
   const [dueDateString, setDueDateString] = useState(''); // YYYY-MM-DD
@@ -97,10 +99,12 @@ export default function ModalScreen() {
   const applyProgress = (progress: NonNullable<MetadataResult['progress']>) => {
     setProgressType(progress.type);
     if (progress.total) setTotalCheckpoints(String(progress.total));
+    if (progress.seasons) setSeasons(progress.seasons);
   };
 
   const handlePick = (result: MetadataResult) => {
     setPicked(result);
+    setSeasons(undefined);
     setTitle(result.title);
     setSubtitle(result.subtitle ?? '');
     setQuery('');
@@ -118,6 +122,7 @@ export default function ModalScreen() {
     setType(newType);
     setProgressType(getDefaultProgressType(newType));
     setTotalCheckpoints('');
+    setSeasons(undefined);
     setPicked(null);
     setQuery('');
     setResults([]);
@@ -150,6 +155,8 @@ export default function ModalScreen() {
       status: 'unstarted',
       progress: 0,
       totalCheckpoints: parsedTotal,
+      // Only kept while the total still matches, so editing the total by hand drops the season split.
+      seasons: progressType === 'episodes' && seasons && parsedTotal === totalEpisodes(seasons) ? seasons : undefined,
       currentCheckpoint: 0,
       checkpointType: finalCheckpointType as any,
       listId: selectedListId || undefined,
@@ -310,6 +317,11 @@ export default function ModalScreen() {
             placeholderTextColor={colors.text + '80'}
             keyboardType="numeric"
           />
+          {progressType === 'episodes' && seasons && parseInt(totalCheckpoints, 10) === totalEpisodes(seasons) && (
+            <Text style={[styles.helpText, { color: colors.text + '80' }]}>
+              {seasons.length} {seasons.length === 1 ? 'temporada' : 'temporadas'} detectadas: {seasons.join(' + ')} episodios.
+            </Text>
+          )}
         </View>
       )}
 
