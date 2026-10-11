@@ -26,6 +26,8 @@ export interface MediaItem {
   totalCheckpoints?: number;
   currentCheckpoint?: number;
   checkpointType?: 'episodes' | 'pages' | 'chapters' | 'levels' | 'percentage';
+  /** Episodes per season (series). When set, `totalCheckpoints` is their sum. */
+  seasons?: number[];
   
   rating?: number; // 1-5 stars
   tags?: string[];
