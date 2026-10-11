@@ -28,10 +28,10 @@ describe('TMDB provider', () => {
   });
 
   it('marks series for episode tracking and fetches the total afterwards', async () => {
-    mockFetch((url) => (url.includes('/search/tv') ? respond({ results: [{ id: 42, name: 'Show', first_air_date: '2020-01-01' }] }) : respond({ number_of_episodes: 62 })));
+    mockFetch((url) => (url.includes('/search/tv') ? respond({ results: [{ id: 42, name: 'Show', first_air_date: '2020-01-01' }] }) : respond({ seasons: [{ season_number: 1, episode_count: 40 }, { season_number: 2, episode_count: 22 }] })));
     const provider = providerFor('tv_show')!;
     const [r] = await provider.search('show', 'key');
     expect(r.progress).toEqual({ type: 'episodes' });
-    expect(await provider.details!(r, 'key')).toEqual({ progress: { type: 'episodes', total: 62 } });
+    expect(await provider.details!(r, 'key')).toEqual({ progress: { type: 'episodes', total: 62, seasons: [40, 22] } });
   });
 });

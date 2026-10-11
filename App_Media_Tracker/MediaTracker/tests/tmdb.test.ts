@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { getTvEpisodeCount, searchTmdb } from '../services/tmdb';
+import { getTvDetails, searchTmdb, seasonsFromTmdb } from '../services/tmdb';
 
 const respond = (body: unknown, status = 200) => ({ ok: status < 400, status, json: async () => body });
 const mockFetch = (impl: (url: string) => unknown) => {
@@ -42,15 +42,45 @@ describe('searchTmdb', () => {
   });
 });
 
-describe('getTvEpisodeCount', () => {
-  it('returns the number of episodes', async () => {
-    mockFetch(() => respond({ number_of_episodes: 62 }));
-    expect(await getTvEpisodeCount('tmdb:tv:42', 'k')).toBe(62);
+describe('seasonsFromTmdb', () => {
+  it('skips specials and orders by season number', () => {
+    const list = [
+      { season_number: 2, episode_count: 8 },
+      { season_number: 0, episode_count: 5 },
+      { season_number: 1, episode_count: 10 },
+    ];
+    expect(seasonsFromTmdb(list)).toEqual([10, 8]);
+  });
+
+  it('stops at the first season without episodes so numbering never shifts', () => {
+    const list = [
+      { season_number: 1, episode_count: 10 },
+      { season_number: 2, episode_count: 0 },
+      { season_number: 3, episode_count: 6 },
+    ];
+    expect(seasonsFromTmdb(list)).toEqual([10]);
+  });
+
+  it('returns undefined for missing or empty data', () => {
+    expect(seasonsFromTmdb(undefined)).toBeUndefined();
+    expect(seasonsFromTmdb([{ season_number: 0, episode_count: 3 }])).toBeUndefined();
+  });
+});
+
+describe('getTvDetails', () => {
+  it('returns the seasons and their total', async () => {
+    mockFetch(() => respond({ number_of_episodes: 99, seasons: [{ season_number: 1, episode_count: 10 }, { season_number: 2, episode_count: 8 }] }));
+    expect(await getTvDetails('tmdb:tv:42', 'k')).toEqual({ seasons: [10, 8], totalEpisodes: 18 });
+  });
+
+  it('falls back to the overall count when no seasons are listed', async () => {
+    mockFetch(() => respond({ number_of_episodes: 62, seasons: [] }));
+    expect(await getTvDetails('tmdb:tv:42', 'k')).toEqual({ totalEpisodes: 62 });
   });
 
   it('ignores malformed ids without calling the API', async () => {
     const fetchMock = mockFetch(() => respond({}));
-    expect(await getTvEpisodeCount('tmdb:tv:x', 'k')).toBeUndefined();
+    expect(await getTvDetails('tmdb:tv:x', 'k')).toEqual({});
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

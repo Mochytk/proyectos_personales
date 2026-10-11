@@ -1,7 +1,7 @@
 import type { MediaType } from '@/store/useStore';
 import { searchOpenLibrary } from './openlibrary';
 import { searchRawg } from './rawg';
-import { getTvEpisodeCount, searchTmdb } from './tmdb';
+import { getTvDetails, searchTmdb } from './tmdb';
 
 /** One search hit from any provider, in the shape the add-item form needs. */
 export interface MetadataResult {
@@ -14,7 +14,7 @@ export interface MetadataResult {
   overview?: string;
   posterUrl?: string;
   /** Pre-fills progress tracking; `total` may arrive later through `details`. */
-  progress?: { type: 'episodes' | 'pages'; total?: number };
+  progress?: { type: 'episodes' | 'pages'; total?: number; /** episodes per season (series) */ seasons?: number[] };
 }
 
 export interface MetadataProvider {
@@ -51,8 +51,8 @@ const tmdbProvider = (kind: 'movie' | 'tv'): MetadataProvider => ({
   details:
     kind === 'tv'
       ? async (result, apiKey, signal) => {
-          const total = await getTvEpisodeCount(result.externalId, apiKey, signal);
-          return total ? { progress: { type: 'episodes', total } } : {};
+          const { totalEpisodes, seasons } = await getTvDetails(result.externalId, apiKey, signal);
+          return totalEpisodes ? { progress: { type: 'episodes', total: totalEpisodes, seasons } } : {};
         }
       : undefined,
 });
