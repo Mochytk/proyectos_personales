@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
-import { iconForType } from '@/constants/mediaTypes';
+import ItemCover, { rowCover } from '@/components/ItemCover';
 
 export default function SearchModalScreen() {
   const allItems = useStore(state => state.items);
@@ -71,9 +71,7 @@ export default function SearchModalScreen() {
                   router.push(`/item/${item.id}`);
                 }}
               >
-                <View style={[styles.itemIcon, { backgroundColor: colors.tint + '15' }]}>
-                  <SymbolView name={iconForType(item.type)} size={20} tintColor={colors.tint} />
-                </View>
+                <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} iconSize={20} />
                 <View style={styles.itemContent}>
                   <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
                   <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]} numberOfLines={1}>
@@ -106,7 +104,6 @@ const styles = StyleSheet.create({
   listContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 40 },
   resultCount: { fontSize: 13, marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5, fontWeight: '600' },
   itemCard: { flexDirection: 'row', padding: 12, borderRadius: 16, marginBottom: 10, alignItems: 'center' },
-  itemIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   itemContent: { flex: 1, backgroundColor: 'transparent', paddingRight: 10 },
   itemTitle: { fontSize: 16, fontWeight: '600' },
   itemSubtitle: { fontSize: 13, marginTop: 4 },

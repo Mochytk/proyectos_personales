@@ -2,6 +2,7 @@ import { StyleSheet, Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
+import ItemCover, { rowCover } from '@/components/ItemCover';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
@@ -111,9 +112,7 @@ export default function LogbookScreen() {
           {completedItems.map(item => (
             <Link key={item.id} href={`/item/${item.id}`} asChild>
               <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
-                <View style={[styles.iconContainer, { backgroundColor: colors.tint + '15' }]}>
-                  <SymbolView name={iconForType(item.type)} size={24} tintColor={colors.tint} />
-                </View>
+                <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} />
                 <View style={styles.cardContent}>
                   <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
                   <Text style={[styles.cardSubtitle, { color: colors.text + '90' }]}>
@@ -156,7 +155,6 @@ const styles = StyleSheet.create({
   listContainer: { marginTop: 10 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5 },
   card: { flexDirection: 'row', borderRadius: 16, padding: 16, marginBottom: 10, alignItems: 'center', borderBottomWidth: 1 },
-  iconContainer: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   cardContent: { flex: 1, backgroundColor: 'transparent' },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   cardSubtitle: { fontSize: 13 },
