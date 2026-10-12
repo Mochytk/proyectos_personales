@@ -1,7 +1,8 @@
 import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
-import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
+import { mediaTypeLabelsES } from '@/constants/mediaTypes';
+import ItemCover, { rowCover } from '@/components/ItemCover';
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { useMemo } from 'react';
@@ -47,9 +48,7 @@ export default function ListsScreen() {
           styles.gridCard, 
           { backgroundColor: colors.surface, width: itemWidth }
         ])}>
-          <View style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio(), backgroundColor: colors.tint + '15' }]}>
-            <SymbolView name={iconForType(item.type)} size={32} tintColor={colors.tint} />
-          </View>
+          <ItemCover type={item.type} posterUrl={item.posterUrl} style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio() }]} iconSize={32} />
           <View style={styles.gridCardContent}>
             <Text style={[styles.gridTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
             {item.subtitle ? <Text style={[styles.gridSubtitle, { color: colors.text + '90' }]} numberOfLines={1}>{item.subtitle}</Text> : null}
@@ -62,9 +61,7 @@ export default function ListsScreen() {
   const renderListItem = (item: MediaItem) => (
     <Link key={item.id} href={`/item/${item.id}`} asChild>
       <Pressable style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
-        <View style={[styles.itemIcon, { backgroundColor: colors.tint + '15' }]}>
-          <SymbolView name={iconForType(item.type)} size={20} tintColor={colors.tint} />
-        </View>
+        <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} iconSize={20} />
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
@@ -197,7 +194,6 @@ const styles = StyleSheet.create({
   // List Layout
   listContainer: { marginTop: 10 },
   itemCard: { flexDirection: 'row', padding: 12, borderRadius: 16, marginBottom: 10, alignItems: 'center' },
-  itemIcon: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   itemContent: { flex: 1, backgroundColor: 'transparent' },
   itemTitle: { fontSize: 16, fontWeight: '600' },
   itemSubtitle: { fontSize: 13, marginTop: 4 },
