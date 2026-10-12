@@ -46,11 +46,15 @@ Al añadir un elemento, el formulario busca y rellena título, portada y progres
 
 | Tipo | Fuente | Clave | Rellena |
 | --- | --- | --- | --- |
-| Película, serie | [TMDB](https://www.themoviedb.org) | Sí (gratis) | Título, año, portada, sinopsis y total de episodios |
+| Película, serie | [TMDB](https://www.themoviedb.org) | Sí (gratis) | Título, año, portada, sinopsis; en series, episodios por temporada y próximo episodio |
 | Libro | [Open Library](https://openlibrary.org) | No | Título, autor, año, portada y total de páginas |
 | Videojuego | [RAWG](https://rawg.io/apidocs) | Sí (gratis) | Título, año y portada |
 
 Las claves se pegan en Ajustes Globales; quedan solo en el dispositivo y no se incluyen en los respaldos (`SECRET_SETTINGS` en `store/backup.ts`). Para añadir otra fuente, crea un cliente en `services/` y regístralo en `services/metadata.ts`.
+
+## Series con temporadas
+
+Las series elegidas de TMDB guardan cuántos episodios tiene cada temporada. El detalle muestra "Vas por T2 · E3", un botón para marcar el siguiente episodio y una fila por temporada (tocarla la marca como vista). "Actualizar desde TMDB" trae temporadas nuevas y el próximo estreno sin perder tu progreso, y el Planificador lista los estrenos próximos. El progreso sigue siendo un solo contador de episodios vistos (`currentCheckpoint`); `seasons` solo lo traduce a temporada y episodio.
 
 ## Recordatorios
 

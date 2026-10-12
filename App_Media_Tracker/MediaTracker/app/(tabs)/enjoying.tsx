@@ -2,11 +2,12 @@ import { StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import { iconForType } from '@/constants/mediaTypes';
+import { describeProgress, hasSeasonSplit } from '@/store/seasons';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo } from 'react';
-import { useStore } from '@/store/useStore';
+import { useStore, MediaItem } from '@/store/useStore';
 
 export default function EnjoyingScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -48,9 +49,12 @@ export default function EnjoyingScreen() {
     return item.progress || 0;
   };
 
-  const getSubtitle = (item: any) => {
+  const getSubtitle = (item: MediaItem) => {
     if (item.checkpointType === 'percentage') {
       return `${item.subtitle ? item.subtitle + ' · ' : ''}${item.currentCheckpoint || 0}% Completado`;
+    }
+    if (hasSeasonSplit(item)) {
+      return `${item.subtitle ? item.subtitle + ' · ' : ''}${describeProgress(item.currentCheckpoint || 0, item.seasons)}`;
     }
     if (item.totalCheckpoints && item.totalCheckpoints > 0) {
       const unitES: Record<string, string> = { episodes: 'Episodio', chapters: 'Capítulo', pages: 'Página', levels: 'Nivel' };

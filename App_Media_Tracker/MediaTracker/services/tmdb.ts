@@ -49,10 +49,53 @@ export async function searchTmdb(kind: 'movie' | 'tv', query: string, apiKey: st
   });
 }
 
-/** Total number of episodes of a TV show, used to pre-fill progress tracking. */
-export async function getTvEpisodeCount(externalId: string, apiKey: string, signal?: AbortSignal): Promise<number | undefined> {
+export interface NextEpisode {
+  date: string; // "YYYY-MM-DD", as announced by TMDB
+  season: number;
+  episode: number;
+}
+
+export interface TvDetails {
+  /** Episodes per season, in order, specials excluded. */
+  seasons?: number[];
+  totalEpisodes?: number;
+  /** The next episode to air, for shows that are still running. */
+  nextEpisode?: NextEpisode;
+}
+
+function nextEpisodeFromTmdb(raw: any): NextEpisode | undefined {
+  if (!raw || typeof raw.air_date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw.air_date)) return undefined;
+  if (!Number.isInteger(raw.season_number) || !Number.isInteger(raw.episode_number)) return undefined;
+  return { date: raw.air_date, season: raw.season_number, episode: raw.episode_number };
+}
+
+/**
+ * Builds the episodes-per-season list from TMDB's `seasons` array. Season 0 (specials) is skipped,
+ * and the list stops at the first season without a known episode count so later seasons cannot
+ * shift the numbering of earlier ones.
+ */
+export function seasonsFromTmdb(list: unknown): number[] | undefined {
+  if (!Array.isArray(list)) return undefined;
+  const sorted = list
+    .filter((s) => s && Number.isInteger(s.season_number) && s.season_number >= 1)
+    .sort((a, b) => a.season_number - b.season_number);
+  const seasons: number[] = [];
+  for (const season of sorted) {
+    if (!(Number.isInteger(season.episode_count) && season.episode_count > 0)) break;
+    seasons.push(season.episode_count);
+  }
+  return seasons.length > 0 ? seasons : undefined;
+}
+
+/** Seasons and total episodes of a TV show, used to pre-fill progress tracking. */
+export async function getTvDetails(externalId: string, apiKey: string, signal?: AbortSignal): Promise<TvDetails> {
   const id = externalId.split(':')[2];
-  if (!/^\d+$/.test(id ?? '')) return undefined;
+  if (!/^\d+$/.test(id ?? '')) return {};
   const data = await request(`/tv/${id}`, {}, apiKey, signal);
-  return typeof data.number_of_episodes === 'number' && data.number_of_episodes > 0 ? data.number_of_episodes : undefined;
+  const nextEpisode = nextEpisodeFromTmdb(data.next_episode_to_air);
+  const seasons = seasonsFromTmdb(data.seasons);
+  if (seasons) return { seasons, totalEpisodes: seasons.reduce((sum, n) => sum + n, 0), nextEpisode };
+  // Some shows list no seasons; fall back to the overall count.
+  const total = typeof data.number_of_episodes === 'number' && data.number_of_episodes > 0 ? data.number_of_episodes : undefined;
+  return { totalEpisodes: total, nextEpisode };
 }

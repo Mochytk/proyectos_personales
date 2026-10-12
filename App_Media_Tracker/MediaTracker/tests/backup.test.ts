@@ -46,6 +46,11 @@ describe('sanitizing', () => {
     expect(it.dueHasTime).toBe(true);
   });
 
+  it('keeps valid seasons and drops invalid ones', () => {
+    expect(sanitizeItem({ id: '1', title: 't', seasons: [10, 0, 8] })!.seasons).toEqual([10, 8]);
+    expect(sanitizeItem({ id: '1', title: 't', seasons: 'x' })!.seasons).toBeUndefined();
+  });
+
   it('clears references to lists that no longer exist', () => {
     expect(dropOrphanListRefs([item({ listId: 'GONE' })], [list])[0].listId).toBeUndefined();
     expect(dropOrphanListRefs([item({ listId: 'L' })], [list])[0].listId).toBe('L');
