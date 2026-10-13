@@ -5,6 +5,7 @@ import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
+import ItemCover, { rowCover } from '@/components/ItemCover';
 import { useStore } from '@/store/useStore';
 import { DayBucket } from '@/store/dates';
 import { PlannerEntry, buildPlannerEntries, groupEntries } from '@/store/planner';
@@ -98,6 +99,8 @@ export default function PlannerScreen() {
                       onPress={() => updateItem(item.id, { status: 'completed' })}
                     />
                   )}
+                  {/* Only items with a poster get one: tasks and events keep the compact row. */}
+                  {item.posterUrl ? <ItemCover type={item.type} posterUrl={item.posterUrl} style={{ ...rowCover, width: 36, height: 54 }} /> : null}
                   <Link href={`/item/${item.id}`} asChild>
                     <Pressable style={styles.cardContent}>
                       <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>

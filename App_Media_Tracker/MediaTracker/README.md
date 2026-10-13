@@ -52,6 +52,10 @@ Al añadir un elemento, el formulario busca y rellena título, portada y progres
 
 Las claves se pegan en Ajustes Globales; quedan solo en el dispositivo y no se incluyen en los respaldos (`SECRET_SETTINGS` en `store/backup.ts`). Para añadir otra fuente, crea un cliente en `services/` y regístralo en `services/metadata.ts`.
 
+## Portadas
+
+Las portadas se guardan como URL (`posterUrl`) al elegir un resultado de TMDB, Open Library o RAWG. `components/ItemCover.tsx` las muestra en La Pila, las listas, Disfrutando, Bitácora, Buscar y Planificador; si un elemento no tiene portada, o la imagen no carga, se ve el icono de su tipo. Las portadas se descargan de la fuente cada vez (no se guardan en el equipo), así que sin conexión se ven los iconos.
+
 ## Series con temporadas
 
 Las series elegidas de TMDB guardan cuántos episodios tiene cada temporada. El detalle muestra "Vas por T2 · E3", un botón para marcar el siguiente episodio y una fila por temporada (tocarla la marca como vista). "Actualizar desde TMDB" trae temporadas nuevas y el próximo estreno sin perder tu progreso, y el Planificador lista los estrenos próximos. El progreso sigue siendo un solo contador de episodios vistos (`currentCheckpoint`); `seasons` solo lo traduce a temporada y episodio.
