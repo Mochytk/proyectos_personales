@@ -1,5 +1,7 @@
 import { useLocalSearchParams, router, Stack } from 'expo-router';
-import { StyleSheet, Pressable, ScrollView, TextInput, Image, Switch } from 'react-native';
+import { StyleSheet, Pressable, ScrollView, TextInput, Switch } from 'react-native';
+import PressableScale from '@/components/PressableScale';
+import ItemCover from '@/components/ItemCover';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
 import Colors from '@/constants/Colors';
@@ -137,21 +139,21 @@ export default function ItemDetailScreen() {
       const current = item.currentCheckpoint || 0;
       const total = item.totalCheckpoints || 100;
       return (
-        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Progreso ({current}%)</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Pressable 
+            <PressableScale 
               style={[styles.actionButton, { flex: 1, backgroundColor: colors.cardBackground, padding: 12 }]} 
               onPress={() => updateItem(item.id, { currentCheckpoint: Math.max(0, current - 10), status: current - 10 > 0 ? 'in_progress' : 'unstarted' })}
             >
               <Text style={{ color: colors.text, fontWeight: 'bold' }}>- 10%</Text>
-            </Pressable>
-            <Pressable 
+            </PressableScale>
+            <PressableScale 
               style={[styles.actionButton, { flex: 1, backgroundColor: colors.tint, padding: 12 }]} 
               onPress={() => updateItem(item.id, { currentCheckpoint: Math.min(total, current + 10), status: 'in_progress' })}
             >
               <Text style={{ color: '#fff', fontWeight: 'bold' }}>+ 10%</Text>
-            </Pressable>
+            </PressableScale>
           </View>
         </View>
       );
@@ -174,7 +176,7 @@ export default function ItemDetailScreen() {
       const setCurrent = (next: number) =>
         updateItem(item.id, { currentCheckpoint: next, status: next > 0 ? 'in_progress' : 'unstarted' });
       return (
-        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Progreso</Text>
           <View style={styles.counterRow}>
             <TextInput
@@ -184,20 +186,20 @@ export default function ItemDetailScreen() {
               keyboardType="numeric"
               accessibilityLabel={`${unit} actual`}
             />
-            <Text style={{ color: colors.text + '90', fontSize: 16 }}>de {total} · {unit}s</Text>
+            <Text style={{ color: colors.text + '90', fontSize: 16, fontVariant: ['tabular-nums'] }}>de {total} · {unit}s</Text>
           </View>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${Math.round((current / total) * 100)}%` }]} />
           </View>
           <View style={styles.counterRow}>
             {[-10, -1, 1, 10].map((delta) => (
-              <Pressable
+              <PressableScale
                 key={delta}
                 style={[styles.actionButton, { flex: 1, padding: 12, backgroundColor: delta > 0 ? colors.tint : colors.cardBackground }]}
                 onPress={() => setCurrent(clampProgress(current, delta, total))}
               >
                 <Text style={{ color: delta > 0 ? '#fff' : colors.text, fontWeight: 'bold' }}>{delta > 0 ? `+${delta}` : delta}</Text>
-              </Pressable>
+              </PressableScale>
             ))}
           </View>
         </View>
@@ -236,7 +238,7 @@ export default function ItemDetailScreen() {
     }
     
     return (
-      <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+      <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Lista de Progreso</Text>
         {checkboxes}
       </View>
@@ -253,14 +255,14 @@ export default function ItemDetailScreen() {
       }} />
       <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
-          {item.posterUrl ? <Image source={{ uri: item.posterUrl }} style={styles.poster} /> : null}
+          {item.posterUrl ? <ItemCover type={item.type} posterUrl={item.posterUrl} style={styles.poster} /> : null}
           <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.subtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
           {item.overview ? <Text style={[styles.overview, { color: colors.text + '90' }]}>{item.overview}</Text> : null}
         </View>
 
         {/* Rating Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Calificación</Text>
           <View style={styles.starsContainer}>
             {[1, 2, 3, 4, 5].map(star => (
@@ -276,7 +278,7 @@ export default function ItemDetailScreen() {
         </View>
 
         {/* Due date / reminder */}
-        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Fecha y recordatorio</Text>
           <DateField date={dueDate} time={dueTime} onChange={({ date, time }) => saveDue(date, time)} />
           {dueDate !== '' && (
@@ -310,7 +312,7 @@ export default function ItemDetailScreen() {
         </View>
 
         {/* Tags Section */}
-        <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+        <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Etiquetas</Text>
           <View style={styles.tagsContainer}>
             {(item.tags || []).map(tag => (
@@ -329,16 +331,16 @@ export default function ItemDetailScreen() {
               onChangeText={setNewTag}
               onSubmitEditing={addTag}
             />
-            <Pressable style={[styles.addTagButton, { backgroundColor: colors.cardBackground }]} onPress={addTag}>
+            <PressableScale style={[styles.addTagButton, { backgroundColor: colors.cardBackground }]} onPress={addTag}>
               <Text style={[styles.addTagButtonText, { color: colors.text }]}>Añadir</Text>
-            </Pressable>
+            </PressableScale>
           </View>
         </View>
         
         {renderChecklist()}
 
         {(canRefresh || upcoming) && (
-          <View style={[styles.sectionContainer, { backgroundColor: colors.surface }]}>
+          <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
             {upcoming && (
               <>
                 <Text style={[styles.sectionTitle, { color: colors.text }]}>Próximo episodio</Text>
@@ -348,7 +350,7 @@ export default function ItemDetailScreen() {
               </>
             )}
             {canRefresh && (
-              <Pressable
+              <PressableScale
                 disabled={refreshing}
                 style={[styles.actionButton, { backgroundColor: colors.cardBackground, marginTop: upcoming ? 16 : 0, opacity: refreshing ? 0.5 : 1 }]}
                 onPress={handleRefresh}
@@ -356,7 +358,7 @@ export default function ItemDetailScreen() {
                 <Text style={[styles.actionButtonText, { color: colors.text, marginLeft: 0 }]}>
                   {refreshing ? 'Actualizando…' : 'Actualizar desde TMDB'}
                 </Text>
-              </Pressable>
+              </PressableScale>
             )}
             {refreshMessage !== '' && <Text style={{ color: colors.text + '90', marginTop: 10 }}>{refreshMessage}</Text>}
           </View>
@@ -364,16 +366,16 @@ export default function ItemDetailScreen() {
 
         <View style={styles.actions}>
           {item.status !== 'completed' && (
-            <Pressable style={[styles.actionButton, { backgroundColor: colors.tint }]} onPress={handleComplete}>
+            <PressableScale style={[styles.actionButton, { backgroundColor: colors.tint }]} onPress={handleComplete}>
               <SymbolView name={{ ios: 'book.closed.fill', android: 'book', web: 'book' }} size={20} tintColor="#fff" />
               <Text style={[styles.actionButtonText, { color: '#fff' }]}>Marcar como Terminado</Text>
-            </Pressable>
+            </PressableScale>
           )}
 
-          <Pressable style={[styles.actionButton, { backgroundColor: '#ff3b3020' }]} onPress={handleDelete}>
+          <PressableScale style={[styles.actionButton, { backgroundColor: '#ff3b3020' }]} onPress={handleDelete}>
             <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={20} tintColor="#ff3b30" />
             <Text style={[styles.actionButtonText, { color: '#ff3b30' }]}>Eliminar Elemento</Text>
-          </Pressable>
+          </PressableScale>
         </View>
       </ScrollView>
     </>
@@ -394,7 +396,7 @@ const styles = StyleSheet.create({
 
   // Rating
   starsContainer: { flexDirection: 'row', gap: 10 },
-  star: { padding: 5 },
+  star: { padding: 6 },
 
   // Sticky Notes
   notesHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 10 },
@@ -410,7 +412,7 @@ const styles = StyleSheet.create({
   addTagButtonText: { fontWeight: '600' },
 
   counterRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 12, backgroundColor: 'transparent' },
-  counterInput: { width: 90, borderWidth: 1, borderRadius: 12, padding: 10, fontSize: 18, fontWeight: '600', textAlign: 'center' },
+  counterInput: { fontVariant: ['tabular-nums'], width: 90, borderWidth: 1, borderRadius: 12, padding: 10, fontSize: 18, fontWeight: '600', textAlign: 'center' },
   progressTrack: { height: 8, borderRadius: 4, backgroundColor: '#8884', overflow: 'hidden', marginTop: 14 },
   progressFill: { height: 8, borderRadius: 4 },
   checklistItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1 },

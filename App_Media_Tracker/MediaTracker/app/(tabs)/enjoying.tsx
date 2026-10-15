@@ -1,4 +1,5 @@
 import { StyleSheet, ScrollView, Pressable } from 'react-native';
+import PressableScale from '@/components/PressableScale';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import ItemCover from '@/components/ItemCover';
@@ -84,7 +85,7 @@ export default function EnjoyingScreen() {
           const progressPercent = calculateProgress(item) * 100;
           return (
             <Link key={item.id} href={`/item/${item.id}`} asChild>
-              <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
+              <PressableScale style={StyleSheet.flatten([styles.card, { backgroundColor: colors.cardBackground }])}>
                 <ItemCover type={item.type} posterUrl={item.posterUrl} style={styles.poster} />
                 <View style={styles.cardContent}>
                   <Text style={styles.cardTitle}>{item.title}</Text>
@@ -93,7 +94,7 @@ export default function EnjoyingScreen() {
                     <View style={[styles.progressBarFill, { backgroundColor: colors.tint, width: `${progressPercent}%` }]} />
                   </View>
                 </View>
-              </Pressable>
+              </PressableScale>
             </Link>
           );
         })
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 40 },
   headerTitleContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   headerTitle: { fontSize: 17, fontWeight: '600' },
-  headerButton: { paddingHorizontal: 10, backgroundColor: 'transparent' },
+  headerButton: { paddingHorizontal: 10, paddingVertical: 10, backgroundColor: 'transparent' },
   headerRightContainer: { flexDirection: 'row', backgroundColor: 'transparent', paddingRight: 5, alignItems: 'center' },
   mainTitle: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
   description: { fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 30, paddingHorizontal: 10 },
@@ -117,7 +118,7 @@ const styles = StyleSheet.create({
   poster: { width: 50, height: 70, borderRadius: 12, marginRight: 15 },
   cardContent: { flex: 1, backgroundColor: 'transparent' },
   cardTitle: { fontSize: 17, fontWeight: '600', marginBottom: 4 },
-  cardSubtitle: { fontSize: 14, marginBottom: 12 },
+  cardSubtitle: { fontSize: 14, marginBottom: 12, fontVariant: ['tabular-nums'] },
   progressBarBg: { height: 4, borderRadius: 2, width: '100%' },
   progressBarFill: { height: 4, borderRadius: 2 }
 });

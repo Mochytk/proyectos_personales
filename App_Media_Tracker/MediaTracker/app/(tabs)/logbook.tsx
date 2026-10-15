@@ -1,4 +1,5 @@
 import { StyleSheet, Pressable, ScrollView } from 'react-native';
+import PressableScale from '@/components/PressableScale';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
@@ -69,18 +70,18 @@ export default function LogbookScreen() {
         <View style={styles.statsContainer}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Tus Estadísticas</Text>
           <View style={styles.statsGrid}>
-            <View style={[styles.statBox, { backgroundColor: colors.surface }]}>
+            <View style={[styles.statBox, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
               <Text style={[styles.statNumber, { color: colors.tint }]}>{stats.total}</Text>
               <Text style={[styles.statLabel, { color: colors.text + '80' }]}>Histórico</Text>
             </View>
-            <View style={[styles.statBox, { backgroundColor: colors.surface }]}>
+            <View style={[styles.statBox, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
               <Text style={[styles.statNumber, { color: colors.tint }]}>{stats.thisYearCount}</Text>
               <Text style={[styles.statLabel, { color: colors.text + '80' }]}>Este Año</Text>
             </View>
           </View>
           
           {stats.topTypes.length > 0 && (
-            <View style={[styles.breakdownContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.breakdownContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
               <Text style={[styles.breakdownTitle, { color: colors.text }]}>Top Categorías</Text>
               {stats.topTypes.map(([type, count], index) => (
                 <View key={type} style={[styles.breakdownRow, { borderTopColor: index > 0 ? colors.cardBackground : 'transparent', borderTopWidth: index > 0 ? 1 : 0 }]}>
@@ -111,7 +112,7 @@ export default function LogbookScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Actividad Reciente</Text>
           {completedItems.map(item => (
             <Link key={item.id} href={`/item/${item.id}`} asChild>
-              <Pressable style={StyleSheet.flatten([styles.card, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
+              <PressableScale style={StyleSheet.flatten([styles.card, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
                 <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} />
                 <View style={styles.cardContent}>
                   <Text style={[styles.cardTitle, { color: colors.text }]}>{item.title}</Text>
@@ -120,7 +121,7 @@ export default function LogbookScreen() {
                   </Text>
                 </View>
                 <SymbolView name={{ ios: 'checkmark.circle.fill', android: 'check-circle', web: 'check-circle' }} size={20} tintColor={colors.tint} />
-              </Pressable>
+              </PressableScale>
             </Link>
           ))}
         </View>
@@ -132,21 +133,21 @@ export default function LogbookScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20 },
   content: { flexGrow: 1, paddingBottom: 40 },
-  headerButton: { paddingHorizontal: 10, backgroundColor: 'transparent' },
+  headerButton: { paddingHorizontal: 10, paddingVertical: 10, backgroundColor: 'transparent' },
   headerRightContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   
   // Stats
   statsContainer: { marginTop: 20, marginBottom: 20 },
   statsGrid: { flexDirection: 'row', gap: 15, marginBottom: 15 },
   statBox: { flex: 1, padding: 20, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  statNumber: { fontSize: 32, fontWeight: 'bold', marginBottom: 4 },
+  statNumber: { fontSize: 32, fontWeight: 'bold', marginBottom: 4, fontVariant: ['tabular-nums'] },
   statLabel: { fontSize: 13, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 0.5 },
   breakdownContainer: { padding: 20, borderRadius: 16 },
   breakdownTitle: { fontSize: 14, fontWeight: '600', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5 },
   breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
   breakdownLeft: { flexDirection: 'row', alignItems: 'center' },
   breakdownLabel: { fontSize: 16, fontWeight: '500' },
-  breakdownCount: { fontSize: 16, fontWeight: 'bold' },
+  breakdownCount: { fontSize: 16, fontWeight: 'bold', fontVariant: ['tabular-nums'] },
 
   emptyStateContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 100 },
   emptyStateIconContainer: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
   emptyStateSubtitle: { fontSize: 16, textAlign: 'center', paddingHorizontal: 30, marginBottom: 30, lineHeight: 22 },
   listContainer: { marginTop: 10 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5 },
-  card: { flexDirection: 'row', borderRadius: 16, padding: 16, marginBottom: 10, alignItems: 'center', borderBottomWidth: 1 },
+  card: { flexDirection: 'row', borderRadius: 16, padding: 16, marginBottom: 10, alignItems: 'center' },
   cardContent: { flex: 1, backgroundColor: 'transparent' },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
   cardSubtitle: { fontSize: 13 },

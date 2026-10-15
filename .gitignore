@@ -1,0 +1,4 @@
+# Skills instaladas con `npx skills` (no se versionan)
+/.agents/
+/.claude/
+/skills-lock.json

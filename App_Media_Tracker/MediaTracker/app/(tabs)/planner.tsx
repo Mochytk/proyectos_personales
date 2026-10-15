@@ -95,6 +95,7 @@ export default function PlannerScreen() {
                   ) : (
                     <Pressable
                       accessibilityLabel="Marcar como terminado"
+                      hitSlop={9}
                       style={[styles.checkButton, { borderColor: colors.tint }]}
                       onPress={() => updateItem(item.id, { status: 'completed' })}
                     />
@@ -124,7 +125,7 @@ export default function PlannerScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 20 },
   content: { flexGrow: 1, paddingBottom: 40 },
-  headerButton: { paddingHorizontal: 10, backgroundColor: 'transparent' },
+  headerButton: { paddingHorizontal: 10, paddingVertical: 10, backgroundColor: 'transparent' },
   headerRightContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   emptyStateContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 100 },
   emptyStateIconContainer: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
@@ -140,5 +141,5 @@ const styles = StyleSheet.create({
   iconContainer: { width: 44, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   cardContent: { flex: 1, backgroundColor: 'transparent' },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 4 },
-  cardSubtitle: { fontSize: 13 },
+  cardSubtitle: { fontSize: 13, fontVariant: ['tabular-nums'] },
 });

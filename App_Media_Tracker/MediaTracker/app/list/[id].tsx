@@ -1,10 +1,11 @@
 import { useLocalSearchParams, router, Link, useNavigation } from 'expo-router';
-import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { useStore, MediaItem } from '@/store/useStore';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
+import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
 import { useMemo, useEffect } from 'react';
 
@@ -58,12 +59,12 @@ export default function ListDetailScreen() {
         headerStyle: { backgroundColor: colors.background, shadowColor: 'transparent', elevation: 0 },
         headerShadowVisible: false,
         headerRight: () => (
-          <Pressable 
+          <PressableScale 
             onPress={() => router.push(`/listSettingsModal?id=${list.id}`)} 
-            style={{ paddingHorizontal: 10 }}
+            style={{ paddingHorizontal: 10, paddingVertical: 10 }}
           >
             <SymbolView name={{ ios: 'slider.horizontal.3', android: 'tune', web: 'tune' }} size={24} tintColor={colors.text} />
-          </Pressable>
+          </PressableScale>
         )
       });
     } else {
@@ -101,29 +102,29 @@ export default function ListDetailScreen() {
     
     return (
       <Link key={item.id} href={`/item/${item.id}`} asChild>
-        <Pressable style={StyleSheet.flatten([
+        <PressableScale style={StyleSheet.flatten([
           styles.gridCard, 
-          { backgroundColor: colors.surface, width: itemWidth }
+          { backgroundColor: colors.surface, width: itemWidth, boxShadow: colors.shadowBorder }
         ])}>
           <ItemCover type={item.type} posterUrl={item.posterUrl} style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio() }]} iconSize={32} />
           <View style={styles.gridCardContent}>
             <Text style={[styles.gridTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
             {item.subtitle ? <Text style={[styles.gridSubtitle, { color: colors.text + '90' }]} numberOfLines={1}>{item.subtitle}</Text> : null}
           </View>
-        </Pressable>
+        </PressableScale>
       </Link>
     );
   };
 
   const renderListItem = (item: MediaItem) => (
     <Link key={item.id} href={`/item/${item.id}`} asChild>
-      <Pressable style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
+      <PressableScale style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
         <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} iconSize={20} />
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
         </View>
-      </Pressable>
+      </PressableScale>
     </Link>
   );
 
@@ -154,10 +155,10 @@ export default function ListDetailScreen() {
       )}
 
       <View style={styles.actions}>
-        <Pressable style={[styles.deleteButton, { backgroundColor: '#ff3b3020' }]} onPress={handleDelete}>
+        <PressableScale style={[styles.deleteButton, { backgroundColor: '#ff3b3020' }]} onPress={handleDelete}>
           <SymbolView name={{ ios: 'trash', android: 'delete', web: 'delete' }} size={20} tintColor="#ff3b30" />
           <Text style={styles.deleteButtonText}>Eliminar Lista</Text>
-        </Pressable>
+        </PressableScale>
         {!list.isSmartList && (
           <Text style={[styles.deleteWarning, { color: colors.text + '80' }]}>
             Al eliminar esta lista, sus elementos regresarán a La Pila.

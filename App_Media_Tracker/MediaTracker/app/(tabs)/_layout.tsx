@@ -38,21 +38,21 @@ export default function TabLayout() {
           headerRight: () => (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Link href="/globalSettingsModal" asChild>
-                <Pressable>
+                <Pressable hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}>
                   {({ pressed }) => (
                     <Ionicons name="settings-outline" size={24} color={Colors[colorScheme].text} style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }} />
                   )}
                 </Pressable>
               </Link>
               <Link href="/modal" asChild>
-                <Pressable>
+                <Pressable hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}>
                   {({ pressed }) => (
                     <Ionicons name="add" size={28} color={Colors[colorScheme].text} style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }} />
                   )}
                 </Pressable>
               </Link>
               <Link href="/searchModal" asChild>
-                <Pressable>
+                <Pressable hitSlop={{ top: 10, bottom: 10, left: 8, right: 8 }}>
                   {({ pressed }) => (
                     <Ionicons name="search" size={24} color={Colors[colorScheme].text} style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }} />
                   )}

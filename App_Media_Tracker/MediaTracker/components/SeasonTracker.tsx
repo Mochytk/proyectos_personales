@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet } from 'react-native';
+import PressableScale from '@/components/PressableScale';
 import { Text, View } from '@/components/Themed';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -17,7 +18,7 @@ export default function SeasonTracker({ seasons, watched, onChange }: Props) {
   const next = nextToWatch(watched, seasons);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface }]}>
+    <View style={[styles.container, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
       <Text style={[styles.title, { color: colors.text }]}>Progreso</Text>
       <Text style={[styles.position, { color: colors.text }]}>
         {last ? `Vas por ${formatPosition(last)}` : 'Aún no empiezas'}
@@ -25,22 +26,22 @@ export default function SeasonTracker({ seasons, watched, onChange }: Props) {
       {!next && <Text style={[styles.hint, { color: colors.tint }]}>Terminaste todos los episodios</Text>}
 
       <View style={styles.buttons}>
-        <Pressable
+        <PressableScale
           accessibilityLabel="Retroceder un episodio"
           disabled={watched <= 0}
           style={[styles.button, { flex: 1, backgroundColor: colors.cardBackground, opacity: watched <= 0 ? 0.4 : 1 }]}
           onPress={() => onChange(watched - 1)}
         >
           <Text style={{ color: colors.text, fontWeight: 'bold' }}>−1</Text>
-        </Pressable>
-        <Pressable
+        </PressableScale>
+        <PressableScale
           accessibilityLabel="Marcar el siguiente episodio"
           disabled={!next}
           style={[styles.button, { flex: 3, backgroundColor: colors.tint, opacity: next ? 1 : 0.4 }]}
           onPress={() => onChange(watched + 1)}
         >
           <Text style={{ color: '#fff', fontWeight: 'bold' }}>{next ? `Visto ${formatPosition(next)}` : 'Sin episodios pendientes'}</Text>
-        </Pressable>
+        </PressableScale>
       </View>
 
       {seasonProgress(watched, seasons).map(({ season, total, watched: done }) => {
@@ -54,7 +55,7 @@ export default function SeasonTracker({ seasons, watched, onChange }: Props) {
           >
             <View style={styles.seasonHeader}>
               <Text style={{ color: colors.text, fontSize: 16 }}>Temporada {season}</Text>
-              <Text style={{ color: finished ? colors.tint : colors.text + '90', fontWeight: finished ? '700' : '400' }}>
+              <Text style={{ color: finished ? colors.tint : colors.text + '90', fontWeight: finished ? '700' : '400', fontVariant: ['tabular-nums'] }}>
                 {done}/{total}{finished ? ' ✓' : ''}
               </Text>
             </View>

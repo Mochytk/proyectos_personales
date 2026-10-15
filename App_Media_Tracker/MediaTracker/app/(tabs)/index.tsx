@@ -1,7 +1,8 @@
-import { StyleSheet, Pressable, ScrollView, Dimensions } from 'react-native';
+import { StyleSheet, ScrollView, Dimensions } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import { mediaTypeLabelsES } from '@/constants/mediaTypes';
+import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
@@ -44,29 +45,29 @@ export default function ListsScreen() {
     const itemWidth = (width - 60) / 2;
     return (
       <Link key={item.id} href={`/item/${item.id}`} asChild>
-        <Pressable style={StyleSheet.flatten([
+        <PressableScale style={StyleSheet.flatten([
           styles.gridCard, 
-          { backgroundColor: colors.surface, width: itemWidth }
+          { backgroundColor: colors.surface, width: itemWidth, boxShadow: colors.shadowBorder }
         ])}>
           <ItemCover type={item.type} posterUrl={item.posterUrl} style={[styles.gridImagePlaceholder, { aspectRatio: getCardAspectRatio() }]} iconSize={32} />
           <View style={styles.gridCardContent}>
             <Text style={[styles.gridTitle, { color: colors.text }]} numberOfLines={2}>{item.title}</Text>
             {item.subtitle ? <Text style={[styles.gridSubtitle, { color: colors.text + '90' }]} numberOfLines={1}>{item.subtitle}</Text> : null}
           </View>
-        </Pressable>
+        </PressableScale>
       </Link>
     );
   };
 
   const renderListItem = (item: MediaItem) => (
     <Link key={item.id} href={`/item/${item.id}`} asChild>
-      <Pressable style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, borderBottomColor: colors.cardBackground }])}>
+      <PressableScale style={StyleSheet.flatten([styles.itemCard, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
         <ItemCover type={item.type} posterUrl={item.posterUrl} style={rowCover} iconSize={20} />
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
         </View>
-      </Pressable>
+      </PressableScale>
     </Link>
   );
 
@@ -93,7 +94,7 @@ export default function ListsScreen() {
               
             return (
               <Link key={list.id} href={`/list/${list.id}`} asChild>
-                <Pressable style={StyleSheet.flatten([styles.listCard, { backgroundColor: colors.surface }])}>
+                <PressableScale style={StyleSheet.flatten([styles.listCard, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
                   <View style={[styles.listIconContainer, { backgroundColor: colors.cardBackground }]}>
                     {list.isSmartList ? (
                       <SymbolView name={{ ios: 'wand.and.stars', android: 'auto-fix-high', web: 'auto-fix-high' }} size={20} tintColor={colors.tint} />
@@ -106,7 +107,7 @@ export default function ListsScreen() {
                     <Text style={[styles.listSubtitle, { color: colors.text + '80' }]}>{listItemsCount} Elementos</Text>
                   </View>
                   <SymbolView name={{ ios: 'chevron.right', android: 'chevron-right', web: 'chevron-right' }} size={16} tintColor={colors.text + '60'} />
-                </Pressable>
+                </PressableScale>
               </Link>
             )
           })}
@@ -115,10 +116,10 @@ export default function ListsScreen() {
 
       {/* Add New List Button */}
       <Link href="/newListModal" asChild>
-        <Pressable style={StyleSheet.flatten([styles.newListButton, { backgroundColor: colors.cardBackground }])}>
+        <PressableScale style={StyleSheet.flatten([styles.newListButton, { backgroundColor: colors.cardBackground }])}>
           <SymbolView name={{ ios: 'plus', android: 'add', web: 'add' }} size={16} tintColor={colors.tint} />
           <Text style={[styles.newListButtonText, { color: colors.tint }]}>Crear Nueva Lista</Text>
-        </Pressable>
+        </PressableScale>
       </Link>
 
       {pileItems.length === 0 ? (
@@ -132,9 +133,9 @@ export default function ListsScreen() {
           </Text>
           
           <Link href="/modal" asChild>
-            <Pressable style={StyleSheet.flatten([styles.createButton, { backgroundColor: colors.tint + '20' }])}>
+            <PressableScale style={StyleSheet.flatten([styles.createButton, { backgroundColor: colors.tint + '20' }])}>
               <Text style={StyleSheet.flatten([styles.createButtonText, { color: colors.tint }])}>Añadir a La Pila</Text>
-            </Pressable>
+            </PressableScale>
           </Link>
         </View>
       ) : (
@@ -142,9 +143,9 @@ export default function ListsScreen() {
           <View style={styles.pileHeaderRow}>
             <Text style={[styles.sectionTitle, { color: colors.text, marginBottom: 0, marginTop: 10 }]}>Contenido de La Pila</Text>
             <Link href="/pileSettingsModal" asChild>
-              <Pressable style={{ padding: 10 }}>
+              <PressableScale style={{ padding: 10 }} accessibilityLabel="Ajustes de La Pila">
                 <SymbolView name={{ ios: 'slider.horizontal.3', android: 'tune', web: 'tune' }} size={20} tintColor={colors.text} />
-              </Pressable>
+              </PressableScale>
             </Link>
           </View>
 
@@ -169,14 +170,14 @@ const styles = StyleSheet.create({
   pileCard: { borderRadius: 20, padding: 20, flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'flex-start', minHeight: 120, marginBottom: 20 },
   pileIconContainer: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
   pileTitle: { fontSize: 18, fontWeight: '600' },
-  pileSubtitle: { fontSize: 14, marginTop: 4 },
+  pileSubtitle: { fontSize: 14, marginTop: 4, fontVariant: ['tabular-nums'] },
   customListsContainer: { marginBottom: 15 },
   sectionTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 15, marginLeft: 4, textTransform: 'uppercase', letterSpacing: 0.5 },
   listCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderRadius: 16, marginBottom: 10 },
   listIconContainer: { width: 40, height: 40, borderRadius: 10, alignItems: 'center', justifyContent: 'center', marginRight: 15 },
   listCardContent: { flex: 1 },
   listTitle: { fontSize: 17, fontWeight: '600', marginBottom: 2 },
-  listSubtitle: { fontSize: 14 },
+  listSubtitle: { fontSize: 14, fontVariant: ['tabular-nums'] },
   newListButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 14, borderRadius: 16, marginBottom: 20 },
   newListButtonText: { fontSize: 16, fontWeight: '600', marginLeft: 8 },
   emptyStateContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 20 },

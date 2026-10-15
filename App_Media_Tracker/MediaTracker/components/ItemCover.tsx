@@ -34,10 +34,13 @@ export default function ItemCover({ type, posterUrl, style, iconSize = 24 }: Pro
       ) : (
         <SymbolView name={iconForType(type)} size={iconSize} tintColor={colors.tint} />
       )}
+      {/* Inset 1px outline over the poster edge; an overlay so it neither changes layout nor hides under the image. */}
+      {showPoster && <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.outline, { borderColor: colors.imageOutline }]} />}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   box: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  outline: { borderWidth: 1 },
 });
