@@ -316,7 +316,7 @@ export default function ItemDetailScreen() {
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Etiquetas</Text>
           <View style={styles.tagsContainer}>
             {(item.tags || []).map(tag => (
-              <Pressable key={tag} style={[styles.tag, { backgroundColor: colors.tint + '20' }]} onPress={() => removeTag(tag)}>
+              <Pressable key={tag} hitSlop={8} accessibilityLabel={`Quitar etiqueta ${tag}`} style={[styles.tag, { backgroundColor: colors.tint + '20' }]} onPress={() => removeTag(tag)}>
                 <Text style={[styles.tagText, { color: colors.tint }]}>{tag}</Text>
                 <SymbolView name={{ ios: 'xmark', android: 'close', web: 'close' }} size={12} tintColor={colors.tint} style={{ marginLeft: 6 }} />
               </Pressable>
