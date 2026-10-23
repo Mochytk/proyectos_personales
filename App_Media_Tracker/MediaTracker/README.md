@@ -51,6 +51,16 @@ Todo respaldo exportado por esta app debe poder importarse en cualquier versión
 
 Los tests importan todos los respaldos congelados, así que romper la compatibilidad hacia atrás hace fallar `npm test`. Un respaldo de una versión más nueva que la de la app se rechaza con un aviso, en lugar de perder datos en silencio.
 
+## Barra de menú (macOS)
+
+El icono de la barra de menú muestra lo que estás disfrutando y deja avanzar sin abrir la ventana. Su menú lista hasta 8 elementos de **Disfrutando** (los modificados más recientemente) con su progreso ("T2 · E3 · 13 de 30", "Página 212 de 476", "45%"); cada uno abre un submenú con **avanzar** y **Abrir detalle**, y "Ver todo…" abre la pestaña Disfrutando si hay más de 8.
+
+- **Avanzar** suma un episodio (en series con temporadas, el siguiente de la temporada), un capítulo o un nivel; 10 páginas; o 10 % (`advanceProgress` en `store/tray.ts`, con los mismos pasos que el detalle). Nunca marca como terminado, y no se ofrece si ya estás al final.
+- **Cerrar la ventana la oculta**: la app sigue viva en la barra de menú. Para salir de verdad usa ⌘Q, "Salir" del menú de la app o "Salir de Media Tracker" del icono. Un clic en el Dock o "Abrir Media Tracker" la vuelve a mostrar.
+- La ventana (oculta) es quien guarda los datos: calcula el texto del menú y se lo envía al proceso principal (`electron-tray.js`, que lo sanea), y las acciones vuelven a ella y pasan por `updateItem`, así que cuentan para la sincronización y las estadísticas.
+
+Solo en macOS; en otros sistemas la app se comporta como antes. No hay opción para desactivarlo.
+
 ## Listas inteligentes
 
 Una lista inteligente reúne sola los elementos que cumplen sus filtros, que se editan al crearla y después desde sus Ajustes. Los filtros se combinan con "y": **tipo**, **estado**, **nota mínima**, **etiquetas** (alguna de ellas) y **sin tocar hace 7, 30 o 90 días o más**. Sin filtros entra todo lo pendiente, y sin elegir estado se excluye lo terminado (con estado "Terminado" una lista puede mostrar, por ejemplo, tus películas de cinco estrellas). La regla vive en `store/smartLists.ts` (`matchesSmartFilters`) y la usan la pantalla de la lista y el contador de Listas. "Tocado" significa cambiado por última vez (`updatedAt`): marcar un avance o editar una nota cuenta. Quedan fuera la búsqueda por texto, filtrar por saga y combinar con "o".

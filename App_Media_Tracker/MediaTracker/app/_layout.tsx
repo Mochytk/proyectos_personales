@@ -8,6 +8,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useMenuActions } from '@/hooks/useMenuActions';
 import { useReminders } from '@/hooks/useReminders';
 import { useSync } from '@/hooks/useSync';
+import { useTray } from '@/hooks/useTray';
 
 export {
   ErrorBoundary,
@@ -46,6 +47,7 @@ function RootLayoutNav() {
   useReminders();
   useMenuActions();
   useSync();
+  useTray();
   
   const PastelDarkTheme = {
     ...DarkTheme,
