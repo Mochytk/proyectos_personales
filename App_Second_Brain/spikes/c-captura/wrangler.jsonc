@@ -1,0 +1,8 @@
+{
+  // Static assets only: no Worker script, no bindings, no secrets.
+  "name": "sb-spike-captura",
+  "compatibility_date": "2026-10-20",
+  "assets": {
+    "directory": "./pwa/"
+  }
+}

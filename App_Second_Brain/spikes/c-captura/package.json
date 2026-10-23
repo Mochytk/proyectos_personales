@@ -1,0 +1,19 @@
+{
+  "name": "sb-spike-capture",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "deploy": "WRANGLER_SEND_METRICS=false wrangler deploy",
+    "check-deploy": "WRANGLER_SEND_METRICS=false wrangler deploy --dry-run",
+    "undeploy": "WRANGLER_SEND_METRICS=false wrangler delete"
+  },
+  "devDependencies": {
+    "playwright": "1.64.1",
+    "wrangler": "4.151.3"
+  }
+}
