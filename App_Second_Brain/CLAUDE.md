@@ -24,8 +24,11 @@ App personal local-first para capturar ideas (voz, texto, enlaces, documentos), 
 | Tipos | `pnpm typecheck` |
 | Pruebas | `pnpm test` |
 | Auditoría | `pnpm audit` (falla con vulnerabilidades altas o críticas) |
+| Secretos | `gitleaks git --redact ..` (todo el historial del repo) |
 
 Los comandos para desarrollar, construir, evaluar la búsqueda y reconstruir el índice se agregan aquí cuando existan (fase 1 en adelante).
+
+Antes del primer commit en un clon nuevo, activa el hook de secretos desde la raíz del repo: `brew install gitleaks && ln -s ../../App_Second_Brain/scripts/pre-commit .git/hooks/pre-commit`. Bloquea el commit si encuentra un secreto en lo preparado, o si gitleaks no está instalado.
 
 ## Convenciones
 
@@ -50,7 +53,7 @@ Los comandos para desarrollar, construir, evaluar la búsqueda y reconstruir el 
 
 ## Seguridad (no negociable)
 
-- El repo es **público**. Nunca subir notas reales, audios, modelos, claves, `.env`, bases de datos locales ni *builds*. Antes de cada commit, revisar `git status` y `git diff --staged`.
+- El repo es **público**. Nunca subir notas reales, audios, modelos, claves, `.env`, bases de datos locales ni *builds*. Antes de cada commit, revisar `git status` y `git diff --staged`; gitleaks lo revisa en el hook `pre-commit` y en el CI (todo el historial).
 - Ningún contenido de notas sale del equipo sin cifrar: sin telemetría ni servicios de terceros que reciban texto, audio o embeddings.
 - El texto de las notas es **dato no confiable** (inyección de prompts). El servidor MCP lo marca como tal, no tiene herramientas de red, shell, borrado definitivo ni acceso fuera de la bóveda, y las escrituras son propuestas que aprueba la persona dueña.
 - No inventar criptografía: primitivas estándar (WebCrypto, AES-GCM, HKDF) y librerías mantenidas, con el protocolo documentado en un ADR.
