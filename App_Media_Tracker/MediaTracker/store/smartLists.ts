@@ -74,3 +74,24 @@ export function describeFilters(filters: SmartFilters | undefined): string[] {
   if (f.staleDays !== undefined) parts.push(`Sin tocar hace ${f.staleDays} días o más`);
   return parts.length > 0 ? parts : ['Todo lo pendiente'];
 }
+
+/** Adds `value` to `list`, or removes it if it is already there. */
+export const toggleValue = <T,>(list: readonly T[] | undefined, value: T): T[] => {
+  const current = list ?? [];
+  return current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
+};
+
+/** Tags in use, most used first (then alphabetical), one entry per spelling ignoring case. */
+export function collectTags(items: MediaItem[]): string[] {
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const item of items) {
+    for (const tag of item.tags ?? []) {
+      const clean = tag.trim();
+      if (!clean) continue;
+      const key = clean.toLowerCase();
+      const entry = counts.get(key);
+      counts.set(key, { name: entry?.name ?? clean, count: (entry?.count ?? 0) + 1 });
+    }
+  }
+  return [...counts.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)).map((e) => e.name);
+}

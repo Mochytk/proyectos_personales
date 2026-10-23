@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeFilters, matchesSmartFilters, matchingItems, sanitizeSmartFilters } from '../store/smartLists';
+import { collectTags, describeFilters, matchesSmartFilters, matchingItems, sanitizeSmartFilters, toggleValue } from '../store/smartLists';
 import type { MediaItem } from '../store/useStore';
 
 const DAY = 86_400_000;
@@ -94,5 +94,26 @@ describe('describeFilters', () => {
     expect(describeFilters({ types: ['movie', 'tv_show'], statuses: ['in_progress'], minRating: 4, tags: ['clásico'], staleDays: 30 })).toEqual([
       'Películas, Series', 'En curso', '★★★★ o más', '#clásico', 'Sin tocar hace 30 días o más',
     ]);
+  });
+});
+
+describe('toggleValue', () => {
+  it('adds a missing value and removes a present one, without changing the original', () => {
+    const original = ['a', 'b'];
+    expect(toggleValue(original, 'c')).toEqual(['a', 'b', 'c']);
+    expect(toggleValue(original, 'a')).toEqual(['b']);
+    expect(original).toEqual(['a', 'b']);
+    expect(toggleValue(undefined, 'x')).toEqual(['x']);
+  });
+});
+
+describe('collectTags', () => {
+  it('lists the tags in use, most used first, one per spelling', () => {
+    const items = [item({ tags: ['clásico', 'sci-fi'] }), item({ tags: ['Clásico'] }), item({ tags: ['sci-fi', 'terror', ' '] }), item({ tags: undefined })];
+    expect(collectTags(items)).toEqual(['clásico', 'sci-fi', 'terror']);
+  });
+
+  it('is empty when nothing is tagged', () => {
+    expect(collectTags([item()])).toEqual([]);
   });
 });
