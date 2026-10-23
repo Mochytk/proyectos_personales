@@ -1,0 +1,39 @@
+/* Línea: the day as a metro line, one station per anchor (ADR 0009). */
+
+:root[data-style='linea'] {
+  --font-body: 'Overpass Variable', system-ui, sans-serif;
+  --font-display: var(--font-body);
+  --title-weight: 800;
+  --ground: #f6f7f9;
+  --text: #191c22;
+  --muted: #535a67;
+  --accent: #191c22;
+  --accent-contrast: #f6f7f9;
+  --title-color: var(--text);
+  --line: #cdd1d9;
+  --chip: #e9ecf2;
+  --focus: #4c51bf;
+  --anchor-1: #d99a00;
+  --anchor-2: #0e8486;
+  --anchor-3: #e3560b;
+  --anchor-4: #4c51bf;
+  --check-radius: 50%;
+  --control-radius: 999px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-style='linea'] {
+    --ground: #1a1d23;
+    --text: #eef0f4;
+    --muted: #aeb4bf;
+    --accent: #eef0f4;
+    --accent-contrast: #1a1d23;
+    --line: #343944;
+    --chip: #262a32;
+    --focus: #8e93ff;
+    --anchor-1: #f2b92e;
+    --anchor-2: #2cb6b8;
+    --anchor-3: #ff7a33;
+    --anchor-4: #8e93ff;
+  }
+}

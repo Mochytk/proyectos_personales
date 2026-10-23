@@ -1,0 +1,41 @@
+/* Disco: bumper plates in standard colors and condensed athletic type (ADR 0009). */
+
+:root[data-style='disco'] {
+  --font-body: 'Barlow', system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  --title-weight: 800;
+  --ground: #eef1f3;
+  --text: #22252a;
+  --muted: #555b64;
+  --accent: #22252a;
+  --accent-contrast: #eef1f3;
+  --title-color: var(--text);
+  --line: #c6ccd3;
+  --chip: #e0e4e8;
+  --focus: #1554c4;
+  --steel: #9aa2ac;
+  --anchor-1: #f2c230;
+  --anchor-2: #2c9a4b;
+  --anchor-3: #c8102e;
+  --anchor-4: #1554c4;
+  --check-radius: 50%;
+  --control-radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-style='disco'] {
+    --ground: #1e2125;
+    --text: #f0f2f4;
+    --muted: #abb1ba;
+    --accent: #f0f2f4;
+    --accent-contrast: #1e2125;
+    --line: #3a3f47;
+    --chip: #2a2e34;
+    --focus: #4d86f0;
+    --steel: #6e7681;
+    --anchor-1: #f5cb45;
+    --anchor-2: #43b866;
+    --anchor-3: #e8384f;
+    --anchor-4: #4d86f0;
+  }
+}

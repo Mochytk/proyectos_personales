@@ -1,0 +1,55 @@
+/* Cuaderno: squared notebook paper, ballpoint blue and the red margin line (ADR 0009). */
+
+:root[data-style='cuaderno'] {
+  --font-body: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-display: var(--font-body);
+  --title-weight: 700;
+  --ground: #ffffff;
+  --text: #232836;
+  --muted: #545c70;
+  --accent: #1d3fa8;
+  --accent-contrast: #ffffff;
+  --title-color: var(--accent);
+  --line: #c3cde0;
+  --chip: #edf1fa;
+  --focus: #d63c3c;
+  --grid: #e4eaf5;
+  --margin-line: #d63c3c;
+  --check-radius: 4px;
+  --control-radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-style='cuaderno'] {
+    --ground: #111a2c;
+    --text: #e6ebf5;
+    --muted: #a7b1c6;
+    --accent: #93b3ff;
+    --accent-contrast: #111a2c;
+    --line: #34425f;
+    --chip: #1a2643;
+    --focus: #f07272;
+    --grid: #1a2540;
+    --margin-line: #f07272;
+  }
+}
+
+:root[data-style='cuaderno'] body {
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+:root[data-style='cuaderno'] .app-main {
+  position: relative;
+  padding-left: 4.5rem;
+}
+
+:root[data-style='cuaderno'] .app-main::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 3.5rem;
+  width: 2px;
+  background-color: var(--margin-line);
+}
