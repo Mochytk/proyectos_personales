@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
-  BACKUP_FORMAT, DEFAULT_SETTINGS, buildBackup, dropOrphanListRefs, mergeData, normalizeData, parseBackup, sanitizeItem,
+  BACKUP_FORMAT, BACKUP_MIGRATIONS, BACKUP_SCHEMA_VERSION, DEFAULT_SETTINGS, buildBackup, dropOrphanListRefs, mergeData, migrateBackupData,
+  normalizeData, parseBackup, sanitizeItem,
 } from '../store/backup';
 import type { MediaItem, MediaList } from '../store/useStore';
 
@@ -76,5 +77,46 @@ describe('mergeData', () => {
   it('keeps current settings', () => {
     const merged = mergeData({ ...data(), settings: { ...DEFAULT_SETTINGS, showPlanner: false } }, data());
     expect(merged.settings.showPlanner).toBe(false);
+  });
+});
+
+describe('backup versions', () => {
+  afterEach(() => {
+    for (const key of Object.keys(BACKUP_MIGRATIONS)) delete BACKUP_MIGRATIONS[Number(key)];
+  });
+
+  it('writes the current schema version by default', () => {
+    expect(JSON.parse(buildBackup(data())).schemaVersion).toBe(BACKUP_SCHEMA_VERSION);
+  });
+
+  it('treats files with a missing or invalid version as the first format', () => {
+    const file = (schemaVersion: unknown) => JSON.stringify({ format: BACKUP_FORMAT, schemaVersion, data: { items: [{ id: '1', title: 'A' }] } });
+    for (const version of [undefined, 0, -3, 1.5, 'x', null]) {
+      expect(parseBackup(file(version)).items).toHaveLength(1);
+    }
+  });
+
+  it('refuses a file from a newer version instead of silently dropping what it cannot read', () => {
+    const file = JSON.stringify({ format: BACKUP_FORMAT, schemaVersion: BACKUP_SCHEMA_VERSION + 1, data: {} });
+    expect(() => parseBackup(file)).toThrow(/más nueva/);
+  });
+
+  it('upgrades an old file one version at a time, in order', () => {
+    const calls: number[] = [];
+    BACKUP_MIGRATIONS[1] = (d) => { calls.push(1); return { ...d, step: [...((d.step as string[]) ?? []), 'v1->v2'] }; };
+    BACKUP_MIGRATIONS[2] = (d) => { calls.push(2); return { ...d, step: [...((d.step as string[]) ?? []), 'v2->v3'] }; };
+    expect(migrateBackupData({}, 1, 3)).toEqual({ step: ['v1->v2', 'v2->v3'] });
+    expect(calls).toEqual([1, 2]);
+    expect(migrateBackupData({ keep: 1 }, 2, 3)).toEqual({ keep: 1, step: ['v2->v3'] });
+  });
+
+  it('runs the migrations when a file is parsed', () => {
+    BACKUP_MIGRATIONS[1] = (d) => ({ ...d, items: (d.items as { name: string }[]).map((i) => ({ id: i.name, title: i.name })) });
+    const file = JSON.stringify({ format: BACKUP_FORMAT, schemaVersion: 1, data: { items: [{ name: 'Dune' }] } });
+    expect(parseBackup(file, 2).items.map((i) => i.title)).toEqual(['Dune']);
+  });
+
+  it('fails loudly when a migration step is missing', () => {
+    expect(() => migrateBackupData({}, 1, 3)).toThrow(/falta el paso de 1 a 2/);
   });
 });
