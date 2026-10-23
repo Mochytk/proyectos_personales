@@ -25,6 +25,7 @@ erDiagram
     uuid id PK
     text time_zone
     smallint day_cutoff_hour
+    text style
   }
   anchors ||--o{ habits : agrupa
   anchors {
@@ -149,7 +150,7 @@ erDiagram
 
 | Tabla | Campos clave y reglas |
 | --- | --- |
-| `user_settings` | Una fila por usuario, con `id` fijo. `time_zone` (por defecto `America/Santiago`) y `day_cutoff_hour` (0–6, por defecto 4) |
+| `user_settings` | Una fila por usuario, con `id` fijo. `time_zone` (por defecto `America/Santiago`), `day_cutoff_hour` (0–6, por defecto 4) y `style`: `cuaderno`, `linea`, `disco` o `rotate` (por defecto `cuaderno`, ADR 0009) |
 | `anchors` | Lista editable. Por defecto: Al despertar, Mañana, Después de almorzar, Tarde, Noche, Antes de dormir, Después de entrenar. `name` de 1 a 40 caracteres |
 | `habits` | `mode`: `daily` o `weekly_quota`. `weekly_quota` va de 1 a 7 y es obligatoria solo con `weekly_quota`. `weekdays`: días ISO 1–7 en que aplica (solo `daily`; por defecto todos). `starts_on`: fecha local desde la que cuenta (por defecto, el día en que se crea); los días anteriores no afectan las rachas. `archived_at` archiva el hábito sin borrar su historial (HU-6) |
 | `check_ins` | Uno por hábito y día. `id` = UUID v5 de `check_in:{habit_id}:{local_date}`. `status`: `done` o `skipped`. `skip_reason` (solo con `skipped`): `certamen`, `enfermedad`, `viaje`, `descanso` u `otro`. `note` hasta 280 caracteres. `value` es numérico opcional, reservado para metas con número y sin interfaz en la v1. Desmarcar = borrado lógico |

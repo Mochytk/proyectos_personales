@@ -1,6 +1,6 @@
-# Habit tracker
+# Constancia
 
-App personal para llevar hábitos y entrenamiento de gimnasio, pensada para el iPhone (como app web instalada) y el Mac (como app de escritorio). Funciona sin conexión: todo se guarda primero en el dispositivo y se sincroniza cuando hay red.
+App personal para llevar hábitos y entrenamiento de gimnasio, pensada para el iPhone (como app web instalada) y el Mac (como app de escritorio). Funciona sin conexión: todo se guarda primero en el dispositivo y se sincroniza cuando hay red. Tiene tres estilos visuales que se pueden cambiar o rotar cada semana: Cuaderno, Línea y Disco.
 
 Es mi primer proyecto de punta a punta: construirlo, publicarlo gratis, revisarlo contra los errores típicos de las apps hechas con IA y usarlo de verdad.
 
