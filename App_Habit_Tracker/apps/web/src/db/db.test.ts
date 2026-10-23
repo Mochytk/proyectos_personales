@@ -1,17 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { openDb, StorageUnavailableError, type HabitDb } from './db';
+import { openTestDb } from '../test/db';
+import { openDb, StorageUnavailableError } from './db';
 
-const opened: HabitDb[] = [];
-
-async function openTestDb(): Promise<HabitDb> {
-  const db = await openDb(`test-${crypto.randomUUID()}`);
-  opened.push(db);
-  return db;
-}
-
-afterEach(async () => {
+afterEach(() => {
   vi.unstubAllGlobals();
-  await Promise.all(opened.splice(0).map((db) => db.delete()));
 });
 
 describe('openDb', () => {

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { AsyncState } from '../ui/AsyncState';
 import { openDb, StorageUnavailableError, type HabitDb } from './db';
+import { ensureDefaults } from './defaults';
 
 const DbContext = createContext<HabitDb | null>(null);
 
@@ -21,7 +22,8 @@ interface Props {
   children: ReactNode;
 }
 
-// Opens the local database once and hands it to the screens. Nothing renders until it is open.
+// Opens the local database, adds the default content and hands the database to the
+// screens. Nothing below renders until that is done.
 export function DatabaseProvider({ open = openDb, children }: Props) {
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<OpenState>({ status: 'opening' });
@@ -30,17 +32,22 @@ export function DatabaseProvider({ open = openDb, children }: Props) {
     let cancelled = false;
     let opened: HabitDb | undefined;
     setState({ status: 'opening' });
-    open().then(
-      (db) => {
+    open()
+      .then(async (db) => {
         opened = db;
-        if (cancelled) db.close();
-        else setState({ status: 'open', db });
-      },
-      (error: unknown) => {
-        if (cancelled) return;
-        setState({ status: error instanceof StorageUnavailableError ? 'unavailable' : 'error' });
-      },
-    );
+        await ensureDefaults(db);
+        return db;
+      })
+      .then(
+        (db) => {
+          if (cancelled) db.close();
+          else setState({ status: 'open', db });
+        },
+        (error: unknown) => {
+          if (cancelled) return;
+          setState({ status: error instanceof StorageUnavailableError ? 'unavailable' : 'error' });
+        },
+      );
     return () => {
       cancelled = true;
       opened?.close();
