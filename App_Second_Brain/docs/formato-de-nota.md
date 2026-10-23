@@ -31,7 +31,7 @@ La bóveda es la fuente de verdad. Todo lo demás (índice, embeddings, cola de 
 ## Identificadores
 
 - `id`: **ULID** (26 caracteres, ordenable por tiempo, generado con `crypto.getRandomValues`). Se genera una vez y no cambia nunca, aunque la nota se mueva.
-- `capture_id`: ULID generado **en el dispositivo que capturó** (iPhone o Mac). Permite que una captura reintentada no se duplique (RF-8.4): si llega una captura con un `capture_id` que ya existe en la bóveda, se confirma y se descarta.
+- `capture_id`: 16 bytes aleatorios (en hexadecimal) generados **en el dispositivo que capturó** (iPhone o Mac). Permite que una captura reintentada no se duplique (RF-8.4): si llega una captura con un `capture_id` que ya existe en la bóveda, se confirma y se descarta. No es un ULID, para no revelarle al relay la hora de la captura (ver `protocolo-sincronizacion.md`).
 
 ## Frontmatter (YAML)
 
@@ -47,7 +47,7 @@ summary: ''
 source:
   kind: device         # device | url | file | import | manual
   device: iphone-1     # nombre corto del dispositivo emparejado (kind: device)
-  capture_id: 01K8ZQ3K1T3V5X7Z9B1D3F5H7K
+  capture_id: 3f9a1c0e7b2d4e6f8a1b3c5d7e9f0a2b
   # url: https://...   # kind: url
   # file: informe.pdf  # kind: file | import (nombre original, sin la ruta)
 language: es-CL
