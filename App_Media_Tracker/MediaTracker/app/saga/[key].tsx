@@ -57,7 +57,7 @@ export default function SagaScreen() {
 
       {next ? (
         <Link href={`/item/${next.id}`} asChild>
-          <PressableScale style={[styles.nextCard, { backgroundColor: colors.tint + '18' }]}>
+          <PressableScale style={StyleSheet.flatten([styles.nextCard, { backgroundColor: colors.tint + '18' }])}>
             <SymbolView name={{ ios: 'book.fill', android: 'menu-book', web: 'menu-book' }} size={22} tintColor={colors.tint} />
             <View style={styles.nextText}>
               <Text style={[styles.nextLabel, { color: colors.tint }]}>{next.status === 'in_progress' ? 'Sigue con' : 'Siguiente libro'}</Text>
@@ -71,7 +71,7 @@ export default function SagaScreen() {
 
       {saga.books.map((book) => (
         <Link key={book.id} href={`/item/${book.id}`} asChild>
-          <PressableScale style={[styles.row, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
+          <PressableScale style={StyleSheet.flatten([styles.row, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
             <ItemCover type={book.type} posterUrl={book.posterUrl} style={rowCover} iconSize={20} />
             <View style={styles.rowText}>
               <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={2}>
