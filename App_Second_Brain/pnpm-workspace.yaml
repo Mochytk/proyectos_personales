@@ -1,0 +1,6 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply chain: only install versions published at least one day ago.
+minimumReleaseAge: 1440
