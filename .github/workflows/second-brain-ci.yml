@@ -1,0 +1,50 @@
+name: Second brain CI
+
+on:
+  pull_request:
+    paths:
+      - 'App_Second_Brain/**'
+      - '.github/workflows/second-brain-ci.yml'
+  push:
+    branches: [app/second_brain]
+    paths:
+      - 'App_Second_Brain/**'
+      - '.github/workflows/second-brain-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: second-brain-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: App_Second_Brain
+
+jobs:
+  checks:
+    name: Format, lint, types, tests and audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      # Actions pinned to commit SHAs; the comment names the release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: App_Second_Brain/.nvmrc
+          package-manager-cache: false
+
+      # pnpm comes from corepack (bundled with Node 24), pinned by packageManager.
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm audit
