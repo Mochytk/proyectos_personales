@@ -1,4 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router';
+import { DatabaseProvider } from '../db/DatabaseProvider';
 import { HabitDetailScreen } from '../habits/HabitDetailScreen';
 import { HabitsScreen } from '../habits/HabitsScreen';
 import { ReviewScreen } from '../review/ReviewScreen';
@@ -22,13 +23,15 @@ export function App() {
     <div className="app">
       <main className="app-main">
         <ErrorBoundary>
-          <Routes>
-            <Route index element={<TodayScreen />} />
-            <Route path="habitos" element={<HabitsScreen />} />
-            <Route path="habitos/:id" element={<HabitDetailScreen />} />
-            <Route path="revision" element={<ReviewScreen />} />
-            <Route path="ajustes" element={<SettingsScreen />} />
-          </Routes>
+          <DatabaseProvider>
+            <Routes>
+              <Route index element={<TodayScreen />} />
+              <Route path="habitos" element={<HabitsScreen />} />
+              <Route path="habitos/:id" element={<HabitDetailScreen />} />
+              <Route path="revision" element={<ReviewScreen />} />
+              <Route path="ajustes" element={<SettingsScreen />} />
+            </Routes>
+          </DatabaseProvider>
         </ErrorBoundary>
       </main>
       <nav className="tab-bar" aria-label="Secciones">
