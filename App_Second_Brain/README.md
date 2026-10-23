@@ -37,6 +37,13 @@ pnpm install
 pnpm lint && pnpm typecheck && pnpm test
 ```
 
+Escaneo de secretos antes de cada commit (una vez por clon, desde la raíz del repo):
+
+```sh
+brew install gitleaks
+ln -s ../../App_Second_Brain/scripts/pre-commit .git/hooks/pre-commit
+```
+
 ## Documentación
 
 - `CLAUDE.md`: reglas para trabajar en el proyecto (stack, comandos, Git y seguridad).

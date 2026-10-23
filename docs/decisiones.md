@@ -7,3 +7,4 @@ Una linea por decision: `AAAA-MM-DD | decision | por que`. Se indexa en MemPalac
 - 2026-10-23 | Segundo cerebro en `App_Second_Brain/`: monorepo pnpm, Node 24 y TypeScript 6.0, con rama base `app/second_brain` y una PR por rama | Mismas herramientas y flujo que el habit tracker, en el repo público (respuestas 1, 2 y 4 de su fase 0)
 - 2026-10-23 | Segundo cerebro: el código de los spikes vive solo en ramas `spike/*`; los informes llegan por PR de documentación | Que el código desechable no se mezcle con el producto (respuesta 3 de su fase 0)
 - 2026-10-23 | Segundo cerebro: pnpm con `minimumReleaseAge: 1440` | No instalar versiones publicadas hace menos de un día, que es cuando suelen detectarse los paquetes comprometidos
+- 2026-10-23 | Segundo cerebro: gitleaks 8.30.1 en el hook `pre-commit` y en el CI, escaneando todo el historial del repo | El repo es público; versión y SHA-256 fijados, sin actions de terceros

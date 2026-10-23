@@ -1,0 +1,9 @@
+#!/bin/sh
+# Blocks the commit when gitleaks finds a secret in the staged changes.
+# Enable it once per clone, from the repo root:
+#   ln -s ../../App_Second_Brain/scripts/pre-commit .git/hooks/pre-commit
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: falta gitleaks (brew install gitleaks); commit bloqueado." >&2
+  exit 1
+fi
+exec gitleaks git --pre-commit --staged --redact --no-banner .

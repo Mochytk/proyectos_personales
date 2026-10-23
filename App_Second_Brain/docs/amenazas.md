@@ -103,7 +103,7 @@ S = suplantación, T = manipulación, R = repudio, I = divulgación, D = denegac
 | T/E | Paquete npm o PyPI comprometido | Lockfiles; `minimumReleaseAge` de un día en pnpm; scripts de instalación bloqueados salvo revisión; hashes en Python; `pnpm audit` y `pip-audit` en el CI; revisión antes de cada dependencia nueva | CI (0 en adelante) |
 | T/E | Modelo descargado alterado | Fuente oficial documentada y **checksum SHA-256 verificado** antes de usarlo | Script de descarga (spikes A y B) |
 | T/E | Action de GitHub comprometida | Actions fijadas por SHA; permisos de solo lectura | CI (0) |
-| I | Un secreto termina en el repo público | `.gitignore` estricto, revisión del diff antes de cada commit y escaneo de secretos (herramienta pendiente de tu aprobación) | CI (0) |
+| I | Un secreto termina en el repo público | `.gitignore` estricto; revisión del diff antes de cada commit; **gitleaks** 8.30.1 (fijado por versión y SHA-256) en el hook `pre-commit` y en el CI sobre todo el historial; *push protection* de GitHub recomendada | Job `secrets` del CI y hook (0) |
 
 ## Tabla de la sección 8 del documento maestro
 
