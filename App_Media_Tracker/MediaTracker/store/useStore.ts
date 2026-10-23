@@ -3,12 +3,13 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { appStorage } from './storage';
 import { applyItemUpdate, backfillCompletedAt } from './completion';
 import type { Saga } from './sagas';
+import { Tombstones, addTombstone, emptyTombstones, sanitizeTombstones } from './tombstones';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SETTINGS, StoreData, dropOrphanListRefs, mergeData, normalizeData } from './backup';
 
 // Bump this whenever the persisted shape changes, and handle the old version in `migrate` below.
-export const STORE_VERSION = 2;
+export const STORE_VERSION = 3;
 
 export type MediaType = 'software' | 'task' | 'movie' | 'tv_show' | 'book' | 'audiobook' | 'video_game' | 'board_game' | 'music_album' | 'app' | 'event' | 'note';
 
@@ -86,6 +87,8 @@ interface AppState {
   items: MediaItem[];
   lists: MediaList[];
   settings: AppSettings;
+  /** What was deleted and when, so syncing does not bring it back. */
+  deleted: Tombstones;
   
   addItem: (item: Omit<MediaItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateItem: (id: string, updates: Partial<MediaItem>) => void;
@@ -107,6 +110,7 @@ export const useStore = create<AppState>()(
       items: [],
       lists: [],
       settings: DEFAULT_SETTINGS,
+      deleted: emptyTombstones(),
       
       addItem: (itemData) => set((state) => ({
         items: [
@@ -129,7 +133,8 @@ export const useStore = create<AppState>()(
       })),
       
       removeItem: (id) => set((state) => ({
-        items: state.items.filter(item => item.id !== id)
+        items: state.items.filter(item => item.id !== id),
+        deleted: addTombstone(state.deleted, 'items', id, Date.now()),
       })),
       
       addList: (listData) => set((state) => ({
@@ -146,12 +151,15 @@ export const useStore = create<AppState>()(
       })),
       
       removeList: (id) => set((state) => {
+        const now = Date.now();
+        // The items that were in the list change too, so their updatedAt moves and a sync carries it.
         const updatedItems = state.items.map(item => 
-          item.listId === id ? { ...item, listId: undefined } : item
+          item.listId === id ? { ...item, listId: undefined, updatedAt: now } : item
         );
         return {
           lists: state.lists.filter(list => list.id !== id),
-          items: updatedItems
+          items: updatedItems,
+          deleted: addTombstone(state.deleted, 'lists', id, now),
         };
       }),
 
@@ -176,7 +184,9 @@ export const useStore = create<AppState>()(
         const data = normalizeData(persisted);
         // v1 -> v2: items gained `completedAt`; finished ones are dated by their last change.
         const items = version < 2 ? backfillCompletedAt(data.items) : data.items;
-        return { ...data, items: dropOrphanListRefs(items, data.lists) } as unknown as AppState;
+        // v2 -> v3: `deleted` (tombstones) is new; older data starts with none.
+        const deleted = sanitizeTombstones((persisted as { deleted?: unknown } | undefined)?.deleted);
+        return { ...data, items: dropOrphanListRefs(items, data.lists), deleted } as unknown as AppState;
       },
       // Default merge is shallow: without this, settings added in a later release would be
       // missing for users whose stored `settings` object predates them.
