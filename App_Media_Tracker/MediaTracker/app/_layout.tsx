@@ -7,6 +7,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useMenuActions } from '@/hooks/useMenuActions';
 import { useReminders } from '@/hooks/useReminders';
+import { useSync } from '@/hooks/useSync';
 
 export {
   ErrorBoundary,
@@ -44,6 +45,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
   useReminders();
   useMenuActions();
+  useSync();
   
   const PastelDarkTheme = {
     ...DarkTheme,

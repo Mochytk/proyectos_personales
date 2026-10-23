@@ -1,0 +1,208 @@
+{
+  "format": "media-tracker-backup",
+  "schemaVersion": 4,
+  "exportedAt": "2026-10-26T15:00:00.000Z",
+  "data": {
+    "items": [
+      {
+        "id": "it-movie",
+        "title": "Matrix",
+        "subtitle": "1999",
+        "type": "movie",
+        "status": "completed",
+        "progress": 1,
+        "rating": 5,
+        "tags": [
+          "ciencia ficción",
+          "clásico"
+        ],
+        "notes": "Revisar la trilogía",
+        "createdAt": 1791817200000,
+        "updatedAt": 1791817201000,
+        "externalId": "tmdb:movie:603",
+        "posterUrl": "https://image.tmdb.org/t/p/w342/p.jpg",
+        "overview": "Un hacker descubre la verdad.",
+        "releaseDate": "1999-03-30",
+        "completedAt": 1791817201000
+      },
+      {
+        "id": "it-show",
+        "title": "The Expanse",
+        "subtitle": "2015",
+        "type": "tv_show",
+        "status": "in_progress",
+        "progress": 0,
+        "totalCheckpoints": 62,
+        "currentCheckpoint": 25,
+        "checkpointType": "episodes",
+        "seasons": [
+          10,
+          13,
+          13,
+          10,
+          10,
+          6
+        ],
+        "nextEpisode": {
+          "date": "2026-11-01",
+          "season": 6,
+          "episode": 7
+        },
+        "tags": [],
+        "createdAt": 1791817200000,
+        "updatedAt": 1791817202000,
+        "listId": "list-1",
+        "externalId": "tmdb:tv:63639"
+      },
+      {
+        "id": "it-book",
+        "title": "Project Hail Mary",
+        "subtitle": "Andy Weir",
+        "type": "book",
+        "status": "in_progress",
+        "progress": 0,
+        "totalCheckpoints": 476,
+        "currentCheckpoint": 212,
+        "checkpointType": "pages",
+        "tags": [],
+        "createdAt": 1791817200000,
+        "updatedAt": 1791817203000,
+        "externalId": "openlibrary:OL21745884W",
+        "posterUrl": "https://covers.openlibrary.org/b/id/10389354-M.jpg",
+        "releaseDate": "2021"
+      },
+      {
+        "id": "it-game",
+        "title": "Elden Ring",
+        "subtitle": "2022",
+        "type": "video_game",
+        "status": "unstarted",
+        "progress": 0,
+        "tags": [],
+        "createdAt": 1791817200000,
+        "updatedAt": 1791817204000,
+        "externalId": "rawg:326243"
+      },
+      {
+        "id": "it-task",
+        "title": "Renovar suscripción",
+        "type": "task",
+        "status": "unstarted",
+        "progress": 0,
+        "dueDate": 1793718000000,
+        "dueHasTime": true,
+        "remind": true,
+        "notifiedAt": 1791817205000,
+        "tags": [],
+        "createdAt": 1791817200000,
+        "updatedAt": 1791817205000
+      },
+      {
+        "id": "it-saga-1",
+        "title": "El imperio final",
+        "subtitle": "Brandon Sanderson",
+        "type": "book",
+        "status": "completed",
+        "progress": 0,
+        "totalCheckpoints": 541,
+        "currentCheckpoint": 541,
+        "checkpointType": "pages",
+        "tags": [],
+        "createdAt": 1760281200000,
+        "updatedAt": 1760281206000,
+        "saga": {
+          "name": "Nacidos de la bruma",
+          "number": 1
+        },
+        "completedAt": 1760281206000
+      },
+      {
+        "id": "it-saga-2",
+        "title": "El pozo de la ascensión",
+        "subtitle": "Brandon Sanderson",
+        "type": "book",
+        "status": "in_progress",
+        "progress": 0,
+        "totalCheckpoints": 704,
+        "currentCheckpoint": 120,
+        "checkpointType": "pages",
+        "tags": [],
+        "createdAt": 1760281200000,
+        "updatedAt": 1760281207000,
+        "saga": {
+          "name": "Nacidos de la bruma",
+          "number": 2
+        }
+      },
+      {
+        "id": "it-saga-novella",
+        "title": "Aliento de los dioses",
+        "type": "book",
+        "status": "unstarted",
+        "progress": 0,
+        "tags": [],
+        "createdAt": 1760281200000,
+        "updatedAt": 1760281208000,
+        "saga": {
+          "name": "Nacidos de la bruma"
+        }
+      },
+      {
+        "id": "it-done-late",
+        "title": "Dune",
+        "subtitle": "Frank Herbert",
+        "type": "book",
+        "status": "completed",
+        "progress": 0,
+        "totalCheckpoints": 688,
+        "currentCheckpoint": 688,
+        "checkpointType": "pages",
+        "rating": 5,
+        "tags": [
+          "clásico"
+        ],
+        "createdAt": 1760281200000,
+        "updatedAt": 1760281209000,
+        "completedAt": 1759000000000,
+        "saga": {
+          "name": "Dune",
+          "number": 1
+        }
+      }
+    ],
+    "lists": [
+      {
+        "id": "list-1",
+        "name": "Ciencia ficción",
+        "isPinned": true,
+        "type": "collection",
+        "layoutStyle": "medium_grid",
+        "itemShape": "tall",
+        "sortOrder": "a_z",
+        "updatedAt": 1760281200000
+      },
+      {
+        "id": "list-2",
+        "name": "Para ver",
+        "isPinned": false,
+        "type": "todo",
+        "isSmartList": true,
+        "smartFilters": {
+          "types": [
+            "movie",
+            "tv_show"
+          ],
+          "minRating": 4
+        },
+        "updatedAt": 1760281201000
+      }
+    ],
+    "settings": {
+      "showEnjoying": true,
+      "showPlanner": false,
+      "showLogbook": true,
+      "pileLayoutStyle": "large_grid",
+      "pileItemShape": "tall"
+    }
+  }
+}

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { backupSupported, exportBackup, importBackup } from '@/store/backupFiles';
 import { Text, View } from '@/components/Themed';
 import { useStore } from '@/store/useStore';
+import SyncSettings from '@/components/SyncSettings';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -119,6 +120,8 @@ export default function GlobalSettingsScreen() {
           </Text>
         </View>
       </View>
+
+      <SyncSettings />
 
       {backupSupported && (
         <View style={[styles.section, { marginTop: 30 }]}>

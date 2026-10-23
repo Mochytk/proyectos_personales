@@ -67,6 +67,7 @@
       "electron-storage.js",
       "electron-menu.js",
       "electron-window-state.js",
+      "electron-sync.js",
       "package.json",
       "!node_modules"
     ],

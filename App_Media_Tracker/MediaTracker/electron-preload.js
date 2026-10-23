@@ -15,3 +15,18 @@ contextBridge.exposeInMainWorld('mediaTrackerMenu', {
     return () => ipcRenderer.removeListener('menu:action', listener);
   },
 });
+
+// Sync through a shared folder. The folder is chosen in the main process; the page only exchanges
+// the sync content and hears when another device changed its file.
+contextBridge.exposeInMainWorld('mediaTrackerSync', {
+  getConfig: () => ipcRenderer.invoke('sync:getConfig'),
+  chooseFolder: () => ipcRenderer.invoke('sync:chooseFolder'),
+  disable: () => ipcRenderer.invoke('sync:disable'),
+  write: (text) => ipcRenderer.invoke('sync:write', text),
+  readOthers: () => ipcRenderer.invoke('sync:readOthers'),
+  onChange: (callback) => {
+    const listener = () => callback();
+    ipcRenderer.on('sync:changed', listener);
+    return () => ipcRenderer.removeListener('sync:changed', listener);
+  },
+});

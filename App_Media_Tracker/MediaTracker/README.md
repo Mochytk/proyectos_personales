@@ -51,6 +51,19 @@ Todo respaldo exportado por esta app debe poder importarse en cualquier versión
 
 Los tests importan todos los respaldos congelados, así que romper la compatibilidad hacia atrás hace fallar `npm test`. Un respaldo de una versión más nueva que la de la app se rechaza con un aviso, en lugar de perder datos en silencio.
 
+## Sincronización entre equipos
+
+En la app de escritorio, **Ajustes Globales → Sincronización** mantiene los datos iguales en varios equipos a través de una carpeta compartida: elige en cada Mac una carpeta que ya se sincronice (iCloud Drive, Dropbox, Syncthing…).
+
+- Cada equipo escribe **solo su propio archivo** (`media-tracker-sync-<id>.json`) y lee los de los demás, así la nube nunca tiene dos escritores sobre un archivo ni crea copias en conflicto.
+- La fusión (`store/sync.ts`) es por registro: gana la copia modificada al final. Lo eliminado sigue eliminado salvo que se haya modificado después del borrado (por eso se guardan los borrados, `deleted`, durante 180 días). El resultado no depende del orden de los equipos ni de repetir la fusión; las pruebas lo comprueban con cientos de combinaciones.
+- Se sincroniza al abrir, cuando otro equipo cambia su archivo, 3 segundos después de editar, al volver a la ventana y cada 5 minutos.
+- No se sincronizan los ajustes (pestañas visibles, claves de API): son de cada equipo.
+
+Límites: si dos equipos editan **el mismo elemento** a la vez, se queda el último completo (no se mezclan campos), y la comparación usa el reloj de cada equipo, así que conviene tenerlos en hora. No hay app para iPhone, así que de momento solo sincroniza equipos con la app de escritorio.
+
+El archivo de sincronización tiene su propia versión (`SYNC_SCHEMA_VERSION`), con la misma regla que el respaldo: un cambio de formato debe seguir leyendo los archivos de versiones anteriores.
+
 ## Metadatos
 
 Al añadir un elemento, el formulario busca y rellena título, portada y progreso según el tipo:

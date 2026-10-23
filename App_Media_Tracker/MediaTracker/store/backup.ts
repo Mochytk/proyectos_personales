@@ -15,7 +15,7 @@ export const BACKUP_FORMAT = 'media-tracker-backup';
  *   3. add `tests/fixtures/backups/v<new version>.json`, a real export that is never edited again.
  * The tests fail if step 3 is forgotten, and they import every frozen fixture.
  */
-export const BACKUP_SCHEMA_VERSION = 3;
+export const BACKUP_SCHEMA_VERSION = 4;
 
 type BackupData = Record<string, unknown>;
 
@@ -27,6 +27,9 @@ export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData>
   // v2 -> v3: items gained `completedAt` (when they were finished, used by the statistics).
   // Finished items from older files are dated by their last change.
   2: (data) => (Array.isArray(data.items) ? { ...data, items: backfillCompletedAt(data.items) } : data),
+  // v3 -> v4: lists gained an optional `updatedAt` (needed to sync). Old lists have none and count as
+  // the oldest copy, so nothing to convert.
+  3: (data) => data,
 };
 
 /** Upgrades `data` from an older file version to `toVersion`, one step at a time. */
@@ -110,6 +113,7 @@ export function sanitizeList(raw: unknown): MediaList | null {
     sortOrder: raw.sortOrder,
     isSmartList: raw.isSmartList === true ? true : undefined,
     smartFilters: isObject(raw.smartFilters) ? raw.smartFilters : undefined,
+    updatedAt: optNum(raw.updatedAt),
   };
 }
 

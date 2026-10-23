@@ -1,9 +1,12 @@
-const { app, BrowserWindow, Menu, ipcMain, nativeTheme, net, protocol, screen, shell } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, nativeTheme, net, protocol, screen, shell } = require('electron');
+const crypto = require('crypto');
 const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const { pathToFileURL } = require('url');
 const { createFileStorage } = require('./electron-storage');
 const { ACTIONS, buildMenuTemplate } = require('./electron-menu');
+const { createSyncFolder, loadSyncConfig, saveSyncConfig } = require('./electron-sync');
 const { MIN_SIZE, loadWindowState, restoreBounds, saveWindowState } = require('./electron-window-state');
 
 nativeTheme.themeSource = 'system';
@@ -40,6 +43,49 @@ function registerStorageHandlers() {
   ipcMain.handle('storage:get', (_event, key) => storage.getItem(key));
   ipcMain.handle('storage:set', (_event, key, value) => storage.setItem(key, value));
   ipcMain.handle('storage:remove', (_event, key) => storage.removeItem(key));
+}
+
+function registerSyncHandlers() {
+  const configFile = path.join(app.getPath('userData'), 'sync-config.json');
+  const config = loadSyncConfig(configFile);
+  if (!config.deviceId) {
+    config.deviceId = crypto.randomUUID();
+    saveSyncConfig(configFile, config);
+  }
+
+  let folder = null;
+  let stopWatching = null;
+  const open = () => {
+    if (stopWatching) stopWatching();
+    folder = config.folder ? createSyncFolder(config.folder, config.deviceId) : null;
+    stopWatching = folder ? folder.watch(() => mainWindow && mainWindow.webContents.send('sync:changed')) : null;
+  };
+  const requireFolder = () => {
+    if (!folder) throw new Error('La sincronización no está activada.');
+    return folder;
+  };
+  open();
+
+  // The renderer never names a path: the folder only comes from the system's folder picker.
+  ipcMain.handle('sync:getConfig', () => ({ deviceId: config.deviceId, deviceName: os.hostname(), folder: config.folder || null }));
+  ipcMain.handle('sync:chooseFolder', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: 'Elige la carpeta de sincronización',
+      properties: ['openDirectory', 'createDirectory'],
+    });
+    if (result.canceled || !result.filePaths[0]) return null;
+    config.folder = result.filePaths[0];
+    saveSyncConfig(configFile, config);
+    open();
+    return config.folder;
+  });
+  ipcMain.handle('sync:disable', () => {
+    config.folder = undefined;
+    saveSyncConfig(configFile, config);
+    open();
+  });
+  ipcMain.handle('sync:write', (_event, text) => requireFolder().writeOwn(text));
+  ipcMain.handle('sync:readOthers', async () => (await requireFolder().readOthers()).map((file) => file.text));
 }
 
 function registerMenu() {
@@ -117,6 +163,7 @@ app.whenReady().then(() => {
   if (process.platform === 'darwin' && !app.isPackaged) app.dock?.setIcon(path.join(__dirname, 'build', 'icon.png'));
   registerAppProtocol();
   registerStorageHandlers();
+  registerSyncHandlers();
   registerMenu();
   createWindow();
 

@@ -62,7 +62,7 @@ describe('field coverage', () => {
     createdAt: 1, updatedAt: 2, completedAt: 3, listId: 'l', saga: { name: 'Mistborn', number: 2 }, externalId: 'tmdb:tv:1', posterUrl: 'https://x/p.jpg', overview: 'o', releaseDate: '2020-01-01',
   };
   const list: Required<MediaList> = {
-    id: 'l', name: 'Lista', isPinned: true, type: 'collection', layoutStyle: 'large_grid', itemShape: 'tall', sortOrder: 'a_z',
+    id: 'l', name: 'Lista', isPinned: true, updatedAt: 7, type: 'collection', layoutStyle: 'large_grid', itemShape: 'tall', sortOrder: 'a_z',
     isSmartList: true, smartFilters: { types: ['movie'], minRating: 3 },
   };
   const settings: Required<AppSettings> = {
