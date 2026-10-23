@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextBook, sagaKey, sagaLabel, sagasOf, sanitizeSaga, suggestSagas } from '../store/sagas';
+import { buildSaga, nextBook, nextSagaNumber, parseSagaNumber, sagaKey, sagaLabel, sagasOf, sanitizeSaga, suggestSagas } from '../store/sagas';
 import type { MediaItem } from '../store/useStore';
 
 let n = 0;
@@ -99,5 +99,29 @@ describe('suggestSagas', () => {
 
   it('does not suggest what is already typed in full', () => {
     expect(suggestSagas(items, 'mistborn')).toEqual([]);
+  });
+});
+
+describe('form fields', () => {
+  it('parses the number, accepting a decimal comma', () => {
+    expect(parseSagaNumber('2')).toBe(2);
+    expect(parseSagaNumber(' 0,5 ')).toBe(0.5);
+    expect(parseSagaNumber('0')).toBeUndefined();
+    expect(parseSagaNumber('-1')).toBeUndefined();
+    expect(parseSagaNumber('abc')).toBeUndefined();
+    expect(parseSagaNumber('')).toBeUndefined();
+  });
+
+  it('builds the saga to save, or none when the name is empty', () => {
+    expect(buildSaga(' Mistborn ', '2')).toEqual({ name: 'Mistborn', number: 2 });
+    expect(buildSaga('Mistborn', '')).toEqual({ name: 'Mistborn' });
+    expect(buildSaga('  ', '2')).toBeUndefined();
+  });
+
+  it('proposes the next number in an existing saga', () => {
+    const items = [book('Uno', { name: 'Mistborn', number: 1 }), book('Dos', { name: 'mistborn', number: 2 }), book('Medio', { name: 'Mistborn', number: 2.5 })];
+    expect(nextSagaNumber(items, 'MISTBORN')).toBe(3);
+    expect(nextSagaNumber(items, 'Dune')).toBe(1);
+    expect(nextSagaNumber([book('Sin número', { name: 'Dune' })], 'Dune')).toBe(1);
   });
 });

@@ -8,6 +8,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
 import DateField from '@/components/DateField';
 import { fromInputs } from '@/store/dates';
+import SagaField from '@/components/SagaField';
+import { buildSaga } from '@/store/sagas';
 import { NextEpisodeInfo, totalEpisodes } from '@/store/seasons';
 import { MetadataResult, providerFor } from '@/services/metadata';
 
@@ -53,6 +55,8 @@ export default function ModalScreen() {
   const [subtitle, setSubtitle] = useState('');
   const [type, setType] = useState<MediaType>('software');
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [sagaName, setSagaName] = useState('');
+  const [sagaNumber, setSagaNumber] = useState('');
 
   // Progress Tracking State
   const [progressType, setProgressType] = useState<string>('none');
@@ -167,6 +171,7 @@ export default function ModalScreen() {
       currentCheckpoint: 0,
       checkpointType: finalCheckpointType as any,
       listId: selectedListId || undefined,
+      saga: type === 'book' ? buildSaga(sagaName, sagaNumber) : undefined,
       dueDate: due?.dueDate,
       dueHasTime: due?.dueHasTime,
       remind: due && remind ? true : undefined,
@@ -261,6 +266,13 @@ export default function ModalScreen() {
               )}
             </>
           )}
+        </View>
+      )}
+
+      {type === 'book' && (
+        <View>
+          <Text style={[styles.label, { color: colors.text }]}>Saga (Opcional)</Text>
+          <SagaField name={sagaName} number={sagaNumber} onChange={({ name, number }) => { setSagaName(name); setSagaNumber(number); }} />
         </View>
       )}
 

@@ -74,3 +74,20 @@ export function suggestSagas(items: MediaItem[], query: string, limit = 5): stri
   const matches = names.filter((n) => sagaKey(n).includes(q) && sagaKey(n) !== q);
   return matches.sort((a, b) => Number(!sagaKey(a).startsWith(q)) - Number(!sagaKey(b).startsWith(q))).slice(0, limit);
 }
+
+/** Reads the "number in the saga" field: accepts "2", "0.5" and "0,5"; anything else is no number. */
+export function parseSagaNumber(text: string): number | undefined {
+  const value = Number(text.trim().replace(',', '.'));
+  return text.trim() !== '' && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+/** Builds the saga to save from the form fields; undefined when the name is empty. */
+export const buildSaga = (name: string, numberText: string): Saga | undefined =>
+  sanitizeSaga({ name, number: parseSagaNumber(numberText) });
+
+/** The number a new book of this saga most likely has: one more than the highest so far (1 if none). */
+export function nextSagaNumber(items: MediaItem[], name: string): number {
+  const saga = sagasOf(items).find((s) => s.key === sagaKey(name));
+  const numbers = (saga?.books ?? []).map((b) => b.saga?.number).filter((n): n is number => n !== undefined);
+  return numbers.length > 0 ? Math.floor(Math.max(...numbers)) + 1 : 1;
+}
