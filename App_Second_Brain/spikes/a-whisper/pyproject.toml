@@ -1,0 +1,11 @@
+[project]
+name = "sb-spike-whisper"
+version = "0.0.0"
+description = "Spike A: Whisper benchmark (throwaway, never merged)"
+requires-python = ">=3.12,<3.13"
+dependencies = ["faster-whisper==1.2.1", "huggingface-hub"]
+
+[tool.uv]
+package = false
+# Supply chain: resolve only versions published before this date (uv.lock pins exact versions and hashes).
+exclude-newer = "2026-10-22T00:00:00Z"
