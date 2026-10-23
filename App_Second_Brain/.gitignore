@@ -1,0 +1,82 @@
+# Strict by design: this repo is public and must never hold notes, audio,
+# models, keys or local databases. Real vaults live outside the repo.
+
+# Dependencies and build output
+node_modules/
+dist/
+out/
+release/
+coverage/
+*.tsbuildinfo
+
+# Secrets: only .env.example is versioned
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+*.p12
+
+# Vaults and the derived index (never versioned; real vaults live outside the repo)
+vault/
+vaults/
+.vault*/
+**/.index/
+
+# Local databases (SQLite and its WAL files)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*-wal
+*-shm
+
+# AI models and weights (anchored so source folders named "models" stay visible)
+/models/
+*.gguf
+*.ggml
+*.bin
+*.onnx
+*.safetensors
+*.pt
+*.mlmodelc/
+*.mlpackage/
+
+# Audio (recordings stay on your devices)
+*.m4a
+*.wav
+*.mp3
+*.aac
+*.caf
+*.ogg
+*.opus
+*.flac
+*.webm
+
+# Local benchmark and evaluation output (may contain transcripts)
+spike-output/
+eval/local/
+eval/results/
+
+# Python tooling
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Tool output
+.wrangler/
+playwright-report/
+test-results/
+.playwright-cli/
+*.log
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
