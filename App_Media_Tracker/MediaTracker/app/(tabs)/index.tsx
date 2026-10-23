@@ -5,6 +5,7 @@ import { mediaTypeLabelsES } from '@/constants/mediaTypes';
 import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
 import { sagaLabel, sagasOf } from '@/store/sagas';
+import { matchingItems } from '@/store/smartLists';
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { useMemo } from 'react';
@@ -92,8 +93,8 @@ export default function ListsScreen() {
         <View style={styles.customListsContainer}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Mis Listas</Text>
           {lists.map(list => {
-            const listItemsCount = list.isSmartList 
-              ? items.filter(i => i.status !== 'completed' && (!list.smartFilters?.types || list.smartFilters.types.includes(i.type))).length
+            const listItemsCount = list.isSmartList
+              ? matchingItems(items, list.smartFilters).length
               : items.filter(i => i.listId === list.id && i.status !== 'completed').length;
               
             return (

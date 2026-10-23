@@ -8,6 +8,7 @@ import { SymbolView } from '@/components/AppIcon';
 import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
 import { sagaLabel } from '@/store/sagas';
+import { describeFilters, matchingItems } from '@/store/smartLists';
 import { useMemo, useEffect } from 'react';
 
 const { width } = Dimensions.get('window');
@@ -24,22 +25,9 @@ export default function ListDetailScreen() {
 
   const items = useMemo(() => {
     if (!list) return [];
-    
-    // Base active items filter
-    const activeItems = allItems.filter(i => i.status !== 'completed');
-    
-    if (list.isSmartList) {
-      // Smart List logic: apply filters across all active items
-      return activeItems.filter(item => {
-        if (list.smartFilters?.types && list.smartFilters.types.length > 0) {
-          return list.smartFilters.types.includes(item.type);
-        }
-        return true;
-      });
-    } else {
-      // Standard List logic: only match exact listId
-      return activeItems.filter(i => i.listId === id);
-    }
+    // Smart lists pick from every item by their filters; ordinary lists hold what was put in them.
+    if (list.isSmartList) return matchingItems(allItems, list.smartFilters);
+    return allItems.filter(i => i.status !== 'completed' && i.listId === id);
   }, [allItems, list, id]);
 
   const sortedItems = useMemo(() => {
@@ -136,7 +124,10 @@ export default function ListDetailScreen() {
       {list.isSmartList && (
         <View style={[styles.smartListBanner, { backgroundColor: colors.tint + '20' }]}>
           <SymbolView name={{ ios: 'wand.and.stars', android: 'auto-fix-high', web: 'auto-fix-high' }} size={20} tintColor={colors.tint} />
-          <Text style={[styles.smartListBannerText, { color: colors.tint }]}>Lista Inteligente</Text>
+          <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+            <Text style={[styles.smartListBannerText, { color: colors.tint }]}>Lista Inteligente</Text>
+            <Text style={{ color: colors.tint, fontSize: 13, marginTop: 2 }}>{describeFilters(list.smartFilters).join(' · ')}</Text>
+          </View>
         </View>
       )}
 
