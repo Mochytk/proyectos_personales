@@ -1,0 +1,273 @@
+{
+  "version": 1,
+  "descripcion": "Preguntas de oro sintéticas para el spike B. Las ids esperadas son notas de eval/notas.",
+  "preguntas": [
+    {
+      "id": "Q01",
+      "categoria": "jerga-ingles",
+      "pregunta": "¿Por qué falló el deploy en Cloudflare?",
+      "esperadas": [
+        "01EVAL0000000000000000E001"
+      ]
+    },
+    {
+      "id": "Q02",
+      "categoria": "jerga-ingles",
+      "pregunta": "¿Qué pasó con el conflicto de merge del frontend?",
+      "esperadas": [
+        "01EVAL0000000000000000E002"
+      ]
+    },
+    {
+      "id": "Q03",
+      "categoria": "sinonimos",
+      "pregunta": "¿Qué anoté sobre contenedores para la base de datos local?",
+      "esperadas": [
+        "01EVAL0000000000000000E003"
+      ]
+    },
+    {
+      "id": "Q04",
+      "categoria": "sinonimos",
+      "pregunta": "¿Tengo notas sobre la latencia de la API?",
+      "esperadas": [
+        "01EVAL0000000000000000E004"
+      ]
+    },
+    {
+      "id": "Q05",
+      "categoria": "sinonimos",
+      "pregunta": "¿Qué ideas tengo para la tesis?",
+      "esperadas": [
+        "01EVAL0000000000000000E005"
+      ]
+    },
+    {
+      "id": "Q06",
+      "categoria": "general",
+      "pregunta": "¿Qué me recomendó el profesor guía?",
+      "esperadas": [
+        "01EVAL0000000000000000E006"
+      ]
+    },
+    {
+      "id": "Q07",
+      "categoria": "sinonimos",
+      "pregunta": "¿Qué necesito para postular al postgrado?",
+      "esperadas": [
+        "01EVAL0000000000000000E007"
+      ]
+    },
+    {
+      "id": "Q08",
+      "categoria": "sinonimos",
+      "pregunta": "¿Cuándo tengo que mandar el currículum para la práctica?",
+      "esperadas": [
+        "01EVAL0000000000000000E008"
+      ]
+    },
+    {
+      "id": "Q09",
+      "categoria": "nota-corta",
+      "pregunta": "¿Qué tenía que comprar en el súper?",
+      "esperadas": [
+        "01EVAL0000000000000000E009"
+      ]
+    },
+    {
+      "id": "Q10",
+      "categoria": "sinonimos",
+      "pregunta": "Idea de app con la comida que queda en la nevera",
+      "esperadas": [
+        "01EVAL0000000000000000E011"
+      ]
+    },
+    {
+      "id": "Q11",
+      "categoria": "sinonimos",
+      "pregunta": "¿Anoté algo sobre lesiones en el gimnasio?",
+      "esperadas": [
+        "01EVAL0000000000000000E013"
+      ]
+    },
+    {
+      "id": "Q12",
+      "categoria": "tildes",
+      "pregunta": "paseo a valparaiso",
+      "esperadas": [
+        "01EVAL0000000000000000E014"
+      ]
+    },
+    {
+      "id": "Q13",
+      "categoria": "sinonimos",
+      "pregunta": "una peli sobre inteligencia artificial",
+      "esperadas": [
+        "01EVAL0000000000000000E015"
+      ]
+    },
+    {
+      "id": "Q14",
+      "categoria": "sinonimos",
+      "pregunta": "problema de autenticación con acentos en la clave",
+      "esperadas": [
+        "01EVAL0000000000000000E017"
+      ]
+    },
+    {
+      "id": "Q15",
+      "categoria": "transcripcion",
+      "pregunta": "¿Qué tenía que hacer con el deploy del backend?",
+      "esperadas": [
+        "01EVAL0000000000000000E018"
+      ]
+    },
+    {
+      "id": "Q16",
+      "categoria": "transcripcion",
+      "pregunta": "el merge de la rama de pagos que falló",
+      "esperadas": [
+        "01EVAL0000000000000000E019"
+      ]
+    },
+    {
+      "id": "Q17",
+      "categoria": "transcripcion",
+      "pregunta": "revisar el recall de los embeddings",
+      "esperadas": [
+        "01EVAL0000000000000000E020"
+      ]
+    },
+    {
+      "id": "Q18",
+      "categoria": "transcripcion",
+      "pregunta": "el frontend se ve mal en el celular",
+      "esperadas": [
+        "01EVAL0000000000000000E021"
+      ]
+    },
+    {
+      "id": "Q19",
+      "categoria": "transcripcion",
+      "pregunta": "problemas con el wifi",
+      "esperadas": [
+        "01EVAL0000000000000000E022"
+      ]
+    },
+    {
+      "id": "Q20",
+      "categoria": "sinonimos",
+      "pregunta": "presupuesto para comida a domicilio",
+      "esperadas": [
+        "01EVAL0000000000000000E023"
+      ]
+    },
+    {
+      "id": "Q21",
+      "categoria": "sinonimos",
+      "pregunta": "¿Qué tengo que estudiar para la prueba de redes?",
+      "esperadas": [
+        "01EVAL0000000000000000E024"
+      ]
+    },
+    {
+      "id": "Q22",
+      "categoria": "sinonimos",
+      "pregunta": "¿Qué pasó con la fiesta del sábado?",
+      "esperadas": [
+        "01EVAL0000000000000000E027"
+      ]
+    },
+    {
+      "id": "Q23",
+      "categoria": "nota-corta",
+      "pregunta": "¿A quién tenía que llamar?",
+      "esperadas": [
+        "01EVAL0000000000000000E028"
+      ]
+    },
+    {
+      "id": "Q24",
+      "categoria": "nota-corta",
+      "pregunta": "cuentas por pagar",
+      "esperadas": [
+        "01EVAL0000000000000000E029"
+      ]
+    },
+    {
+      "id": "Q25",
+      "categoria": "sinonimos",
+      "pregunta": "aprovechar el viaje en micro para estudiar",
+      "esperadas": [
+        "01EVAL0000000000000000E032"
+      ]
+    },
+    {
+      "id": "Q26",
+      "categoria": "sinonimos",
+      "pregunta": "presentación para la feria de software",
+      "esperadas": [
+        "01EVAL0000000000000000E034"
+      ]
+    },
+    {
+      "id": "Q27",
+      "categoria": "sinonimos",
+      "pregunta": "respaldo del computador",
+      "esperadas": [
+        "01EVAL0000000000000000E036"
+      ]
+    },
+    {
+      "id": "Q28",
+      "categoria": "ingles",
+      "pregunta": "reintentos en la sincronización",
+      "esperadas": [
+        "01EVAL0000000000000000E042"
+      ]
+    },
+    {
+      "id": "Q29",
+      "categoria": "ingles",
+      "pregunta": "fusión de rankings de búsqueda",
+      "esperadas": [
+        "01EVAL0000000000000000E043"
+      ]
+    },
+    {
+      "id": "Q30",
+      "categoria": "tildes",
+      "pregunta": "¿Qué idea tenía de bicicletas eléctricas?",
+      "esperadas": [
+        "01EVAL0000000000000000E046"
+      ]
+    },
+    {
+      "id": "Q31",
+      "categoria": "fechas",
+      "pregunta": "¿Qué hice en el gimnasio la semana pasada?",
+      "esperadas": [
+        "01EVAL0000000000000000E055"
+      ],
+      "fecha_ref": "2026-10-21"
+    },
+    {
+      "id": "Q32",
+      "categoria": "fechas",
+      "pregunta": "¿Qué anoté de la reunión de equipo la semana pasada?",
+      "esperadas": [
+        "01EVAL0000000000000000E056"
+      ],
+      "fecha_ref": "2026-10-22"
+    },
+    {
+      "id": "Q33",
+      "categoria": "fechas",
+      "pregunta": "¿Qué idea anoté ayer?",
+      "esperadas": [
+        "01EVAL0000000000000000E057"
+      ],
+      "fecha_ref": "2026-10-22"
+    }
+  ]
+}
