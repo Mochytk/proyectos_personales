@@ -4,7 +4,3 @@
 /skills-lock.json
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
-
-# MemPalace per-project files (issue #185)
-mempalace.yaml
-entities.json
