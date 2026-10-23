@@ -1,3 +1,4 @@
+import { backfillCompletedAt } from './completion';
 import { sanitizeSaga } from './sagas';
 import { sanitizeNextEpisode, sanitizeSeasons } from './seasons';
 import type { AppSettings, MediaItem, MediaList, MediaType } from './useStore';
@@ -14,7 +15,7 @@ export const BACKUP_FORMAT = 'media-tracker-backup';
  *   3. add `tests/fixtures/backups/v<new version>.json`, a real export that is never edited again.
  * The tests fail if step 3 is forgotten, and they import every frozen fixture.
  */
-export const BACKUP_SCHEMA_VERSION = 2;
+export const BACKUP_SCHEMA_VERSION = 3;
 
 type BackupData = Record<string, unknown>;
 
@@ -23,6 +24,9 @@ export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData>
   // v1 -> v2: books gained an optional `saga`. Old files simply have none, so nothing to convert;
   // the version bump makes older apps refuse v2 files instead of dropping the sagas.
   1: (data) => data,
+  // v2 -> v3: items gained `completedAt` (when they were finished, used by the statistics).
+  // Finished items from older files are dated by their last change.
+  2: (data) => (Array.isArray(data.items) ? { ...data, items: backfillCompletedAt(data.items) } : data),
 };
 
 /** Upgrades `data` from an older file version to `toVersion`, one step at a time. */
@@ -84,6 +88,7 @@ export function sanitizeItem(raw: unknown): MediaItem | null {
     notifiedAt: optNum(raw.notifiedAt),
     createdAt: isNum(raw.createdAt) ? raw.createdAt : now,
     updatedAt: isNum(raw.updatedAt) ? raw.updatedAt : now,
+    completedAt: optNum(raw.completedAt),
     listId: optStr(raw.listId),
     saga: sanitizeSaga(raw.saga),
     externalId: optStr(raw.externalId),
