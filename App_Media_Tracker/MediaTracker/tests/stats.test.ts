@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeStats, finishedAt } from '../store/stats';
+import { buildHighlights, computeStats, finishedAt } from '../store/stats';
 import type { MediaItem } from '../store/useStore';
 
 let n = 0;
@@ -99,5 +99,32 @@ describe('computeStats', () => {
     expect(computeStats(items, 2026).finishedSagas).toEqual(['Mistborn']);
     expect(computeStats(items, 2025).finishedSagas).toEqual(['Dune']);
     expect(computeStats(items, 'all').finishedSagas.sort()).toEqual(['Dune', 'Mistborn']);
+  });
+});
+
+describe('buildHighlights', () => {
+  it('says nothing when nothing was finished', () => {
+    expect(buildHighlights(computeStats([], 2026))).toEqual([]);
+  });
+
+  it('builds the cards of a year, skipping those without data', () => {
+    const items = [
+      done({ type: 'book', checkpointType: 'pages', totalCheckpoints: 300, completedAt: at(2026, 2) }),
+      done({ type: 'book', checkpointType: 'pages', totalCheckpoints: 1200, completedAt: at(2026, 2, 20) }),
+      done({ type: 'movie', completedAt: at(2026, 7) }),
+    ];
+    const cards = buildHighlights(computeStats(items, 2026));
+    expect(cards.map((c) => c.id)).toEqual(['total', 'favoriteType', 'busiestMonth', 'pages']);
+    expect(cards[0]).toMatchObject({ value: '3', caption: 'elementos terminados' });
+    expect(cards[1]).toMatchObject({ value: 'Libros', caption: 'tu categoría favorita, con 2 terminados' });
+    expect(cards[2]).toMatchObject({ value: 'Marzo', caption: 'tu mes más activo, con 2 terminados' });
+    expect(cards[3].value).toBe((1500).toLocaleString('es-ES'));
+  });
+
+  it('uses the singular for a single item and names the finished sagas', () => {
+    const book = (title: string, number: number) => done({ title, type: 'book', saga: { name: 'Mistborn', number }, completedAt: at(2026, 1) });
+    const cards = buildHighlights(computeStats([book('1', 1), book('2', 2)], 2026));
+    expect(cards.find((c) => c.id === 'sagas')).toMatchObject({ value: '1', caption: 'saga completada', detail: 'Mistborn' });
+    expect(buildHighlights(computeStats([done({})], 2026))[0].caption).toBe('elemento terminado');
   });
 });

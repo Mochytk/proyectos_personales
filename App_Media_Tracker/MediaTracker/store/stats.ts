@@ -1,3 +1,4 @@
+import { mediaTypeLabelsES } from '../constants/mediaTypes';
 import { sagasOf } from './sagas';
 import type { MediaItem, MediaType } from './useStore';
 
@@ -95,4 +96,51 @@ export function computeStats(items: MediaItem[], period: StatsPeriod): Stats {
     topRated,
     finishedSagas,
   };
+}
+
+export interface Highlight {
+  id: 'total' | 'favoriteType' | 'busiestMonth' | 'pages' | 'episodes' | 'sagas';
+  /** The big figure or word. */
+  value: string;
+  /** What it means, in a short sentence. */
+  caption: string;
+  /** Extra line, e.g. the names of the finished sagas. */
+  detail?: string;
+}
+
+const formatNumber = (n: number) => n.toLocaleString('es-ES');
+
+/** The cards of a year summary, skipping any that have nothing to say. Empty when nothing was finished. */
+export function buildHighlights(stats: Stats): Highlight[] {
+  if (stats.total === 0) return [];
+  const highlights: Highlight[] = [
+    { id: 'total', value: formatNumber(stats.total), caption: stats.total === 1 ? 'elemento terminado' : 'elementos terminados' },
+  ];
+  const favorite = stats.byType[0];
+  if (favorite) {
+    highlights.push({
+      id: 'favoriteType',
+      value: mediaTypeLabelsES[favorite.type] ?? favorite.type,
+      caption: `tu categoría favorita, con ${favorite.count} ${favorite.count === 1 ? 'terminado' : 'terminados'}`,
+    });
+  }
+  if (stats.busiestMonth !== undefined) {
+    const count = stats.byMonth[stats.busiestMonth];
+    highlights.push({
+      id: 'busiestMonth',
+      value: MONTH_NAMES[stats.busiestMonth],
+      caption: `tu mes más activo, con ${count} ${count === 1 ? 'terminado' : 'terminados'}`,
+    });
+  }
+  if (stats.pages > 0) highlights.push({ id: 'pages', value: formatNumber(stats.pages), caption: 'páginas leídas' });
+  if (stats.episodes > 0) highlights.push({ id: 'episodes', value: formatNumber(stats.episodes), caption: 'episodios vistos' });
+  if (stats.finishedSagas.length > 0) {
+    highlights.push({
+      id: 'sagas',
+      value: String(stats.finishedSagas.length),
+      caption: stats.finishedSagas.length === 1 ? 'saga completada' : 'sagas completadas',
+      detail: stats.finishedSagas.join(', '),
+    });
+  }
+  return highlights;
 }

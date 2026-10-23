@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet } from 'react-native';
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
@@ -64,6 +64,15 @@ export default function StatsScreen() {
             })}
           </ScrollView>
 
+          {period !== 'all' && stats.total > 0 && (
+            <Link href={`/year/${period}`} asChild>
+              <PressableScale style={StyleSheet.flatten([styles.summaryButton, { backgroundColor: colors.tint }])}>
+                <SymbolView name={{ ios: 'sparkles', android: 'auto-awesome', web: 'auto-awesome' }} size={18} tintColor="#fff" />
+                <Text style={styles.summaryText}>Ver mi {period}</Text>
+              </PressableScale>
+            </Link>
+          )}
+
           <View style={styles.tiles}>
             {tiles.map((tile) => (
               <View key={tile.label} style={[styles.tile, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
@@ -116,6 +125,8 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 40 },
   periods: { marginBottom: 16, flexGrow: 0 },
   pill: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 18 },
+  summaryButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 14, borderRadius: 14, marginBottom: 16 },
+  summaryText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   tiles: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16, backgroundColor: 'transparent' },
   tile: { flexGrow: 1, flexBasis: '45%', padding: 16, borderRadius: 16 },
   tileValue: { fontSize: 30, fontWeight: 'bold' },

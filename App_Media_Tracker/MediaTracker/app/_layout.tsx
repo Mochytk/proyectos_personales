@@ -72,6 +72,7 @@ function RootLayoutNav() {
         <Stack.Screen name="list/[id]" options={{ presentation: 'card' }} />
         <Stack.Screen name="saga/[key]" options={{ presentation: 'card' }} />
         <Stack.Screen name="stats" options={{ presentation: 'card' }} />
+        <Stack.Screen name="year/[year]" options={{ presentation: 'card' }} />
       </Stack>
     </ThemeProvider>
   );
