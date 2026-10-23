@@ -1,4 +1,13 @@
+import '@fontsource-variable/atkinson-hyperlegible-next';
+import '@fontsource-variable/overpass';
+import '@fontsource/barlow/400.css';
+import '@fontsource/barlow/600.css';
+import '@fontsource/barlow-condensed/700.css';
+import '@fontsource/barlow-condensed/800.css';
 import './styles/global.css';
+import './styles/cuaderno.css';
+import './styles/linea.css';
+import './styles/disco.css';
 
 import {
   DEFAULT_DAY_CUTOFF_HOUR,
