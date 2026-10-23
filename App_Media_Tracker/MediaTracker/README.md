@@ -51,6 +51,10 @@ Todo respaldo exportado por esta app debe poder importarse en cualquier versión
 
 Los tests importan todos los respaldos congelados, así que romper la compatibilidad hacia atrás hace fallar `npm test`. Un respaldo de una versión más nueva que la de la app se rechaza con un aviso, en lugar de perder datos en silencio.
 
+## Listas inteligentes
+
+Una lista inteligente reúne sola los elementos que cumplen sus filtros, que se editan al crearla y después desde sus Ajustes. Los filtros se combinan con "y": **tipo**, **estado**, **nota mínima**, **etiquetas** (alguna de ellas) y **sin tocar hace 7, 30 o 90 días o más**. Sin filtros entra todo lo pendiente, y sin elegir estado se excluye lo terminado (con estado "Terminado" una lista puede mostrar, por ejemplo, tus películas de cinco estrellas). La regla vive en `store/smartLists.ts` (`matchesSmartFilters`) y la usan la pantalla de la lista y el contador de Listas. "Tocado" significa cambiado por última vez (`updatedAt`): marcar un avance o editar una nota cuenta. Quedan fuera la búsqueda por texto, filtrar por saga y combinar con "o".
+
 ## Sincronización entre equipos
 
 En la app de escritorio, **Ajustes Globales → Sincronización** mantiene los datos iguales en varios equipos a través de una carpeta compartida: elige en cada Mac una carpeta que ya se sincronice (iCloud Drive, Dropbox, Syncthing…).
