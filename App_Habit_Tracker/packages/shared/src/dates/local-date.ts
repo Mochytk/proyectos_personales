@@ -1,9 +1,10 @@
+import { addDays } from './calendar';
+
 // A calendar day in the user's time zone, written as YYYY-MM-DD (ADR 0007).
 // Branded so a plain string cannot be passed where a validated date is expected.
 export type LocalDate = string & { readonly __brand: 'LocalDate' };
 
 const LOCAL_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
-const DAY_MS = 86_400_000;
 const MAX_CUTOFF_HOUR = 6;
 
 export function parseLocalDate(value: string): LocalDate {
@@ -33,13 +34,12 @@ export function toLocalDate(instant: Date, timeZone: string, cutoffHour: number)
     hour: '2-digit',
     hourCycle: 'h23',
   }).formatToParts(instant);
-  const read = (type: Intl.DateTimeFormatPartTypes): number => {
+  const read = (type: Intl.DateTimeFormatPartTypes): string => {
     const part = parts.find((p) => p.type === type);
     if (!part) throw new Error(`Intl.DateTimeFormat returned no ${type} part`);
-    return Number(part.value);
+    return part.value;
   };
-  // Calendar arithmetic in UTC, where every day lasts exactly 24 hours.
-  let dayStart = Date.UTC(read('year'), read('month') - 1, read('day'));
-  if (read('hour') < cutoffHour) dayStart -= DAY_MS;
-  return new Date(dayStart).toISOString().slice(0, 10) as LocalDate;
+  const calendarDay = `${read('year')}-${read('month')}-${read('day')}` as LocalDate;
+  // A calendar day back, not 24 hours back, so DST days of 23 or 25 hours do not matter.
+  return Number(read('hour')) < cutoffHour ? addDays(calendarDay, -1) : calendarDay;
 }
