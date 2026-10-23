@@ -59,7 +59,7 @@ describe('field coverage', () => {
     totalCheckpoints: 30, currentCheckpoint: 13, checkpointType: 'episodes', seasons: [10, 8, 12],
     nextEpisode: { date: '2026-11-01', season: 3, episode: 2 },
     rating: 4, tags: ['a'], notes: 'n', dueDate: 1_760_000_000_000, dueHasTime: true, remind: true, notifiedAt: 1_760_000_100_000,
-    createdAt: 1, updatedAt: 2, listId: 'l', saga: { name: 'Mistborn', number: 2 }, externalId: 'tmdb:tv:1', posterUrl: 'https://x/p.jpg', overview: 'o', releaseDate: '2020-01-01',
+    createdAt: 1, updatedAt: 2, completedAt: 3, listId: 'l', saga: { name: 'Mistborn', number: 2 }, externalId: 'tmdb:tv:1', posterUrl: 'https://x/p.jpg', overview: 'o', releaseDate: '2020-01-01',
   };
   const list: Required<MediaList> = {
     id: 'l', name: 'Lista', isPinned: true, type: 'collection', layoutStyle: 'large_grid', itemShape: 'tall', sortOrder: 'a_z',
