@@ -1,0 +1,9 @@
+pnpm-lock.yaml
+dist/
+coverage/
+.wrangler/
+playwright-report/
+test-results/
+release/
+# Docs keep hand-written tables; Prettier would pad every column.
+*.md
