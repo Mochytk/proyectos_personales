@@ -1,7 +1,9 @@
 import { backfillCompletedAt } from './completion';
+import { MEDIA_TYPES, STATUSES } from './enums';
 import { sanitizeSaga } from './sagas';
+import { sanitizeSmartFilters } from './smartLists';
 import { sanitizeNextEpisode, sanitizeSeasons } from './seasons';
-import type { AppSettings, MediaItem, MediaList, MediaType } from './useStore';
+import type { AppSettings, MediaItem, MediaList } from './useStore';
 
 export const BACKUP_FORMAT = 'media-tracker-backup';
 
@@ -15,7 +17,7 @@ export const BACKUP_FORMAT = 'media-tracker-backup';
  *   3. add `tests/fixtures/backups/v<new version>.json`, a real export that is never edited again.
  * The tests fail if step 3 is forgotten, and they import every frozen fixture.
  */
-export const BACKUP_SCHEMA_VERSION = 4;
+export const BACKUP_SCHEMA_VERSION = 5;
 
 type BackupData = Record<string, unknown>;
 
@@ -30,6 +32,9 @@ export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData>
   // v3 -> v4: lists gained an optional `updatedAt` (needed to sync). Old lists have none and count as
   // the oldest copy, so nothing to convert.
   3: (data) => data,
+  // v4 -> v5: smart-list filters gained statuses, tags and "not touched for N days", and are now
+  // validated. Old filters (types, minRating) are already valid, so nothing to convert.
+  4: (data) => data,
 };
 
 /** Upgrades `data` from an older file version to `toVersion`, one step at a time. */
@@ -57,8 +62,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
   pileItemShape: 'square',
 };
 
-const MEDIA_TYPES: MediaType[] = ['software', 'task', 'movie', 'tv_show', 'book', 'audiobook', 'video_game', 'board_game', 'music_album', 'app', 'event', 'note'];
-const STATUSES: MediaItem['status'][] = ['unstarted', 'in_progress', 'completed', 'abandoned'];
 const LIST_TYPES: MediaList['type'][] = ['todo', 'collection'];
 
 const isObject = (v: unknown): v is Record<string, any> => typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -112,7 +115,7 @@ export function sanitizeList(raw: unknown): MediaList | null {
     itemShape: raw.itemShape,
     sortOrder: raw.sortOrder,
     isSmartList: raw.isSmartList === true ? true : undefined,
-    smartFilters: isObject(raw.smartFilters) ? raw.smartFilters : undefined,
+    smartFilters: sanitizeSmartFilters(raw.smartFilters),
     updatedAt: optNum(raw.updatedAt),
   };
 }

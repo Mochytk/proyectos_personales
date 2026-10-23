@@ -5,6 +5,8 @@ import { useLocalSearchParams } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
+import SmartFiltersEditor from '@/components/SmartFiltersEditor';
+import { sanitizeSmartFilters } from '@/store/smartLists';
 
 export default function ListSettingsModalScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -70,6 +72,15 @@ export default function ListSettingsModalScreen() {
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={{ paddingBottom: 40 }}>
+      {list.isSmartList && (
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Filtros</Text>
+          <View style={[styles.cardGroup, { backgroundColor: colors.surface, padding: 16, paddingTop: 0 }]}>
+            {/* Saved as you tap; the list screen updates behind this one. */}
+            <SmartFiltersEditor value={list.smartFilters ?? {}} onChange={(filters) => handleUpdate({ smartFilters: sanitizeSmartFilters(filters) ?? {} })} />
+          </View>
+        </View>
+      )}
       {renderOptionGroup('Estilo de Diseño', layouts, list.layoutStyle || 'simple_list', 'layoutStyle')}
       {list.layoutStyle === 'large_grid' && renderOptionGroup('Forma del Elemento', shapes, list.itemShape || 'square', 'itemShape')}
       {renderOptionGroup('Orden', sorts, list.sortOrder || 'new_old', 'sortOrder')}

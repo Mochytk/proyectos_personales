@@ -1,20 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, TextInput, Pressable, ScrollView, Switch } from 'react-native';
 import { Text, View } from '@/components/Themed';
-import { useStore, MediaType } from '@/store/useStore';
+import { useStore, SmartFilters } from '@/store/useStore';
+import SmartFiltersEditor from '@/components/SmartFiltersEditor';
+import { sanitizeSmartFilters } from '@/store/smartLists';
 import { router } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { SymbolView } from '@/components/AppIcon';
-
-const mediaTypes: { label: string; value: MediaType; icon: string }[] = [
-  { label: 'Software', value: 'software', icon: 'desktopcomputer' },
-  { label: 'Tarea', value: 'task', icon: 'checkmark.circle' },
-  { label: 'Película', value: 'movie', icon: 'film' },
-  { label: 'Serie', value: 'tv_show', icon: 'tv' },
-  { label: 'Libro', value: 'book', icon: 'book.closed' },
-  { label: 'Juego', value: 'video_game', icon: 'gamecontroller' },
-];
 
 export default function NewListModalScreen() {
   const addList = useStore(state => state.addList);
@@ -23,7 +15,7 @@ export default function NewListModalScreen() {
   
   const [name, setName] = useState('');
   const [isSmartList, setIsSmartList] = useState(false);
-  const [selectedTypes, setSelectedTypes] = useState<MediaType[]>([]);
+  const [filters, setFilters] = useState<SmartFilters>({});
 
   const handleSave = () => {
     if (!name.trim()) return;
@@ -35,18 +27,10 @@ export default function NewListModalScreen() {
       layoutStyle: 'large_grid',
       sortOrder: 'new_old',
       isSmartList,
-      smartFilters: isSmartList ? { types: selectedTypes.length > 0 ? selectedTypes : undefined } : undefined
+      smartFilters: isSmartList ? sanitizeSmartFilters(filters) : undefined,
     });
     
     router.back();
-  };
-
-  const toggleType = (type: MediaType) => {
-    if (selectedTypes.includes(type)) {
-      setSelectedTypes(selectedTypes.filter(t => t !== type));
-    } else {
-      setSelectedTypes([...selectedTypes, type]);
-    }
   };
 
   return (
@@ -69,30 +53,7 @@ export default function NewListModalScreen() {
         <Switch value={isSmartList} onValueChange={setIsSmartList} trackColor={{ true: colors.tint }} />
       </View>
 
-      {isSmartList && (
-        <View style={styles.filtersContainer}>
-          <Text style={[styles.label, { color: colors.text }]}>Filtrar por Tipo (Opcional)</Text>
-          <Text style={[styles.switchDescription, { color: colors.text + '80', marginBottom: 15 }]}>Selecciona los tipos a incluir. Si no seleccionas ninguno, se incluirán todos.</Text>
-          <View style={styles.tagsContainer}>
-            {mediaTypes.map((mt) => {
-              const isSelected = selectedTypes.includes(mt.value);
-              return (
-                <Pressable
-                  key={mt.value}
-                  style={[
-                    styles.tag,
-                    { backgroundColor: isSelected ? colors.tint : colors.cardBackground }
-                  ]}
-                  onPress={() => toggleType(mt.value)}
-                >
-                  <SymbolView name={mt.icon as any} size={16} tintColor={isSelected ? '#fff' : colors.text} />
-                  <Text style={[styles.tagText, { color: isSelected ? '#fff' : colors.text }]}>{mt.label}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </View>
-      )}
+      {isSmartList && <SmartFiltersEditor value={filters} onChange={setFilters} />}
 
       <Pressable 
         style={[styles.saveButton, { backgroundColor: name.trim() ? colors.tint : colors.text + '40' }]} 
@@ -112,10 +73,6 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 30, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: '#88888820' },
   switchTextContainer: { flex: 1, paddingRight: 20 },
   switchDescription: { fontSize: 13, marginTop: 4, lineHeight: 18 },
-  filtersContainer: { marginTop: 10 },
-  tagsContainer: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  tag: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
-  tagText: { marginLeft: 6, fontWeight: '500' },
   saveButton: { marginTop: 40, padding: 16, borderRadius: 25, alignItems: 'center' },
   saveButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' }
 });
