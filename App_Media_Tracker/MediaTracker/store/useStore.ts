@@ -3,7 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { appStorage } from './storage';
 import { applyItemUpdate, backfillCompletedAt } from './completion';
 import type { Saga } from './sagas';
-import { Tombstones, addTombstone, emptyTombstones, sanitizeTombstones } from './tombstones';
+import { Tombstones, addTombstone, emptyTombstones, reviveTombstones, sanitizeTombstones } from './tombstones';
+import type { SyncData } from './sync';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SETTINGS, StoreData, dropOrphanListRefs, mergeData, normalizeData } from './backup';
@@ -105,6 +106,9 @@ interface AppState {
 
   /** Merges backup data into the current data (newest `updatedAt` wins, nothing is deleted). */
   importData: (incoming: StoreData) => { added: number; updated: number };
+
+  /** Replaces items, lists and deletions with the result of a sync merge. */
+  applySync: (data: SyncData) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -173,9 +177,12 @@ export const useStore = create<AppState>()(
       importData: (incoming) => {
         const { items, lists, settings } = get();
         const { added, updated, ...merged } = mergeData({ items, lists, settings }, incoming);
-        set(merged);
+        // Importing is an explicit restore: what comes back must not be deleted again by the next sync.
+        set({ ...merged, deleted: reviveTombstones(get().deleted, merged.items.map(i => i.id), merged.lists.map(l => l.id)) });
         return { added, updated };
       },
+
+      applySync: ({ items, lists, deleted }) => set({ items, lists, deleted }),
     }),
     {
       name: 'media-tracker-storage',

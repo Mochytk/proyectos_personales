@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addTombstone, emptyTombstones, pruneTombstones, sanitizeTombstones } from '../store/tombstones';
+import { addTombstone, emptyTombstones, pruneTombstones, reviveTombstones, sanitizeTombstones } from '../store/tombstones';
 
 describe('addTombstone', () => {
   it('records the time of a deletion without touching the original', () => {
@@ -32,5 +32,12 @@ describe('pruneTombstones', () => {
     const day = 86_400_000;
     const pruned = pruneTombstones({ items: { old: 0, fresh: 100 * day }, lists: { oldList: 1, freshList: 99 * day } }, 100 * day, 30 * day);
     expect(pruned).toEqual({ items: { fresh: 100 * day }, lists: { freshList: 99 * day } });
+  });
+});
+
+describe('reviveTombstones', () => {
+  it('clears the record of what exists again and leaves the rest', () => {
+    const revived = reviveTombstones({ items: { a: 1, b: 2 }, lists: { L: 3, M: 4 } }, ['a'], ['M']);
+    expect(revived).toEqual({ items: { b: 2 }, lists: { L: 3 } });
   });
 });

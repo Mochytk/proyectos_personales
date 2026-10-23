@@ -36,3 +36,15 @@ export function pruneTombstones(tombstones: Tombstones, now: number, maxAgeMs: n
     Object.fromEntries(Object.entries(record).filter(([, deletedAt]) => now - deletedAt <= maxAgeMs));
   return { items: keep(tombstones.items), lists: keep(tombstones.lists) };
 }
+
+/**
+ * Clears the record of anything that exists again (restored from a backup, for example), so the next
+ * sync does not delete it a second time.
+ */
+export function reviveTombstones(tombstones: Tombstones, itemIds: Iterable<string>, listIds: Iterable<string>): Tombstones {
+  const items = { ...tombstones.items };
+  const lists = { ...tombstones.lists };
+  for (const id of itemIds) delete items[id];
+  for (const id of listIds) delete lists[id];
+  return { items, lists };
+}
