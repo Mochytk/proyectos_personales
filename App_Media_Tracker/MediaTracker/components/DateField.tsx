@@ -7,10 +7,12 @@ export interface DateFieldProps {
   date: string; // "YYYY-MM-DD" or ""
   time: string; // "HH:MM" or ""
   onChange: (value: { date: string; time: string }) => void;
+  /** Hide the time field (for things that only have a day). */
+  dateOnly?: boolean;
 }
 
 /** Native fallback: plain text fields. The web / Electron build uses real pickers (DateField.web.tsx). */
-export default function DateField({ date, time, onChange }: DateFieldProps) {
+export default function DateField({ date, time, onChange, dateOnly }: DateFieldProps) {
   const colors = Colors[useColorScheme() ?? 'light'];
   const inputStyle = [styles.input, { color: colors.text, borderColor: colors.text + '40' }];
   return (
@@ -22,13 +24,15 @@ export default function DateField({ date, time, onChange }: DateFieldProps) {
         placeholder="YYYY-MM-DD"
         placeholderTextColor={colors.text + '80'}
       />
-      <TextInput
-        style={[...inputStyle, { flex: 1 }]}
-        value={time}
-        onChangeText={(t) => onChange({ date, time: t })}
-        placeholder="HH:MM"
-        placeholderTextColor={colors.text + '80'}
-      />
+      {!dateOnly && (
+        <TextInput
+          style={[...inputStyle, { flex: 1 }]}
+          value={time}
+          onChangeText={(t) => onChange({ date, time: t })}
+          placeholder="HH:MM"
+          placeholderTextColor={colors.text + '80'}
+        />
+      )}
     </View>
   );
 }

@@ -4,7 +4,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import type { DateFieldProps } from './DateField';
 
 /** Date and time pickers for the web / Electron build, using the browser's native controls. */
-export default function DateField({ date, time, onChange }: DateFieldProps) {
+export default function DateField({ date, time, onChange, dateOnly }: DateFieldProps) {
   const scheme = useColorScheme() ?? 'light';
   const colors = Colors[scheme];
   const style = {
@@ -28,13 +28,15 @@ export default function DateField({ date, time, onChange }: DateFieldProps) {
         onChange={(e) => onChange({ date: e.target.value, time })}
         style={{ ...style, flex: 2 }}
       />
-      <input
-        type="time"
-        aria-label="Hora"
-        value={time}
-        onChange={(e) => onChange({ date, time: e.target.value })}
-        style={{ ...style, flex: 1 }}
-      />
+      {!dateOnly && (
+        <input
+          type="time"
+          aria-label="Hora"
+          value={time}
+          onChange={(e) => onChange({ date, time: e.target.value })}
+          style={{ ...style, flex: 1 }}
+        />
+      )}
     </View>
   );
 }

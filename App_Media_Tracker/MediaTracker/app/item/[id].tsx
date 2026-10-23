@@ -33,6 +33,7 @@ export default function ItemDetailScreen() {
   const [notes, setNotes] = useState(item?.notes || '');
   const [sagaName, setSagaName] = useState(item?.saga?.name ?? '');
   const [sagaNumber, setSagaNumber] = useState(item?.saga?.number !== undefined ? String(item.saga.number) : '');
+  const [finishedDate, setFinishedDate] = useState(toDateInput(item?.completedAt));
   const [dueDate, setDueDate] = useState(toDateInput(item?.dueDate));
   const [dueTime, setDueTime] = useState(toTimeInput(item?.dueDate, item?.dueHasTime));
 
@@ -127,6 +128,13 @@ export default function ItemDetailScreen() {
     setSagaName(name);
     setSagaNumber(number);
     updateItem(item.id, { saga: buildSaga(name, number) });
+  };
+
+  // Lets the user date something they finished earlier; it is what the statistics count by.
+  const saveFinishedDate = (date: string) => {
+    setFinishedDate(date);
+    const parsed = fromInputs(date, '');
+    if (parsed) updateItem(item.id, { completedAt: parsed.dueDate });
   };
 
   const hasCheckpoints = item.totalCheckpoints && item.totalCheckpoints > 0;
@@ -300,6 +308,13 @@ export default function ItemDetailScreen() {
                 <Text style={[styles.actionButtonText, { color: colors.text, marginLeft: 0 }]}>Ver la saga</Text>
               </Pressable>
             )}
+          </View>
+        )}
+
+        {item.status === 'completed' && (
+          <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Terminado el</Text>
+            <DateField dateOnly date={finishedDate} time="" onChange={({ date }) => saveFinishedDate(date)} />
           </View>
         )}
 
