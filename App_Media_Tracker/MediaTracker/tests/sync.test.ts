@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SYNC_FORMAT, SYNC_SCHEMA_VERSION, SyncData, buildSyncFile, mergeSyncData, parseSyncFile, summarizeMerge } from '../store/sync';
+import { SYNC_FORMAT, SYNC_SCHEMA_VERSION, SyncData, buildSyncFile, canonicalSyncJson, mergeSyncData, parseSyncFile, summarizeMerge } from '../store/sync';
 import { emptyTombstones } from '../store/tombstones';
 import type { MediaItem, MediaList } from '../store/useStore';
 
@@ -9,12 +9,8 @@ const item = (id: string, updatedAt: number, over: Partial<MediaItem> = {}): Med
 const list = (id: string, updatedAt?: number, over: Partial<MediaList> = {}): MediaList => ({ id, name: id, isPinned: false, type: 'collection', updatedAt, ...over });
 const data = (items: MediaItem[] = [], lists: MediaList[] = [], deleted = emptyTombstones()): SyncData => ({ items, lists, deleted });
 
-// Order must not matter, so compare as sorted JSON.
-const canon = (d: SyncData) => JSON.stringify({
-  items: [...d.items].sort((a, b) => a.id.localeCompare(b.id)),
-  lists: [...d.lists].sort((a, b) => a.id.localeCompare(b.id)),
-  deleted: { items: Object.entries(d.deleted.items).sort(), lists: Object.entries(d.deleted.lists).sort() },
-});
+// Order must not matter, so compare the canonical form.
+const canon = canonicalSyncJson;
 
 describe('mergeSyncData', () => {
   it('brings in what the other device has and keeps what only this one has', () => {

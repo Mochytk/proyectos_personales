@@ -116,3 +116,14 @@ export function summarizeMerge(before: SyncData, after: SyncData): MergeSummary 
     removed: before.items.filter((i) => !now.has(i.id)).length,
   };
 }
+
+/** The data as one string that does not depend on order, to tell whether two states are the same. */
+export function canonicalSyncJson(data: SyncData): string {
+  const byId = <T extends { id: string }>(records: T[]) => [...records].sort((a, b) => a.id.localeCompare(b.id));
+  const entries = (record: Record<string, number>) => Object.entries(record).sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify({
+    items: byId(data.items),
+    lists: byId(data.lists),
+    deleted: { items: entries(data.deleted.items), lists: entries(data.deleted.lists) },
+  });
+}
