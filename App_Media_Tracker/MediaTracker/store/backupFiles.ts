@@ -1,13 +1,13 @@
 import { Platform } from 'react-native';
 import { buildBackup, parseBackup } from './backup';
-import { STORE_VERSION, useStore } from './useStore';
+import { useStore } from './useStore';
 
 /** Backups use browser file APIs, so they are available in the web / Electron build only. */
 export const backupSupported = Platform.OS === 'web';
 
 export function exportBackup(): string {
   const { items, lists, settings } = useStore.getState();
-  const text = buildBackup({ items, lists, settings }, STORE_VERSION);
+  const text = buildBackup({ items, lists, settings });
   const date = new Date().toISOString().slice(0, 10);
   const filename = `media-tracker-respaldo-${date}.json`;
 
@@ -32,7 +32,7 @@ export function importBackup(): Promise<{ added: number; updated: number } | nul
       const file = input.files?.[0];
       if (!file) return resolve(null);
       try {
-        const incoming = parseBackup(await file.text(), STORE_VERSION);
+        const incoming = parseBackup(await file.text());
         resolve(useStore.getState().importData(incoming));
       } catch (e) {
         reject(e);

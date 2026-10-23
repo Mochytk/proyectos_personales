@@ -3,6 +3,34 @@ import type { AppSettings, MediaItem, MediaList, MediaType } from './useStore';
 
 export const BACKUP_FORMAT = 'media-tracker-backup';
 
+/**
+ * Version of the backup FILE format. It is independent of STORE_VERSION (the local database).
+ *
+ * Every file this app exports must stay importable by every later version, so whenever what a
+ * file contains changes (a new field, a renamed one, a new collection):
+ *   1. bump this number,
+ *   2. add `BACKUP_MIGRATIONS[<old version>]` to upgrade the old `data` to the new shape,
+ *   3. add `tests/fixtures/backups/v<new version>.json`, a real export that is never edited again.
+ * The tests fail if step 3 is forgotten, and they import every frozen fixture.
+ */
+export const BACKUP_SCHEMA_VERSION = 1;
+
+type BackupData = Record<string, unknown>;
+
+/** `BACKUP_MIGRATIONS[n]` upgrades the `data` of a version-n file to version n + 1. */
+export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {};
+
+/** Upgrades `data` from an older file version to `toVersion`, one step at a time. */
+export function migrateBackupData(data: BackupData, fromVersion: number, toVersion: number = BACKUP_SCHEMA_VERSION): BackupData {
+  let current = data;
+  for (let version = fromVersion; version < toVersion; version++) {
+    const migrate = BACKUP_MIGRATIONS[version];
+    if (!migrate) throw new Error(`No hay forma de importar un respaldo de la versión ${fromVersion} (falta el paso de ${version} a ${version + 1}).`);
+    current = migrate(current);
+  }
+  return current;
+}
+
 export interface StoreData {
   items: MediaItem[];
   lists: MediaList[];
@@ -95,7 +123,7 @@ export function normalizeData(raw: unknown): StoreData {
 /** Settings that must never leave this device. */
 export const SECRET_SETTINGS = ['tmdbApiKey', 'rawgApiKey'] as const;
 
-export function buildBackup(data: StoreData, schemaVersion: number): string {
+export function buildBackup(data: StoreData, schemaVersion: number = BACKUP_SCHEMA_VERSION): string {
   // Credentials stay on this device; a backup file may be shared or synced.
   const settings: Record<string, unknown> = { ...data.settings };
   for (const key of SECRET_SETTINGS) delete settings[key];
@@ -111,8 +139,11 @@ export function buildBackup(data: StoreData, schemaVersion: number): string {
   );
 }
 
-/** Parses a backup file. Throws an Error with a user-facing (Spanish) message. */
-export function parseBackup(text: string, currentSchemaVersion: number): StoreData {
+/**
+ * Parses a backup file written by this or any earlier version of the app, upgrading old formats.
+ * Throws an Error with a user-facing (Spanish) message.
+ */
+export function parseBackup(text: string, currentSchemaVersion: number = BACKUP_SCHEMA_VERSION): StoreData {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -122,10 +153,12 @@ export function parseBackup(text: string, currentSchemaVersion: number): StoreDa
   if (!isObject(parsed) || parsed.format !== BACKUP_FORMAT || !isObject(parsed.data)) {
     throw new Error('Este archivo no es un respaldo de Media Tracker.');
   }
-  if (isNum(parsed.schemaVersion) && parsed.schemaVersion > currentSchemaVersion) {
+  // Files without a version predate versioning and use the first format.
+  const fileVersion = isNum(parsed.schemaVersion) && Number.isInteger(parsed.schemaVersion) && parsed.schemaVersion >= 1 ? parsed.schemaVersion : 1;
+  if (fileVersion > currentSchemaVersion) {
     throw new Error('El respaldo es de una versión más nueva de la app. Actualiza Media Tracker e inténtalo de nuevo.');
   }
-  return normalizeData(parsed.data);
+  return normalizeData(migrateBackupData(parsed.data, fileVersion, currentSchemaVersion));
 }
 
 /**
