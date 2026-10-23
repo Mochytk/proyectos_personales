@@ -1,6 +1,8 @@
 import { sagasOf } from './sagas';
 import type { MediaItem, MediaType } from './useStore';
 
+export const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
 export type StatsPeriod = number | 'all';
 
 export interface Stats {

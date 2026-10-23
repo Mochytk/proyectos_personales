@@ -2,13 +2,13 @@ import { StyleSheet, Pressable, ScrollView } from 'react-native';
 import PressableScale from '@/components/PressableScale';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
-import { iconForType, mediaTypeLabelsES } from '@/constants/mediaTypes';
 import ItemCover, { rowCover } from '@/components/ItemCover';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useNavigation, Link } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { useStore, MediaType } from '@/store/useStore';
+import { useNavigation, Link, router } from 'expo-router';
+import { useEffect, useMemo } from 'react';
+import { useStore } from '@/store/useStore';
+import { finishedAt } from '@/store/stats';
 
 export default function LogbookScreen() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -16,32 +16,12 @@ export default function LogbookScreen() {
   const navigation = useNavigation();
 
   const allItems = useStore(state => state.items);
-  const [showStats, setShowStats] = useState(false);
 
   const completedItems = useMemo(() => {
     return allItems
       .filter(item => item.status === 'completed')
-      .sort((a, b) => b.updatedAt - a.updatedAt);
+      .sort((a, b) => finishedAt(b) - finishedAt(a));
   }, [allItems]);
-
-  const stats = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    let thisYearCount = 0;
-    const typeCount: Record<string, number> = {};
-
-    completedItems.forEach(item => {
-      const isThisYear = new Date(item.updatedAt).getFullYear() === currentYear;
-      if (isThisYear) thisYearCount++;
-      
-      typeCount[item.type] = (typeCount[item.type] || 0) + 1;
-    });
-
-    const topTypes = Object.entries(typeCount)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-
-    return { total: completedItems.length, thisYearCount, topTypes };
-  }, [completedItems]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -50,8 +30,8 @@ export default function LogbookScreen() {
       headerTitleStyle: { fontWeight: '600' },
       headerRight: () => (
         <View style={styles.headerRightContainer}>
-          <Pressable style={styles.headerButton} onPress={() => setShowStats(!showStats)}>
-            <SymbolView name={{ ios: 'chart.bar.fill', android: 'bar-chart', web: 'bar-chart' }} size={24} tintColor={showStats ? colors.tint : colors.text} />
+          <Pressable style={styles.headerButton} accessibilityLabel="Estadísticas" onPress={() => router.push('/stats')}>
+            <SymbolView name={{ ios: 'chart.bar.fill', android: 'bar-chart', web: 'bar-chart' }} size={24} tintColor={colors.text} />
           </Pressable>
           <Link href="/searchModal" asChild>
             <Pressable style={styles.headerButton}>
@@ -61,42 +41,11 @@ export default function LogbookScreen() {
         </View>
       ),
     });
-  }, [navigation, colors, showStats]);
+  }, [navigation, colors]);
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       
-      {showStats && completedItems.length > 0 && (
-        <View style={styles.statsContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>Tus Estadísticas</Text>
-          <View style={styles.statsGrid}>
-            <View style={[styles.statBox, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
-              <Text style={[styles.statNumber, { color: colors.tint }]}>{stats.total}</Text>
-              <Text style={[styles.statLabel, { color: colors.text + '80' }]}>Histórico</Text>
-            </View>
-            <View style={[styles.statBox, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
-              <Text style={[styles.statNumber, { color: colors.tint }]}>{stats.thisYearCount}</Text>
-              <Text style={[styles.statLabel, { color: colors.text + '80' }]}>Este Año</Text>
-            </View>
-          </View>
-          
-          {stats.topTypes.length > 0 && (
-            <View style={[styles.breakdownContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
-              <Text style={[styles.breakdownTitle, { color: colors.text }]}>Top Categorías</Text>
-              {stats.topTypes.map(([type, count], index) => (
-                <View key={type} style={[styles.breakdownRow, { borderTopColor: index > 0 ? colors.cardBackground : 'transparent', borderTopWidth: index > 0 ? 1 : 0 }]}>
-                  <View style={styles.breakdownLeft}>
-                    <SymbolView name={iconForType(type)} size={16} tintColor={colors.text} style={{ marginRight: 10 }} />
-                    <Text style={[styles.breakdownLabel, { color: colors.text }]}>{mediaTypeLabelsES[type as MediaType] || type}</Text>
-                  </View>
-                  <Text style={[styles.breakdownCount, { color: colors.tint }]}>{count}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-      )}
-
       {completedItems.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <View style={[styles.emptyStateIconContainer, { backgroundColor: colors.cardBackground }]}>
@@ -136,18 +85,6 @@ const styles = StyleSheet.create({
   headerButton: { paddingHorizontal: 10, paddingVertical: 10, backgroundColor: 'transparent' },
   headerRightContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'transparent' },
   
-  // Stats
-  statsContainer: { marginTop: 20, marginBottom: 20 },
-  statsGrid: { flexDirection: 'row', gap: 15, marginBottom: 15 },
-  statBox: { flex: 1, padding: 20, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  statNumber: { fontSize: 32, fontWeight: 'bold', marginBottom: 4, fontVariant: ['tabular-nums'] },
-  statLabel: { fontSize: 13, fontWeight: '500', textTransform: 'uppercase', letterSpacing: 0.5 },
-  breakdownContainer: { padding: 20, borderRadius: 16 },
-  breakdownTitle: { fontSize: 14, fontWeight: '600', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 0.5 },
-  breakdownRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
-  breakdownLeft: { flexDirection: 'row', alignItems: 'center' },
-  breakdownLabel: { fontSize: 16, fontWeight: '500' },
-  breakdownCount: { fontSize: 16, fontWeight: 'bold', fontVariant: ['tabular-nums'] },
 
   emptyStateContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', marginTop: 100 },
   emptyStateIconContainer: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center', marginBottom: 20 },
