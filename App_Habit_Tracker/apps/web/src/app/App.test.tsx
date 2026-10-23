@@ -1,7 +1,10 @@
 import { parseLocalDate } from '@habit-tracker/shared';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { openDb } from '../db/db';
+import { settingsId } from '../db/defaults';
+import { writeRows } from '../db/write';
 import { App } from './App';
 import { useStyle } from './useStyle';
 
@@ -29,6 +32,25 @@ describe('App', () => {
     expect(screen.getByRole('link', { name: 'Ajustes' }).getAttribute('aria-current')).toBe('page');
     const heading = await screen.findByRole('heading', { level: 1, name: 'Ajustes' });
     expect(heading.textContent).toBe('Ajustes');
+  });
+
+  it('applies the style saved in the settings', async () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Hoy' });
+
+    const db = await openDb();
+    const saved = await db.userSettings.get(await settingsId());
+    if (!saved) throw new Error('missing settings');
+    await writeRows(db, 'userSettings', [{ ...saved, style: 'disco' }]);
+    db.close();
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.style).toBe('disco');
+    });
   });
 
   it('explains when the device storage cannot be opened', async () => {

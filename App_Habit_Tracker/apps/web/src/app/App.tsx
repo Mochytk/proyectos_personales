@@ -5,7 +5,10 @@ import { HabitsScreen } from '../habits/HabitsScreen';
 import { ReviewScreen } from '../review/ReviewScreen';
 import { SettingsScreen } from '../settings/SettingsScreen';
 import { TodayScreen } from '../today/TodayScreen';
+import { useSettings } from '../settings/useSettings';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
+import { useStyle } from './useStyle';
+import { useToday } from './useToday';
 
 const TABS = [
   { to: '/', label: 'Hoy', icon: 'M4 5h16v15H4zM4 9h16M9 3v4M15 3v4' },
@@ -18,12 +21,19 @@ const TABS = [
   },
 ] as const;
 
+// Applies the saved style; with "rotar" it changes on Mondays at the cutoff (ADR 0009).
+function SavedStyle() {
+  useStyle(useSettings().style, useToday());
+  return null;
+}
+
 export function App() {
   return (
     <div className="app">
       <main className="app-main">
         <ErrorBoundary>
           <DatabaseProvider>
+            <SavedStyle />
             <Routes>
               <Route index element={<TodayScreen />} />
               <Route path="habitos" element={<HabitsScreen />} />
