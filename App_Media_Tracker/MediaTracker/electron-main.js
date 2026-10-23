@@ -97,7 +97,10 @@ function registerSyncHandlers() {
 
 function registerMenu() {
   const send = (action) => {
-    if (ACTIONS.includes(action) && mainWindow) mainWindow.webContents.send('menu:action', action);
+    if (!ACTIONS.includes(action) || !mainWindow) return;
+    // The window may be hidden (menu bar mode): what the action does has to be visible.
+    showWindow();
+    mainWindow.webContents.send('menu:action', action);
   };
   const template = buildMenuTemplate({ isMac: process.platform === 'darwin', appName: app.name, send });
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
@@ -142,7 +145,13 @@ function createWindow(options = {}) {
     remember();
     if (shouldHideOnClose({ platform: process.platform, quitting })) {
       event.preventDefault();
-      win.hide();
+      // Hiding a window that is in native full screen leaves its Space behind as a black screen.
+      if (win.isFullScreen()) {
+        win.once('leave-full-screen', () => win.hide());
+        win.setFullScreen(false);
+      } else {
+        win.hide();
+      }
     }
   });
 
@@ -156,6 +165,12 @@ function createWindow(options = {}) {
   mainWindow.on('closed', () => {
     mainWindow = null;
     rendererReady = false;
+  });
+  // The page now lives as long as the app, so it can crash while hidden. Load it again: until then
+  // actions wait, and the first update afterwards makes the menu and the queued actions current.
+  mainWindow.webContents.on('render-process-gone', () => {
+    rendererReady = false;
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.reload();
   });
 }
 
@@ -179,7 +194,7 @@ const pendingActions = [];
 function sendTrayAction(action, { reveal }) {
   if (reveal) showWindow();
   else if (!mainWindow) createWindow({ show: false });
-  if (rendererReady && mainWindow) mainWindow.webContents.send('tray:action', action);
+  if (rendererReady && mainWindow && !mainWindow.webContents.isCrashed()) mainWindow.webContents.send('tray:action', action);
   else pendingActions.push(action);
 }
 

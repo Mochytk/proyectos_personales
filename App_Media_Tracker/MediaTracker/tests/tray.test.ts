@@ -117,6 +117,13 @@ describe('resolveTrayAction', () => {
     expect(resolveTrayAction({ kind: 'advance', id: 'done' }, items)).toBeNull();
   });
 
+  it('ignores an advance for an item that left Disfrutando since the menu was built, so a finished item is not reopened', () => {
+    const finished = item({ id: 'fin', status: 'completed', completedAt: 5, checkpointType: 'pages', totalCheckpoints: 100, currentCheckpoint: 40 });
+    const reset = item({ id: 'reset', status: 'unstarted', progress: 0, checkpointType: 'pages', totalCheckpoints: 100, currentCheckpoint: 0 });
+    expect(resolveTrayAction({ kind: 'advance', id: 'fin' }, [finished])).toBeNull();
+    expect(resolveTrayAction({ kind: 'advance', id: 'reset' }, [reset])).toBeNull();
+  });
+
   it('resolves opening an item and the Disfrutando tab', () => {
     expect(resolveTrayAction({ kind: 'open', id: 'show' }, items)).toEqual({ type: 'open', id: 'show' });
     expect(resolveTrayAction({ kind: 'open-enjoying' }, items)).toEqual({ type: 'open-enjoying' });

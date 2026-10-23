@@ -88,7 +88,8 @@ export type ResolvedTrayAction =
 
 /**
  * Turns an action coming back from the menu into something to do, or null when it should be
- * ignored: unknown actions, items deleted since the menu was built, items already at their end.
+ * ignored: unknown actions, items deleted or no longer in Disfrutando since the menu was built,
+ * items already at their end.
  */
 export function resolveTrayAction(action: unknown, items: MediaItem[]): ResolvedTrayAction | null {
   if (typeof action !== 'object' || action === null) return null;
@@ -98,6 +99,8 @@ export function resolveTrayAction(action: unknown, items: MediaItem[]): Resolved
   const item = items.find((i) => i.id === id);
   if (!item) return null;
   if (kind === 'open') return { type: 'open', id };
+  // The menu can be a few moments old: an item finished or reset since then must not be reopened.
+  if (selectEnjoying([item]).length === 0) return null;
   const advance = advanceProgress(item);
   return advance ? { type: 'advance', id, updates: advance.updates } : null;
 }
