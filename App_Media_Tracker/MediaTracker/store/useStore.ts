@@ -16,7 +16,14 @@ export type MediaType = 'software' | 'task' | 'movie' | 'tv_show' | 'book' | 'au
 
 export interface SmartFilters {
   types?: MediaType[];
+  /** Statuses to include; unset means everything except finished items. */
+  statuses?: MediaItem['status'][];
+  /** Minimum stars (1-5). */
   minRating?: number;
+  /** Items with any of these tags (case-insensitive). */
+  tags?: string[];
+  /** Only items not changed for at least this many days. */
+  staleDays?: number;
 }
 
 export interface MediaItem {

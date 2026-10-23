@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { BACKUP_SCHEMA_VERSION, SECRET_SETTINGS, buildBackup, parseBackup } from '../store/backup';
-import type { AppSettings, MediaItem, MediaList } from '../store/useStore';
+import type { AppSettings, MediaItem, MediaList, SmartFilters } from '../store/useStore';
 
 /**
  * Backups must stay importable forever. `tests/fixtures/backups/v<N>.json` are real exports from
@@ -61,9 +61,10 @@ describe('field coverage', () => {
     rating: 4, tags: ['a'], notes: 'n', dueDate: 1_760_000_000_000, dueHasTime: true, remind: true, notifiedAt: 1_760_000_100_000,
     createdAt: 1, updatedAt: 2, completedAt: 3, listId: 'l', saga: { name: 'Mistborn', number: 2 }, externalId: 'tmdb:tv:1', posterUrl: 'https://x/p.jpg', overview: 'o', releaseDate: '2020-01-01',
   };
+  const smartFilters: Required<SmartFilters> = { types: ['movie'], statuses: ['in_progress', 'abandoned'], minRating: 3, tags: ['clásico'], staleDays: 30 };
   const list: Required<MediaList> = {
     id: 'l', name: 'Lista', isPinned: true, updatedAt: 7, type: 'collection', layoutStyle: 'large_grid', itemShape: 'tall', sortOrder: 'a_z',
-    isSmartList: true, smartFilters: { types: ['movie'], minRating: 3 },
+    isSmartList: true, smartFilters,
   };
   const settings: Required<AppSettings> = {
     showEnjoying: false, showPlanner: false, showLogbook: false, pileLayoutStyle: 'large_grid', pileItemShape: 'tall',
