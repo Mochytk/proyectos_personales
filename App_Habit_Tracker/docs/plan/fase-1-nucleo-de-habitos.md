@@ -14,7 +14,7 @@
 - [`../modelo-de-datos.md`](../modelo-de-datos.md).
 - [ADR 0002](../decisions/0002-cliente-y-estado-local.md), [ADR 0006](../decisions/0006-sincronizacion.md) y [ADR 0007](../decisions/0007-fechas-y-zona-horaria.md).
 
-**Depende de:** la PR `chore/monorepo-setup` fusionada y la dirección visual elegida (solo para las tareas 9 en adelante).
+**Depende de:** la PR `chore/monorepo-setup` (fusionada), el [ADR 0009](../decisions/0009-identidad-visual.md) con los tres estilos (solo para las tareas 9 en adelante) y las dependencias aprobadas.
 
 ## Restricciones globales
 
@@ -22,6 +22,7 @@
 - Fechas en pantalla: `DD-MM-AAAA`. Internamente, `LocalDate` en `AAAA-MM-DD`.
 - Zona por defecto: `America/Santiago`. Hora de corte por defecto: 4. Semana de lunes a domingo.
 - Áreas táctiles de 44 px o más. Respetar `prefers-reduced-motion` y `prefers-color-scheme`.
+- Toda pantalla funciona igual en los tres estilos (`cuaderno`, `linea`, `disco`). Los tests de componentes que dependen del estilo se parametrizan con `describe.each`.
 - Ninguna dependencia nueva sin aprobación. Sin `console.log` sobrantes.
 - Un commit por cambio lógico (Conventional Commits, en inglés), con `git push` después de cada uno. Una PR por rama, hacia `app/habit_tracker`.
 - Paquetes: `@habit-tracker/shared` y `@habit-tracker/web`.
@@ -248,22 +249,31 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 
 ## PR 1.3 · `feat/web-shell`
 
-### Tarea 9: app base y navegación
+### Tarea 9: app base, navegación y los tres estilos
 
 **Archivos:**
-- Crear `apps/web/package.json`, `vite.config.ts` e `index.html` (`lang="es-CL"`).
-- Crear `apps/web/src/main.tsx`, `src/app/App.tsx` y `src/app/routes.tsx`.
-- Crear `src/styles/tokens.css` (con la dirección visual elegida) y `src/styles/global.css`.
+- Crear `packages/shared/src/settings/style.ts` y `style.test.ts`.
+- Crear `apps/web/package.json`, `vite.config.ts` e `index.html` (`lang="es-CL"`, `<title>Constancia</title>`).
+- Crear `apps/web/src/main.tsx`, `src/app/App.tsx`, `src/app/routes.tsx` y `src/app/useStyle.ts`.
+- Crear `src/styles/global.css` y `src/styles/{cuaderno,linea,disco}.css`. Cada archivo define las variables de su estilo para claro y oscuro, y su `@font-face` desde Fontsource.
+- Crear `src/ui/StyleSignature.tsx`, con el elemento propio de cada estilo (`aria-hidden`).
 
 **Interfaces:**
+- Produce `type VisualStyle = 'cuaderno' | 'linea' | 'disco'` y `type StyleSetting = VisualStyle | 'rotate'`.
+- Produce `resolveStyle(setting: StyleSetting, today: LocalDate): VisualStyle`. Con `rotate`, la semana del 19-10-2026 es `cuaderno`, y sigue el orden cuaderno, línea, disco.
+- Produce `useStyle()`, que pone `data-style` en `<html>` según `userSettings.style` y `useToday()`.
 - Produce las rutas `/` (Hoy), `/habitos`, `/habitos/:id`, `/revision` y `/ajustes`.
 - Produce la barra de pestañas inferior: Hoy, Hábitos, Revisión y Ajustes.
 
-- [ ] **Paso 1: test** (Testing Library). `renders Hoy as the default tab`: el enlace "Hoy" tiene `aria-current="page"` en `/`.
-- [ ] **Paso 2: ver que falla.**
-- [ ] **Paso 3: implementar** con el enrutador aprobado, y el tema claro y oscuro desde `prefers-color-scheme`.
-- [ ] **Paso 4: ver que pasa.** `pnpm --filter @habit-tracker/web test`, y además `pnpm --filter @habit-tracker/web build` sin errores.
-- [ ] **Paso 5: commit.** `feat(web): add app shell and navigation`.
+- [ ] **Paso 1: tests.**
+  - `resolveStyle('linea', d('2026-10-23'))` es `'linea'`.
+  - Con `'rotate'`: `2026-10-23` da `'cuaderno'`, `2026-10-26` da `'linea'`, `2026-11-02` da `'disco'`, `2026-11-09` da `'cuaderno'`, y `2026-10-12` (la semana anterior) da `'disco'`.
+  - `renders Hoy as the default tab`: el enlace "Hoy" tiene `aria-current="page"` en `/`.
+  - `sets data-style on the html element`: al cambiar `userSettings.style`, cambia el atributo.
+- [ ] **Paso 2: ver que fallan.**
+- [ ] **Paso 3: implementar** con el enrutador aprobado. El modo claro u oscuro sale de `prefers-color-scheme`, dentro de cada estilo.
+- [ ] **Paso 4: ver que pasan.** `pnpm --filter @habit-tracker/shared test style`, `pnpm --filter @habit-tracker/web test` y `pnpm --filter @habit-tracker/web build` sin errores. Anotar en la PR el peso de cada fuente en el *build*.
+- [ ] **Paso 5: commits.** `feat(shared): resolve the visual style, including weekly rotation`, `feat(web): add app shell and navigation` y `feat(web): add the Cuaderno, Línea and Disco styles`.
 
 ### Tarea 10: *error boundary* y estados con tiempo máximo
 
@@ -373,6 +383,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - No se puede archivar un ancla con hábitos activos: aparece "Mueve sus hábitos a otra ancla primero."
   - En Ajustes, cambiar la hora de corte a 0 (de 0 a 6) actualiza `useToday` de inmediato.
   - La zona horaria muestra `America/Santiago` por defecto y advierte que solo afecta a los registros nuevos.
+  - "Estilo" es un grupo de opciones (Cuaderno, Línea, Disco, Rotar cada semana), con `cuaderno` por defecto. Elegir uno cambia `data-style` al instante y guarda `userSettings.style`.
 - [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
 - [ ] **Paso 5: commits.** `feat(web): edit anchors` y `feat(web): add settings for day cutoff and time zone`.
 
@@ -392,6 +403,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - **Dos toques en menos de 400 ms dejan el hábito marcado y hacen una sola escritura** (foco de revisión 1).
   - Sin hábitos: "Todavía no tienes hábitos." con el botón "Crear hábito".
   - Los hábitos de cuota muestran "2 de 3 esta semana".
+  - Todo lo anterior corre con `describe.each(['cuaderno', 'linea', 'disco'])`, y en cada estilo se dibuja su `StyleSignature`: los cuadritos de la semana, el riel con estaciones o la barra con discos.
 - [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
 - [ ] **Paso 5: commit.** `feat(web): add the Today screen with one-tap check-ins`.
 
@@ -472,7 +484,8 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - Progreso de un hábito de cuota.
   - Archivar y reactivar.
   - Revisión del domingo, con el reloj simulado de Playwright.
-  - Capturas en claro y oscuro, en móvil y escritorio.
+  - Capturas de "Hoy" en los 3 estilos × claro y oscuro × móvil y escritorio (12 en total).
+  - Si apruebas `@axe-core/playwright`: cero violaciones de contraste y accesibilidad en las 6 combinaciones de estilo y modo.
 - [ ] **Paso 2: correrlos.** `pnpm --filter @habit-tracker/web e2e` debe pasar con Chromium.
 - [ ] **Paso 3: revisión.** Correr la skill `web-design-guidelines` sobre `apps/web/src` y corregir lo que encuentre, con un commit por corrección.
 - [ ] **Paso 4: verificar.** Volver a correr unitarios, E2E, `typecheck`, `lint` y `build`, y confirmar que todo pasa.

@@ -10,6 +10,8 @@ Plan general por fases, ramas y PRs. Cada fase tiene su plan detallado con tarea
 
 Cada PR sale de `app/habit_tracker` y vuelve a ella. Cada fase termina con PRs fusionadas por ti, el CI en verde y la etiqueta `phase-N-ok`.
 
+**Ejecución (decidida el 23-10-2026):** nativa. Implemento cada tarea yo mismo en la sesión, con TDD. Al cierre de cada fase, un revisor independiente (un subagente que no vio cómo se escribió el código) revisa la rama completa, y te aviso cuando lo lance.
+
 ## Fase 0 · Descubrimiento y base
 
 | Rama | Contenido |
@@ -27,9 +29,9 @@ Detalle en [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md).
 | --- | --- | --- |
 | 1.1 | `feat/shared-dates` | Fecha local con hora de corte, semanas, formato DD-MM-AAAA e IDs deterministas (UUID v5) |
 | 1.2 | `feat/shared-habit-rules` | Esquemas Zod de hábitos; si un hábito aplica; racha diaria; progreso, cuota efectiva y racha semanal |
-| 1.3 | `feat/web-shell` | App Vite + React con la dirección visual elegida, navegación, *error boundary* y estados de carga, error y vacío con tiempo máximo |
+| 1.3 | `feat/web-shell` | App Vite + React con los tres estilos (Cuaderno, Línea, Disco; ADR 0009) y fuentes autoalojadas, navegación, *error boundary* y estados de carga, error y vacío con tiempo máximo |
 | 1.4 | `feat/web-local-db` | Esquema Dexie, repositorios, contenido inicial (anclas) y *outbox* lista para la fase 2 |
-| 1.5 | `feat/habits-crud` | Crear, editar y archivar hábitos; editar anclas; ajustes de hora de corte y zona horaria |
+| 1.5 | `feat/habits-crud` | Crear, editar y archivar hábitos; editar anclas; ajustes de hora de corte, zona horaria y estilo |
 | 1.6 | `feat/today-screen` | "Hoy" por ancla: marcar con un toque, saltar con motivo, pausar el día, rachas y progreso |
 | 1.7 | `feat/habit-history` | Mapa de calor de 90 días por hábito |
 | 1.8 | `feat/weekly-review` | Revisión del domingo y cuota de la semana siguiente |
@@ -101,12 +103,17 @@ Revisión final con las Web Interface Guidelines, rendimiento, README con captur
 
 ## Dependencias nuevas que pediré aprobar
 
-Antes de agregar cada una reviso su mantenimiento y sus scripts de instalación, y te cuento lo que encontré.
+Antes de agregar cada una reviso su mantenimiento, sus scripts de instalación y sus vulnerabilidades conocidas, y te cuento lo que encontré. Las apruebas de a una. La revisión de las de la fase 1 se hizo el 23-10-2026: ninguna tiene vulnerabilidades conocidas (`npm audit`) ni scripts que corran al instalarse desde npm.
 
-| Fase | Paquete | Para qué |
-| --- | --- | --- |
-| 1 | Enrutador (React Router u otro) | Navegación entre pantallas. Se decide con su documentación al comenzar la fase 1 |
-| 1 | `fake-indexeddb` (desarrollo) | Probar Dexie en Vitest sin navegador |
-| 1 | `@testing-library/react` y `happy-dom` (desarrollo) | Pruebas de componentes |
-| 2 | `pg` (desarrollo) | Postgres local en tests y CI |
-| 5 | `@better-auth/electron` | Login de escritorio |
+| Fase | Paquete | Para qué | Recomendación |
+| --- | --- | --- | --- |
+| 1 | `react-router` 8 (modo declarativo) | Navegación entre pantallas | Recomendado, sobre TanStack Router (más complejo de lo necesario) y wouter (un solo mantenedor) |
+| 1 | `@fontsource-variable/atkinson-hyperlegible-next`, `@fontsource-variable/overpass`, `@fontsource/barlow-condensed`, `@fontsource/barlow` | Fuentes autoalojadas de los tres estilos (ADR 0009) | Recomendado |
+| 1 | `fake-indexeddb` (desarrollo) | Probar Dexie en Vitest sin navegador | Recomendado |
+| 1 | `@testing-library/react`, `@testing-library/dom` y `@testing-library/user-event` (desarrollo) | Pruebas de componentes con clics realistas | Recomendado |
+| 1 | `jsdom` (desarrollo) | DOM simulado para esas pruebas | Recomendado sobre `happy-dom`, que tiene un solo mantenedor |
+| 1 | `@axe-core/playwright` (desarrollo) | Revisar contraste y accesibilidad en los E2E de las 6 combinaciones de estilo | Se revisa al llegar a la tarea 21 |
+| 2 | `pg` (desarrollo) | Postgres local en tests y CI | — |
+| 5 | `@better-auth/electron` | Login de escritorio | — |
+
+Las dependencias del documento maestro (React, Vite, `vite-plugin-pwa`, Dexie, Zod, Drizzle, Hono, Better Auth, Electron, Playwright) no necesitan aprobación, pero igual se revisan al agregarlas.
