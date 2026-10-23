@@ -67,6 +67,10 @@ Las claves se pegan en Ajustes Globales; quedan solo en el dispositivo y no se i
 
 Las portadas se guardan como URL (`posterUrl`) al elegir un resultado de TMDB, Open Library o RAWG. `components/ItemCover.tsx` las muestra en La Pila, las listas, Disfrutando, Bitácora, Buscar y Planificador; si un elemento no tiene portada, o la imagen no carga, se ve el icono de su tipo. Las portadas se descargan de la fuente cada vez (no se guardan en el equipo), así que sin conexión se ven los iconos.
 
+## Estadísticas
+
+El botón de gráficas de la Bitácora abre **Estadísticas**: terminados por mes (o por año), por tipo, distribución de notas, páginas leídas, episodios vistos y nota media, para un año o para todo el historial. Desde un año se abre **Tu año**, un resumen con la categoría favorita, el mes más activo, las sagas completadas y lo mejor valorado. Todo se calcula en `store/stats.ts` a partir de `completedAt`, la fecha en que se terminó cada elemento: se fija sola al terminarlo, se borra si se reabre y se puede cambiar desde el detalle ("Terminado el") para fechar lo que terminaste antes de usar la app. Los elementos terminados antes de que existiera `completedAt` usan la fecha de su último cambio.
+
 ## Sagas de libros
 
 Un libro puede pertenecer a una saga: nombre y número dentro de ella (`saga: { name, number? }`). Se escribe en el formulario o en el detalle del libro, con las sagas existentes como sugerencias. La sección **Sagas** de Listas abre la pantalla de cada saga con sus libros en orden de lectura, cuántos llevas leídos y el siguiente pendiente. Dos nombres que solo difieren en mayúsculas, tildes o espacios son la misma saga. La saga es un campo del libro, no una entidad aparte: para renombrarla hay que editar el nombre en cada libro. Open Library no entrega la saga de forma fiable, así que no se rellena sola.
