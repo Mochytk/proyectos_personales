@@ -1,0 +1,22 @@
+{
+  "name": "sb-spike-search",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.ts",
+    "eval": "node src/run.ts",
+    "eval:fts": "node src/run.ts --fts-only",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "4.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "6.0.3"
+  }
+}
