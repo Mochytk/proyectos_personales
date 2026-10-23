@@ -38,7 +38,18 @@ npm test             # vitest
 
 - En Electron se guardan en `userData/data/media-tracker-storage.json` con copia `.bak`. Fuera de Electron se usa `AsyncStorage`.
 - **Ajustes Globales → Respaldo** exporta e importa un JSON. Importar fusiona (gana lo más reciente) y nunca borra.
-- Si cambias la forma de los datos, sube `STORE_VERSION` en `store/useStore.ts` y añade el paso en `migrate`.
+- Si cambias la forma de los datos guardados en el equipo, sube `STORE_VERSION` en `store/useStore.ts` y añade el paso en `migrate`.
+
+### Compatibilidad de los respaldos
+
+Todo respaldo exportado por esta app debe poder importarse en cualquier versión posterior. El formato del archivo tiene su propia versión (`BACKUP_SCHEMA_VERSION` en `store/backup.ts`, independiente de `STORE_VERSION`). Al cambiar lo que contiene un respaldo (campo nuevo o renombrado, colección nueva):
+
+1. Sube `BACKUP_SCHEMA_VERSION`.
+2. Añade `BACKUP_MIGRATIONS[<versión anterior>]`, que convierte los datos viejos a la forma nueva.
+3. Añade `tests/fixtures/backups/v<versión nueva>.json`: un respaldo real exportado con ese formato, que no se vuelve a editar.
+4. Cubre el campo en `sanitizeItem` / `sanitizeList` (si se te olvida, `tests/backup-compat.test.ts` no compila).
+
+Los tests importan todos los respaldos congelados, así que romper la compatibilidad hacia atrás hace fallar `npm test`. Un respaldo de una versión más nueva que la de la app se rechaza con un aviso, en lugar de perder datos en silencio.
 
 ## Metadatos
 
