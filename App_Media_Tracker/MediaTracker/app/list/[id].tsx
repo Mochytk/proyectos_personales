@@ -7,6 +7,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { SymbolView } from '@/components/AppIcon';
 import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
+import { sagaLabel } from '@/store/sagas';
 import { useMemo, useEffect } from 'react';
 
 const { width } = Dimensions.get('window');
@@ -123,6 +124,7 @@ export default function ListDetailScreen() {
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
+          {sagaLabel(item) ? <Text style={[styles.itemSubtitle, { color: colors.tint }]}>{sagaLabel(item)}</Text> : null}
         </View>
       </PressableScale>
     </Link>

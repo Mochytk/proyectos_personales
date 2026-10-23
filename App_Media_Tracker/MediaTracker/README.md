@@ -67,6 +67,10 @@ Las claves se pegan en Ajustes Globales; quedan solo en el dispositivo y no se i
 
 Las portadas se guardan como URL (`posterUrl`) al elegir un resultado de TMDB, Open Library o RAWG. `components/ItemCover.tsx` las muestra en La Pila, las listas, Disfrutando, Bitácora, Buscar y Planificador; si un elemento no tiene portada, o la imagen no carga, se ve el icono de su tipo. Las portadas se descargan de la fuente cada vez (no se guardan en el equipo), así que sin conexión se ven los iconos.
 
+## Sagas de libros
+
+Un libro puede pertenecer a una saga: nombre y número dentro de ella (`saga: { name, number? }`). Se escribe en el formulario o en el detalle del libro, con las sagas existentes como sugerencias. La sección **Sagas** de Listas abre la pantalla de cada saga con sus libros en orden de lectura, cuántos llevas leídos y el siguiente pendiente. Dos nombres que solo difieren en mayúsculas, tildes o espacios son la misma saga. La saga es un campo del libro, no una entidad aparte: para renombrarla hay que editar el nombre en cada libro. Open Library no entrega la saga de forma fiable, así que no se rellena sola.
+
 ## Series con temporadas
 
 Las series elegidas de TMDB guardan cuántos episodios tiene cada temporada. El detalle muestra "Vas por T2 · E3", un botón para marcar el siguiente episodio y una fila por temporada (tocarla la marca como vista). "Actualizar desde TMDB" trae temporadas nuevas y el próximo estreno sin perder tu progreso, y el Planificador lista los estrenos próximos. El progreso sigue siendo un solo contador de episodios vistos (`currentCheckpoint`); `seasons` solo lo traduce a temporada y episodio.

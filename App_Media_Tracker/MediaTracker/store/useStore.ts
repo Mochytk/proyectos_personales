@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { appStorage } from './storage';
+import type { Saga } from './sagas';
 import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SETTINGS, StoreData, dropOrphanListRefs, mergeData, normalizeData } from './backup';
@@ -44,6 +45,8 @@ export interface MediaItem {
   updatedAt: number;
   
   listId?: string;
+  /** Saga the book belongs to (books only). */
+  saga?: Saga;
 
   // Filled when the item was picked from a metadata search (TMDB, Open Library, RAWG).
   externalId?: string;

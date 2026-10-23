@@ -14,6 +14,8 @@ import SeasonTracker from '@/components/SeasonTracker';
 import { clampProgress, usesCounter } from '@/store/progress';
 import { formatPosition, hasSeasonSplit, refreshUpdates, upcomingEpisode, airDateTimestamp } from '@/store/seasons';
 import { getTvDetails } from '@/services/tmdb';
+import SagaField from '@/components/SagaField';
+import { buildSaga, sagaKey } from '@/store/sagas';
 
 export default function ItemDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -29,6 +31,8 @@ export default function ItemDetailScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMessage, setRefreshMessage] = useState('');
   const [notes, setNotes] = useState(item?.notes || '');
+  const [sagaName, setSagaName] = useState(item?.saga?.name ?? '');
+  const [sagaNumber, setSagaNumber] = useState(item?.saga?.number !== undefined ? String(item.saga.number) : '');
   const [dueDate, setDueDate] = useState(toDateInput(item?.dueDate));
   const [dueTime, setDueTime] = useState(toTimeInput(item?.dueDate, item?.dueHasTime));
 
@@ -116,6 +120,13 @@ export default function ItemDetailScreen() {
     } finally {
       setRefreshing(false);
     }
+  };
+
+  // Saved as you type; clearing the name removes the book from its saga.
+  const saveSaga = (name: string, number: string) => {
+    setSagaName(name);
+    setSagaNumber(number);
+    updateItem(item.id, { saga: buildSaga(name, number) });
   };
 
   const hasCheckpoints = item.totalCheckpoints && item.totalCheckpoints > 0;
@@ -276,6 +287,21 @@ export default function ItemDetailScreen() {
             ))}
           </View>
         </View>
+
+        {item.type === 'book' && (
+          <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Saga</Text>
+            <SagaField name={sagaName} number={sagaNumber} onChange={({ name, number }) => saveSaga(name, number)} />
+            {item.saga && (
+              <Pressable
+                style={[styles.actionButton, { backgroundColor: colors.cardBackground, marginTop: 14 }]}
+                onPress={() => router.push(`/saga/${encodeURIComponent(sagaKey(item.saga!.name))}`)}
+              >
+                <Text style={[styles.actionButtonText, { color: colors.text, marginLeft: 0 }]}>Ver la saga</Text>
+              </Pressable>
+            )}
+          </View>
+        )}
 
         {/* Due date / reminder */}
         <View style={[styles.sectionContainer, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }]}>

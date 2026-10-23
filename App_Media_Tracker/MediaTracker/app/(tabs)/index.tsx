@@ -4,6 +4,7 @@ import { SymbolView } from '@/components/AppIcon';
 import { mediaTypeLabelsES } from '@/constants/mediaTypes';
 import PressableScale from '@/components/PressableScale';
 import ItemCover, { rowCover } from '@/components/ItemCover';
+import { sagaLabel, sagasOf } from '@/store/sagas';
 import Colors from '@/constants/Colors';
 import { Link } from 'expo-router';
 import { useMemo } from 'react';
@@ -22,6 +23,8 @@ export default function ListsScreen() {
   
   const pileItems = items.filter(i => !i.listId && i.status !== 'completed');
   
+  const sagas = useMemo(() => sagasOf(items), [items]);
+
   const groupedItems = useMemo(() => {
     return pileItems.reduce((acc, item) => {
       if (!acc[item.type]) acc[item.type] = [];
@@ -66,6 +69,7 @@ export default function ListsScreen() {
         <View style={styles.itemContent}>
           <Text style={[styles.itemTitle, { color: colors.text }]}>{item.title}</Text>
           {item.subtitle ? <Text style={[styles.itemSubtitle, { color: colors.text + '90' }]}>{item.subtitle}</Text> : null}
+          {sagaLabel(item) ? <Text style={[styles.itemSubtitle, { color: colors.tint }]}>{sagaLabel(item)}</Text> : null}
         </View>
       </PressableScale>
     </Link>
@@ -111,6 +115,31 @@ export default function ListsScreen() {
               </Link>
             )
           })}
+        </View>
+      )}
+
+      {sagas.length > 0 && (
+        <View style={styles.customListsContainer}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Sagas</Text>
+          {sagas.map(saga => (
+            <Link key={saga.key} href={`/saga/${encodeURIComponent(saga.key)}`} asChild>
+              <PressableScale style={StyleSheet.flatten([styles.listCard, { backgroundColor: colors.surface, boxShadow: colors.shadowBorder }])}>
+                <ItemCover
+                  type="book"
+                  posterUrl={(saga.books.find(b => b.posterUrl) ?? saga.books[0]).posterUrl}
+                  style={rowCover}
+                  iconSize={20}
+                />
+                <View style={styles.listCardContent}>
+                  <Text style={[styles.listTitle, { color: colors.text }]}>{saga.name}</Text>
+                  <Text style={[styles.listSubtitle, { color: colors.text + '80' }]}>
+                    {saga.completed} de {saga.books.length} {saga.books.length === 1 ? 'libro leído' : 'libros leídos'}
+                  </Text>
+                </View>
+                <SymbolView name={{ ios: 'chevron.right', android: 'chevron-right', web: 'chevron-right' }} size={16} tintColor={colors.text + '60'} />
+              </PressableScale>
+            </Link>
+          ))}
         </View>
       )}
 
