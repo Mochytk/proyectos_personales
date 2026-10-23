@@ -36,6 +36,20 @@ Hay un solo usuario, pero el login tiene que existir. El registro público se ci
 
 **Propuesta:** antes de la fase 2 se verifica Brevo. Para eso hay que permitir esos dos dominios, o puedes revisar tú su plan gratis. Si Brevo no sirve sin dominio, la opción gratis es recuperar la contraseña con un script que corres tú contra la base. Si en algún momento compras un dominio, se usa Resend.
 
+### Actualización 23-10-2026: Brevo
+
+Con los dominios ya permitidos, el punto pendiente se cierra así:
+
+- **Plan gratis de Brevo:** gratis para siempre, sin tarjeta, con hasta 300 correos al día una vez que Brevo aprueba la cuenta para enviar. Recuperar la contraseña de un solo usuario usa unos pocos al año.
+- **Remitente sin dominio propio:** la API acepta como remitente cualquier dirección que se haya verificado con el correo que Brevo envía a esa dirección. Su documentación advierte que, sin un dominio autenticado (SPF y DKIM), los correos tienen mucha más probabilidad de caer en spam o de ser bloqueados.
+- **Decisión:** Brevo, con tu propio correo como remitente y como destinatario.
+  - Se llama a su API REST (`POST https://api.brevo.com/v3/smtp/email`) con `fetch` desde el Worker, sin SDK, así que no hay dependencia nueva.
+  - La clave va en el secreto `BREVO_API_KEY` de Cloudflare.
+  - En la fase 2 se prueba con tu cuenta real. Si el correo llega a spam, lo marcas como deseado y listo. Si Brevo lo bloquea, queda el script de recuperación como salida gratis.
+- **Privacidad:** a Brevo solo le llega tu dirección de correo y el enlace de recuperación, que vence en poco tiempo y sirve una sola vez.
+
+`help.brevo.com` responde con un desafío anti-bots, así que la regla sobre remitentes se leyó en la documentación de la API (vía Context7) y en su página de precios.
+
 ## Alternativas
 
 - **Sesiones propias.** Van contra el documento maestro (no inventar criptografía ni manejo de sesiones).
@@ -61,3 +75,5 @@ Hay un solo usuario, pero el login tiene que existir. El registro público se ci
 - Resend: https://resend.com/pricing y https://resend.com/docs/send-with-cloudflare-workers
 - Cloudflare Email Service: https://developers.cloudflare.com/email-service/
 - Brevo (API): https://developers.brevo.com/docs/send-a-transactional-email
+- Brevo, precios y plan gratis (23-10-2026): https://www.brevo.com/pricing/
+- Brevo, remitentes y dominios (23-10-2026): https://developers.brevo.com/reference/create-sender y https://developers.brevo.com/docs/getting-started-with-senders-and-domains
