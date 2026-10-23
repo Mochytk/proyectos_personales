@@ -1,6 +1,6 @@
 # 0002 · Cliente web y estado local
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (23-10-2026, PR #18)
 - **Fecha:** 23-10-2026
 
 ## Contexto
