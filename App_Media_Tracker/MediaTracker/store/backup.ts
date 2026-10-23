@@ -1,3 +1,4 @@
+import { sanitizeSaga } from './sagas';
 import { sanitizeNextEpisode, sanitizeSeasons } from './seasons';
 import type { AppSettings, MediaItem, MediaList, MediaType } from './useStore';
 
@@ -13,12 +14,16 @@ export const BACKUP_FORMAT = 'media-tracker-backup';
  *   3. add `tests/fixtures/backups/v<new version>.json`, a real export that is never edited again.
  * The tests fail if step 3 is forgotten, and they import every frozen fixture.
  */
-export const BACKUP_SCHEMA_VERSION = 1;
+export const BACKUP_SCHEMA_VERSION = 2;
 
 type BackupData = Record<string, unknown>;
 
 /** `BACKUP_MIGRATIONS[n]` upgrades the `data` of a version-n file to version n + 1. */
-export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {};
+export const BACKUP_MIGRATIONS: Record<number, (data: BackupData) => BackupData> = {
+  // v1 -> v2: books gained an optional `saga`. Old files simply have none, so nothing to convert;
+  // the version bump makes older apps refuse v2 files instead of dropping the sagas.
+  1: (data) => data,
+};
 
 /** Upgrades `data` from an older file version to `toVersion`, one step at a time. */
 export function migrateBackupData(data: BackupData, fromVersion: number, toVersion: number = BACKUP_SCHEMA_VERSION): BackupData {
@@ -80,6 +85,7 @@ export function sanitizeItem(raw: unknown): MediaItem | null {
     createdAt: isNum(raw.createdAt) ? raw.createdAt : now,
     updatedAt: isNum(raw.updatedAt) ? raw.updatedAt : now,
     listId: optStr(raw.listId),
+    saga: sanitizeSaga(raw.saga),
     externalId: optStr(raw.externalId),
     posterUrl: optStr(raw.posterUrl),
     overview: optStr(raw.overview),

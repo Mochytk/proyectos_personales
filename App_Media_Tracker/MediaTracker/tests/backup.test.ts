@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   BACKUP_FORMAT, BACKUP_MIGRATIONS, BACKUP_SCHEMA_VERSION, DEFAULT_SETTINGS, buildBackup, dropOrphanListRefs, mergeData, migrateBackupData,
   normalizeData, parseBackup, sanitizeItem,
@@ -81,8 +81,18 @@ describe('mergeData', () => {
 });
 
 describe('backup versions', () => {
+  // Tests register fake migrations; put the real ones back afterwards.
+  const real = { ...BACKUP_MIGRATIONS };
+  beforeEach(() => {
+    for (const key of Object.keys(BACKUP_MIGRATIONS)) delete BACKUP_MIGRATIONS[Number(key)];
+  });
   afterEach(() => {
     for (const key of Object.keys(BACKUP_MIGRATIONS)) delete BACKUP_MIGRATIONS[Number(key)];
+    Object.assign(BACKUP_MIGRATIONS, real);
+  });
+
+  it('has a migration for every step up to the current version', () => {
+    for (let version = 1; version < BACKUP_SCHEMA_VERSION; version++) expect(real[version]).toBeTypeOf('function');
   });
 
   it('writes the current schema version by default', () => {
@@ -90,6 +100,7 @@ describe('backup versions', () => {
   });
 
   it('treats files with a missing or invalid version as the first format', () => {
+    Object.assign(BACKUP_MIGRATIONS, real);
     const file = (schemaVersion: unknown) => JSON.stringify({ format: BACKUP_FORMAT, schemaVersion, data: { items: [{ id: '1', title: 'A' }] } });
     for (const version of [undefined, 0, -3, 1.5, 'x', null]) {
       expect(parseBackup(file(version)).items).toHaveLength(1);
