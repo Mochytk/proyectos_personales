@@ -1,0 +1,5 @@
+{
+  "guion-1": ["offline-first", "deploy", "cloudflare workers", "14 de noviembre", "18:30", "merge", "pull request", "frontend", "backend", "typescript", "lint", "playwright", "papers", "embeddings", "recall", "62", "cachai", "harto"],
+  "guion-2": ["metro", "al tiro", "palta", "lactosa", "5 de diciembre", "23.500", "pega", "pdf", "profe guia", "benchmark", "github", "issue", "128", "carrete", "fome", "certamen", "bip", "lucas"],
+  "guion-3": ["whisper", "metal", "mcp", "stdio", "approach", "rag", "llm", "sqlite", "fts5", "markdown", "obsidian", "bacan", "end-to-end", "aes-gcm", "webcrypto", "docker", "overkill", "stride", "threat model", "po", "pillan"]
+}
