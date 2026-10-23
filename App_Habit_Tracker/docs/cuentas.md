@@ -2,7 +2,7 @@
 
 Nada de esto hace falta antes de la **fase 2**. La fase 1 corre 100 % en local. Todo es gratis: Neon indica que su plan Free no pide tarjeta, y los planes gratis de Cloudflare y GitHub tampoco deberían pedirla. Si algún servicio te pide una tarjeta, avísame antes de ingresarla.
 
-Los nombres de los menús pueden cambiar un poco. En la fase 2 te guío con capturas de cada paso.
+Los nombres de los menús pueden cambiar un poco. En la fase 2 te guío paso a paso, con la documentación vigente de cada servicio.
 
 **Regla fija:** las claves y las URLs con contraseña se pegan solo en los paneles de cada servicio, en los secretos de GitHub o en tu `.env.local`. Nunca en el chat, en un commit, en una issue ni en una PR.
 
