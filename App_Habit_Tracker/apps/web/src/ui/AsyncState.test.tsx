@@ -35,6 +35,15 @@ describe('AsyncState', () => {
     expect(screen.getByText('Cargando…')).toBeTruthy();
   });
 
+  it('shows the timeout message right away for a query that already timed out', () => {
+    render(
+      <AsyncState status="timeout" onRetry={vi.fn()}>
+        <p>Contenido</p>
+      </AsyncState>,
+    );
+    expect(screen.getByText('Está tardando más de lo normal.')).toBeTruthy();
+  });
+
   it('shows an error with a retry', () => {
     const onRetry = vi.fn();
     render(
