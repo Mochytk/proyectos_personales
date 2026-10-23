@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, dialog, ipcMain, nativeTheme, net, protocol, screen, shell } = require('electron');
+const { app, BrowserWindow, Menu, Tray, dialog, ipcMain, nativeImage, nativeTheme, net, protocol, screen, shell } = require('electron');
 const crypto = require('crypto');
 const fs = require('fs');
 const os = require('os');
@@ -7,6 +7,7 @@ const { pathToFileURL } = require('url');
 const { createFileStorage } = require('./electron-storage');
 const { ACTIONS, buildMenuTemplate } = require('./electron-menu');
 const { createSyncFolder, loadSyncConfig, saveSyncConfig } = require('./electron-sync');
+const { buildTrayTemplate, sanitizeSnapshot, shouldHideOnClose } = require('./electron-tray');
 const { MIN_SIZE, loadWindowState, restoreBounds, saveWindowState } = require('./electron-window-state');
 
 nativeTheme.themeSource = 'system';
@@ -22,6 +23,12 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 let mainWindow = null;
+// Set when the app is really going away (Cmd+Q, Quit in the Dock, system shutdown): closing the
+// window hides it on macOS so the menu bar icon keeps working, but not then.
+let quitting = false;
+app.on('before-quit', () => {
+  quitting = true;
+});
 
 function registerAppProtocol() {
   protocol.handle(SCHEME, (request) => {
@@ -96,13 +103,15 @@ function registerMenu() {
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
 
-function createWindow() {
+function createWindow(options = {}) {
   const stateFile = path.join(app.getPath('userData'), 'window-state.json');
   const saved = loadWindowState(stateFile);
   const bounds = restoreBounds(saved, screen.getAllDisplays().map((d) => d.workArea));
 
+  rendererReady = false;
   mainWindow = new BrowserWindow({
     ...bounds,
+    show: options.show !== false,
     minWidth: MIN_SIZE.width,
     minHeight: MIN_SIZE.height,
     titleBarStyle: 'hiddenInset',
@@ -128,9 +137,13 @@ function createWindow() {
   };
   win.on('resize', rememberSoon);
   win.on('move', rememberSoon);
-  win.on('close', () => {
+  win.on('close', (event) => {
     clearTimeout(timer);
     remember();
+    if (shouldHideOnClose({ platform: process.platform, quitting })) {
+      event.preventDefault();
+      win.hide();
+    }
   });
 
   // Links to other sites open in the default browser, never inside the app window.
@@ -142,7 +155,59 @@ function createWindow() {
   mainWindow.loadURL(`${SCHEME}://${HOST}/`);
   mainWindow.on('closed', () => {
     mainWindow = null;
+    rendererReady = false;
   });
+}
+
+/** Brings the window back (creating it if it was destroyed). */
+function showWindow() {
+  if (!mainWindow) {
+    createWindow();
+    return;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+}
+
+// Menu bar icon (macOS). The page owns the data, so the menu is built from text it sends, and the
+// actions chosen in the menu go back to the page. Actions wait until the page is ready to take them.
+let tray = null;
+let rendererReady = false;
+const pendingActions = [];
+
+function sendTrayAction(action, { reveal }) {
+  if (reveal) showWindow();
+  else if (!mainWindow) createWindow({ show: false });
+  if (rendererReady && mainWindow) mainWindow.webContents.send('tray:action', action);
+  else pendingActions.push(action);
+}
+
+function registerTray() {
+  const image = nativeImage.createFromPath(path.join(__dirname, 'build', 'trayTemplate.png'));
+  image.setTemplateImage(true);
+  tray = new Tray(image);
+  tray.setToolTip('Media Tracker');
+
+  let snapshot = sanitizeSnapshot(null);
+  const handlers = {
+    onAdvance: (id) => sendTrayAction({ kind: 'advance', id }, { reveal: false }),
+    onOpen: (id) => sendTrayAction({ kind: 'open', id }, { reveal: true }),
+    onOpenEnjoying: () => sendTrayAction({ kind: 'open-enjoying' }, { reveal: true }),
+    onShow: () => showWindow(),
+    onQuit: () => app.quit(),
+  };
+  const refresh = () => tray.setContextMenu(Menu.buildFromTemplate(buildTrayTemplate(snapshot, handlers)));
+
+  ipcMain.on('tray:update', (event, raw) => {
+    if (!mainWindow || event.sender !== mainWindow.webContents) return;
+    snapshot = sanitizeSnapshot(raw);
+    // The page only sends this once it is listening for actions, so it also means "ready".
+    rendererReady = true;
+    while (pendingActions.length > 0) mainWindow.webContents.send('tray:action', pendingActions.shift());
+    refresh();
+  });
+  refresh();
 }
 
 // A second copy would fight over the data file; focus the open window instead.
@@ -150,11 +215,7 @@ const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
 } else {
-  app.on('second-instance', () => {
-    if (!mainWindow) return;
-    if (mainWindow.isMinimized()) mainWindow.restore();
-    mainWindow.focus();
-  });
+  app.on('second-instance', () => showWindow());
 }
 
 app.whenReady().then(() => {
@@ -165,11 +226,11 @@ app.whenReady().then(() => {
   registerStorageHandlers();
   registerSyncHandlers();
   registerMenu();
+  if (process.platform === 'darwin') registerTray();
   createWindow();
 
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  });
+  // Clicking the Dock icon brings the (possibly hidden) window back.
+  app.on('activate', () => showWindow());
 });
 
 app.on('window-all-closed', () => {
