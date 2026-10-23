@@ -42,6 +42,7 @@ erDiagram
     text mode
     smallint weekly_quota
     smallint_array weekdays
+    date starts_on
     uuid anchor_id FK
     text color
     text icon
@@ -150,7 +151,7 @@ erDiagram
 | --- | --- |
 | `user_settings` | Una fila por usuario, con `id` fijo. `time_zone` (por defecto `America/Santiago`) y `day_cutoff_hour` (0–6, por defecto 4) |
 | `anchors` | Lista editable. Por defecto: Al despertar, Mañana, Después de almorzar, Tarde, Noche, Antes de dormir, Después de entrenar. `name` de 1 a 40 caracteres |
-| `habits` | `mode`: `daily` o `weekly_quota`. `weekly_quota` va de 1 a 7 y es obligatoria solo con `weekly_quota`. `weekdays`: días ISO 1–7 en que aplica (solo `daily`; por defecto todos). `archived_at` archiva el hábito sin borrar su historial (HU-6) |
+| `habits` | `mode`: `daily` o `weekly_quota`. `weekly_quota` va de 1 a 7 y es obligatoria solo con `weekly_quota`. `weekdays`: días ISO 1–7 en que aplica (solo `daily`; por defecto todos). `starts_on`: fecha local desde la que cuenta (por defecto, el día en que se crea); los días anteriores no afectan las rachas. `archived_at` archiva el hábito sin borrar su historial (HU-6) |
 | `check_ins` | Uno por hábito y día. `id` = UUID v5 de `check_in:{habit_id}:{local_date}`. `status`: `done` o `skipped`. `skip_reason` (solo con `skipped`): `certamen`, `enfermedad`, `viaje`, `descanso` u `otro`. `note` hasta 280 caracteres. `value` es numérico opcional, reservado para metas con número y sin interfaz en la v1. Desmarcar = borrado lógico |
 | `weekly_quota_overrides` | La cuota de un hábito en una semana, si es distinta de la normal (revisión del domingo, RF-1.4). `id` = UUID v5 de `quota:{habit_id}:{week_start}`. `quota` de 0 a 7 |
 | `weekly_reviews` | La reflexión de la semana (RF-1.6). `id` = UUID v5 de `review:{week_start}` |
@@ -192,7 +193,7 @@ erDiagram
 | --- | --- |
 | Racha diaria (RF-1.3) | Días aplicables consecutivos hacia atrás desde ayer, más hoy si ya está `done`. `done` suma 1. `skipped` no suma, pero no corta. Un día aplicable pasado sin registro corta la racha. Hoy sin registro no la corta todavía |
 | Progreso semanal (RF-1.4) | `done` de la semana / cuota efectiva (`weekly_quota_overrides.quota` si existe; si no, `habits.weekly_quota`) |
-| Racha semanal (respuesta 10) | Semanas cerradas consecutivas con la cuota cumplida, más la actual si ya se cumplió |
+| Racha semanal (respuesta 10) | Semanas cerradas consecutivas con la cuota cumplida, más la actual si ya se cumplió. Una semana con cuota 0 (en pausa) no suma ni corta. La semana en que empieza el hábito suma si se cumplió y, si no, no corta |
 | 1RM estimado (Epley) | `peso × (1 + reps / 30)`, solo con series no de calentamiento. Con 1 repetición, el 1RM es el peso. Con más de 12 repeticiones no se estima, porque la fórmula pierde precisión |
 | Volumen semanal | Suma de `reps × weight_kg` de las series no de calentamiento de la semana (lunes a domingo) |
 | Récords personales | Por ejercicio: mayor peso, mayor 1RM estimado y mayor volumen en una sesión |

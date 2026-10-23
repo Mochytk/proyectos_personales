@@ -21,7 +21,7 @@ Las rachas y las cuotas dependen de "qué día es" y de "qué semana es". `Ameri
 
 | Dónde | Formato |
 | --- | --- |
-| Interfaz | DD-MM-AAAA (por ejemplo, 23-10-2026). Los días van con nombre corto en español de Chile: "jue 23-10" |
+| Interfaz | DD-MM-AAAA (por ejemplo, 23-10-2026). Los días van con nombre corto en español de Chile: "vie 23-10" |
 | Exportación CSV | DD-MM-AAAA, para abrir directo en Numbers o Excel |
 | Exportación JSON | `AAAA-MM-DD` e ISO 8601, para que la importación no tenga ambigüedad |
 | Documentación para ti | DD-MM-AAAA |
