@@ -68,6 +68,9 @@ export interface MediaList {
   itemShape?: 'short' | 'square' | 'medium' | 'tall' | 'wide';
   sortOrder?: 'new_old' | 'old_new' | 'a_z' | 'z_a';
   
+  /** Last change, so syncing can tell which copy of a list is newer. Lists from before it existed have none. */
+  updatedAt?: number;
+
   isSmartList?: boolean;
   smartFilters?: SmartFilters;
 }
@@ -140,13 +143,13 @@ export const useStore = create<AppState>()(
       addList: (listData) => set((state) => ({
         lists: [
           ...state.lists,
-          { ...listData, id: uuidv4() }
+          { ...listData, id: uuidv4(), updatedAt: Date.now() }
         ]
       })),
       
       updateList: (id, updates) => set((state) => ({
         lists: state.lists.map(list => 
-          list.id === id ? { ...list, ...updates } : list
+          list.id === id ? { ...list, ...updates, updatedAt: Date.now() } : list
         )
       })),
       
