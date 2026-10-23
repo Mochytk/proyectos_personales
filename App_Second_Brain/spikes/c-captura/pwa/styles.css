@@ -1,0 +1,75 @@
+:root {
+  color-scheme: light dark;
+  --fondo: #f6f4ef;
+  --texto: #1d1b16;
+  --acento: #2f5d50;
+  --borde: #d9d4c7;
+  font-family: -apple-system, system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fondo: #171612;
+    --texto: #ece8de;
+    --acento: #7fb8a6;
+    --borde: #3a372f;
+  }
+}
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+}
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem 3rem;
+}
+button {
+  min-height: 44px;
+  margin: 0.25rem 0;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--acento);
+  border-radius: 0.75rem;
+  background: transparent;
+  color: var(--texto);
+  font-size: 1rem;
+}
+button.grande {
+  width: 100%;
+  min-height: 72px;
+  background: var(--acento);
+  color: var(--fondo);
+  font-size: 1.4rem;
+}
+button:focus-visible {
+  outline: 3px solid var(--acento);
+  outline-offset: 2px;
+}
+fieldset {
+  border: 1px solid var(--borde);
+  border-radius: 0.75rem;
+}
+label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-right: 1rem;
+}
+pre {
+  overflow-x: auto;
+  padding: 0.75rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.aviso {
+  font-size: 0.9rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

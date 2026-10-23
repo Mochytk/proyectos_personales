@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es-CL">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Prueba SC" />
+    <title>Prueba de captura</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon-180.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <main>
+      <h1>Prueba de captura</h1>
+      <p class="aviso">Página desechable del spike C. No envía nada a ningún servidor: todo queda en este iPhone.</p>
+
+      <section aria-labelledby="t-grabar">
+        <h2 id="t-grabar">1 · Grabar</h2>
+        <button id="rec" type="button" class="grande">Grabar</button>
+        <p id="rec-estado" role="status" aria-live="polite">Listo.</p>
+        <fieldset>
+          <legend>¿Apareció el aviso de permiso del micrófono en este intento?</legend>
+          <label><input type="radio" name="aviso" value="si" /> Sí</label>
+          <label><input type="radio" name="aviso" value="no" /> No</label>
+        </fieldset>
+        <audio id="reproductor" controls hidden></audio>
+      </section>
+
+      <section aria-labelledby="t-acciones">
+        <h2 id="t-acciones">2 · Otras pruebas</h2>
+        <button id="persistir" type="button">Pedir almacenamiento persistente</button>
+        <button id="copiar" type="button">Copiar resultados</button>
+        <p id="copiar-estado" role="status" aria-live="polite"></p>
+      </section>
+
+      <section aria-labelledby="t-resultados">
+        <h2 id="t-resultados">Resultados</h2>
+        <pre id="resultados">Calculando…</pre>
+      </section>
+    </main>
+  </body>
+</html>
