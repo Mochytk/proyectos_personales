@@ -47,14 +47,15 @@ No hace falta crear ningún token de API de Cloudflare: Workers Builds despliega
 4. Crea dos ramas desde `production`: `preview` y `dev`.
 5. Copia la *connection string* de cada rama (la "pooled" o la directa, como te indique en la fase 2) y pégala solo en Cloudflare, en GitHub o en tu `.env.local`.
 
-## 4. Correo para recuperar la contraseña (pendiente)
+## 4. Brevo (correo para recuperar la contraseña)
 
-Ver el [ADR 0005](decisions/0005-autenticacion.md). Antes de la fase 2 hay que confirmar si Brevo permite enviar gratis sin dominio propio. Para eso:
+Ver el [ADR 0005](decisions/0005-autenticacion.md), sección "Actualización 23-10-2026". En la fase 2:
 
-- agrega `www.brevo.com` y `help.brevo.com` a los dominios permitidos del entorno, o
-- revisa tú su plan gratis.
+1. Crea una cuenta gratis en brevo.com. Brevo revisa la cuenta antes de habilitar los envíos.
+2. En **Senders, Domains & Dedicated IPs**, agrega tu correo como remitente y confírmalo con el correo de verificación que te llega.
+3. Crea una clave de API y pégala únicamente como secreto `BREVO_API_KEY` en Cloudflare. Si Brevo permite limitar sus permisos, déjala solo para enviar correos transaccionales.
 
-Resend es la alternativa si en algún momento compras un dominio.
+Si algún día compras un dominio, conviene autenticarlo en Brevo (SPF y DKIM) para que los correos no caigan en spam.
 
 ## 5. En tu Mac
 

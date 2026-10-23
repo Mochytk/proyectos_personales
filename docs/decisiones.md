@@ -12,3 +12,5 @@ Una linea por decision: `AAAA-MM-DD | decision | por que`.
 - 2026-10-23 | Habit tracker: sync push/pull propio, ultimo en escribir por registro, aviso de cambios por Durable Object | Simple para un usuario y sin gastar el computo de Neon (ADR 0006)
 - 2026-10-23 | Habit tracker: dias como fecha local con corte a las 04:00; DD-MM-AAAA en pantalla | Rachas estables ante horario de verano y trasnoches (ADR 0007)
 - 2026-10-23 | Habit tracker: Electron con firma ad hoc y token en safeStorage asincrono | Sin cuenta de Apple; la API sincrona se elimina en Electron 46 (ADR 0008)
+- 2026-10-23 | Habit tracker se llama Constancia; tres estilos (Cuaderno, Linea, Disco) elegibles o rotando cada lunes | Gustaron las tres direcciones de la fase 0 (ADR 0009)
+- 2026-10-23 | Habit tracker: recuperacion de contrasena con Brevo gratis y remitente propio, por su API REST sin SDK | Gratis sin dominio; si cae en spam o se bloquea, queda el script de recuperacion (ADR 0005)

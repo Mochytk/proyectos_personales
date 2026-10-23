@@ -1,6 +1,6 @@
 # 0008 · App de escritorio para Mac
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (23-10-2026, PR #18)
 - **Fecha:** 23-10-2026
 
 ## Contexto
