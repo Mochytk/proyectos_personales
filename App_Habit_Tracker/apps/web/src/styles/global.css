@@ -41,6 +41,15 @@ textarea {
   color: inherit;
 }
 
+/* No double-tap zoom delay; each control shows its own pressed state instead of the
+   browser's grey flash. */
+a,
+button,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
