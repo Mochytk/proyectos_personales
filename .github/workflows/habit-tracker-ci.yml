@@ -49,3 +49,25 @@ jobs:
       - run: pnpm test
       - run: pnpm test:tz
       - run: pnpm audit
+
+  e2e:
+    name: End-to-end tests (Chromium)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: App_Habit_Tracker/.nvmrc
+          package-manager-cache: false
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      # The Chromium build that matches the pinned @playwright/test, plus its system libraries.
+      - run: pnpm --filter @habit-tracker/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @habit-tracker/web e2e
