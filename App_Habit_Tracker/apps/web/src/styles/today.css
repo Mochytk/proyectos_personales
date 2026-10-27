@@ -239,6 +239,7 @@
 .sheet-backdrop {
   position: fixed;
   inset: 0;
+  overscroll-behavior: contain;
   z-index: 10;
   display: flex;
   align-items: flex-end;
@@ -251,6 +252,7 @@
   max-width: 40rem;
   max-height: 90dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 1rem;

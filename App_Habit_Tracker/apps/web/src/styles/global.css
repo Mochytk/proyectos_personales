@@ -9,6 +9,8 @@
 html {
   color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
+  /* Keeps a focused control from scrolling under the fixed tab bar. */
+  scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
 }
 
 body {
