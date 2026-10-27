@@ -85,6 +85,11 @@ describe('habitSchema', () => {
     expect(habitSchema.safeParse(dailyHabit({ name })).success).toBe(false);
   });
 
+  it('asks to choose an anchor when there is none', () => {
+    const result = habitSchema.safeParse(dailyHabit({ anchorId: '' }));
+    expect(result.error?.issues[0]?.message).toBe('Elige un ancla.');
+  });
+
   it('rejects an impossible startsOn date', () => {
     expect(habitSchema.safeParse(dailyHabit({ startsOn: '2026-02-30' })).success).toBe(false);
   });

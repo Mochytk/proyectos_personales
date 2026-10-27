@@ -56,7 +56,7 @@ export const habitSchema = z
       .min(1, 'Elige al menos un día.')
       .refine((days) => new Set(days).size === days.length, { message: 'Hay días repetidos.' }),
     startsOn: localDateSchema,
-    anchorId: z.uuid(),
+    anchorId: z.uuid('Elige un ancla.'),
     color: z.string().min(1).max(30),
     icon: z.string().max(40).nullable(),
     sortOrder: z.number().int(),
