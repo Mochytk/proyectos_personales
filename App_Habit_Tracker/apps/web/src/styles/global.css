@@ -401,3 +401,91 @@ a.button {
     transition-duration: 0.01ms !important;
   }
 }
+
+.page-subtitle {
+  margin: 0.375rem 0 0;
+  color: var(--muted);
+}
+
+.row-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+
+/* 90-day history */
+
+.heatmap-wrap {
+  margin-top: 0.75rem;
+  max-width: 22rem;
+}
+
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.heatmap-weekdays {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1;
+  border-radius: var(--check-radius);
+  border: 1.5px solid transparent;
+}
+
+.heatmap-cell[data-state='done'] {
+  background-color: var(--accent);
+}
+
+.heatmap-cell[data-state='skipped'] {
+  border-color: var(--muted);
+  background-image: repeating-linear-gradient(135deg, var(--muted) 0 2px, transparent 2px 6px);
+}
+
+.heatmap-cell[data-state='missed'] {
+  border-color: var(--muted);
+}
+
+.heatmap-cell[data-state='today_pending'] {
+  border: 2.5px solid var(--accent);
+}
+
+.heatmap-cell[data-state='not_scheduled'] {
+  background-color: var(--chip);
+}
+
+.heatmap-cell[data-state='before_start'] {
+  border: 1px dashed var(--line);
+}
+
+.heatmap-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.heatmap-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.heatmap-legend .heatmap-cell {
+  width: 14px;
+}

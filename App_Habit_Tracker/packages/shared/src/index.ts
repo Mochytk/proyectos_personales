@@ -2,6 +2,7 @@
 export * from './dates/calendar';
 export * from './dates/format';
 export * from './dates/local-date';
+export * from './habits/heatmap';
 export * from './habits/schedule';
 export * from './habits/streak';
 export * from './habits/weekly';
