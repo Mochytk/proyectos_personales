@@ -5,6 +5,7 @@ export * from './dates/local-date';
 export * from './habits/heatmap';
 export * from './habits/schedule';
 export * from './habits/streak';
+export * from './habits/week-summary';
 export * from './habits/weekly';
 export * from './ids';
 export * from './schemas/errors';
