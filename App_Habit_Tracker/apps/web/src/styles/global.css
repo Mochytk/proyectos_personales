@@ -304,6 +304,56 @@ a.button {
   color: var(--muted);
 }
 
+.row-wrap {
+  flex-wrap: wrap;
+}
+
+.row-full {
+  flex-basis: 100%;
+}
+
+.button-icon {
+  min-width: 44px;
+  justify-content: center;
+}
+
+.inline-form {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.inline-form input {
+  flex: 1;
+  min-width: 10rem;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--muted);
+  border-radius: var(--control-radius);
+  background-color: var(--ground);
+}
+
+.inline-form input[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.add-form {
+  margin-top: 1rem;
+}
+
+.add-form label {
+  flex-basis: 100%;
+  font-weight: 700;
+}
+
+.subgroup-title {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  color: var(--muted);
+}
+
 .async-loading,
 .async-problem {
   margin: 1.5rem 0;

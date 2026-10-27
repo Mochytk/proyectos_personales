@@ -4,6 +4,7 @@ import { useDb } from '../db/DatabaseProvider';
 import { habitsRepo } from '../db/habits-repo';
 import { AsyncState } from '../ui/AsyncState';
 import { useTimedLiveQuery } from '../ui/useTimedLiveQuery';
+import { AnchorsEditor } from './AnchorsEditor';
 import { scheduleLabel } from './schedule-label';
 
 interface Data {
@@ -127,6 +128,7 @@ export function HabitsScreen() {
           </section>
         ) : null}
       </AsyncState>
+      <AnchorsEditor />
     </>
   );
 }
