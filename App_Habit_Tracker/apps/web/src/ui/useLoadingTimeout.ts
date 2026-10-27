@@ -10,8 +10,15 @@ export function useLoadingTimeout(
   attempt = 0,
 ): boolean {
   const [timedOut, setTimedOut] = useState(false);
-  useEffect(() => {
+  // A new load (or a retry) starts with a fresh clock: reset while rendering, which
+  // React supports for state derived from changed inputs, instead of in the effect.
+  const [started, setStarted] = useState({ isLoading, attempt });
+  if (started.isLoading !== isLoading || started.attempt !== attempt) {
+    setStarted({ isLoading, attempt });
     setTimedOut(false);
+  }
+
+  useEffect(() => {
     if (!isLoading) return;
     const timer = setTimeout(() => {
       setTimedOut(true);
@@ -20,5 +27,6 @@ export function useLoadingTimeout(
       clearTimeout(timer);
     };
   }, [isLoading, timeoutMs, attempt]);
+
   return isLoading && timedOut;
 }

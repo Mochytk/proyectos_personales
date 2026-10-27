@@ -31,7 +31,6 @@ export function DatabaseProvider({ open = openDb, children }: Props) {
   useEffect(() => {
     let cancelled = false;
     let opened: HabitDb | undefined;
-    setState({ status: 'opening' });
     open()
       .then(async (db) => {
         opened = db;
@@ -55,6 +54,7 @@ export function DatabaseProvider({ open = openDb, children }: Props) {
   }, [open, attempt]);
 
   const retry = () => {
+    setState({ status: 'opening' });
     setAttempt((n) => n + 1);
   };
 
