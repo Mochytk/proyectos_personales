@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { MemoryRouter, useLocation } from 'react-router';
-import { AppRoutes } from '../app/App';
+import { AppRoutes, SavedStyle } from '../app/App';
 import { DatabaseProvider } from '../db/DatabaseProvider';
 import type { HabitDb } from '../db/db';
 import { ensureDefaults } from '../db/defaults';
@@ -22,6 +22,7 @@ export async function renderRoute(route: string): Promise<{
   render(
     <MemoryRouter initialEntries={[route]}>
       <DatabaseProvider open={() => Promise.resolve(db)}>
+        <SavedStyle />
         <AppRoutes />
         <CurrentPath />
       </DatabaseProvider>

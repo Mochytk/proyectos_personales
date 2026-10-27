@@ -23,7 +23,7 @@ const TABS = [
 ] as const;
 
 // Applies the saved style; with "rotar" it changes on Mondays at the cutoff (ADR 0009).
-function SavedStyle() {
+export function SavedStyle() {
   useStyle(useSettings().style, useToday());
   return null;
 }
