@@ -8,6 +8,7 @@ import './styles/global.css';
 import './styles/cuaderno.css';
 import './styles/linea.css';
 import './styles/disco.css';
+import './styles/today.css';
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
