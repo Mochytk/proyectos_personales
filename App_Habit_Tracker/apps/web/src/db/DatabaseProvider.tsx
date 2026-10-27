@@ -64,7 +64,7 @@ export function DatabaseProvider({ open = openDb, children }: Props) {
         <p>No pudimos abrir el almacenamiento de este dispositivo.</p>
         <p className="async-detail">
           Pasa en navegación privada o si el navegador bloquea los datos de los sitios. Sin
-          almacenamiento, Constancia no puede guardar tus hábitos.
+          almacenamiento, <span translate="no">Constancia</span> no puede guardar tus hábitos.
         </p>
         <button type="button" className="button" onClick={retry}>
           Reintentar
