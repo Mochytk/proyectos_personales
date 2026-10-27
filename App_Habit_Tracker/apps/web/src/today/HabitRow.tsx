@@ -39,7 +39,12 @@ export function HabitRow({ row, today, onMore }: Props) {
   const detail = habitStats(row, today);
 
   return (
-    <li className="habit" aria-label={habit.name} data-done={done}>
+    <li
+      className="habit"
+      aria-label={habit.name}
+      data-done={done}
+      data-skipped={!done && checkIn?.status === 'skipped'}
+    >
       <button type="button" className="habit-toggle" aria-pressed={done} onClick={tap}>
         <span className="check" aria-hidden="true" />
         <span className="habit-name">{habit.name}</span>

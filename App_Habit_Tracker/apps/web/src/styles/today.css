@@ -79,6 +79,18 @@
   transform: rotate(-45deg);
 }
 
+.habit[data-skipped='true'] .check {
+  border-color: var(--muted);
+}
+
+.habit[data-skipped='true'] .check::after {
+  content: '';
+  width: 12px;
+  height: 3px;
+  border-radius: 1px;
+  background-color: var(--muted);
+}
+
 .habit[data-done='true'] .habit-name {
   color: var(--muted);
 }

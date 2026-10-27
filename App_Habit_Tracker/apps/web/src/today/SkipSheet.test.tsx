@@ -51,6 +51,7 @@ describe('SkipSheet', () => {
     expect(document.activeElement?.getAttribute('aria-label')).toBe('Más opciones para Leer');
     const row = screen.getByRole('listitem', { name: 'Leer' });
     expect(await within(row).findByText('Saltado: certamen')).toBeTruthy();
+    expect(row.dataset.skipped).toBe('true');
   });
 
   it('keeps Tab inside the sheet', async () => {
