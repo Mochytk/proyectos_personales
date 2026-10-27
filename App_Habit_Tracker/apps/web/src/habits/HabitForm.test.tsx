@@ -1,10 +1,13 @@
 import { parseLocalDate } from '@habit-tracker/shared';
-import { screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { checkInsRepo } from '../db/check-ins-repo';
 import type { HabitDb } from '../db/db';
 import { habitsRepo } from '../db/habits-repo';
 import { renderRoute } from '../test/render';
+import { HabitForm } from './HabitForm';
 
 async function firstAnchorId(db: HabitDb): Promise<string> {
   const anchor = await db.anchors.orderBy('sortOrder').first();
@@ -59,14 +62,39 @@ describe('HabitForm', () => {
     expect(await db.habits.count()).toBe(0);
   });
 
-  it('moves focus to the first invalid field when saving fails', async () => {
+  it('moves focus to the first invalid field, already marked invalid, when saving fails', async () => {
     const { user } = await renderRoute('/habitos/nuevo');
+    const name = await screen.findByLabelText('Nombre');
+    let invalidOnFocus: string | null = null;
+    name.addEventListener('focus', () => {
+      invalidOnFocus = name.getAttribute('aria-invalid');
+    });
 
-    await user.click(await screen.findByRole('radio', { name: 'Cuota semanal' }));
+    await user.click(screen.getByRole('radio', { name: 'Cuota semanal' }));
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
 
     expect(await screen.findByText('Escribe un nombre.')).toBeTruthy();
-    expect(document.activeElement).toBe(screen.getByLabelText('Nombre'));
+    await waitFor(() => {
+      expect(document.activeElement).toBe(name);
+    });
+    expect(invalidOnFocus).toBe('true');
+    expect(screen.getByText('Indica cuántas veces por semana (1 a 7).')).toBeTruthy();
+  });
+
+  it('links the weekdays error to the checkbox that gets the focus', async () => {
+    const { user } = await renderRoute('/habitos/nuevo');
+    await user.type(await screen.findByLabelText('Nombre'), 'Correr');
+    for (const day of ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']) {
+      await user.click(screen.getByRole('checkbox', { name: day }));
+    }
+    await user.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    const monday = screen.getByRole('checkbox', { name: 'Lunes' });
+    await waitFor(() => {
+      expect(document.activeElement).toBe(monday);
+    });
+    const describedBy = monday.getAttribute('aria-describedby') ?? '';
+    expect(document.getElementById(describedBy)?.textContent).toBe('Elige al menos un día.');
   });
 
   it('creates a single habit when Guardar is clicked twice in a row', async () => {
@@ -108,5 +136,31 @@ describe('HabitForm', () => {
     await waitFor(async () => {
       expect((await db.habits.get(habit.id))?.weekdays).toEqual([1, 2, 3, 5]);
     });
+  });
+});
+
+describe('HabitForm when saving fails for another reason', () => {
+  it('says so and lets the user try again', async () => {
+    const user = userEvent.setup();
+    const onSave = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('disk full'))
+      .mockResolvedValue(undefined);
+    render(
+      <MemoryRouter>
+        <HabitForm anchors={[]} hasCheckIns={false} onSave={onSave} />
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText('Nombre'), 'Leer');
+    await user.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    expect((await screen.findByRole('alert')).textContent).toBe(
+      'No pudimos guardar el hábito. Intenta de nuevo.',
+    );
+    const save = screen.getByRole('button', { name: 'Guardar' });
+    expect(save.hasAttribute('disabled')).toBe(false);
+    await user.click(save);
+    expect(onSave).toHaveBeenCalledTimes(2);
   });
 });

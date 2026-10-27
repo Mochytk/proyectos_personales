@@ -1,5 +1,6 @@
 import { fieldErrors, type Anchor, type Habit, type IsoWeekday } from '@habit-tracker/shared';
 import { useId, useRef, useState, type SubmitEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { Link } from 'react-router';
 import type { NewHabit } from '../db/habits-repo';
 import { WEEKDAYS } from './schedule-label';
@@ -36,6 +37,7 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
   const [weekdays, setWeekdays] = useState<IsoWeekday[]>(habit?.weekdays ?? ALL_DAYS);
   const [quota, setQuota] = useState(habit?.weeklyQuota?.toString() ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [problem, setProblem] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false);
 
@@ -63,13 +65,22 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         weeklyQuota: mode === 'weekly_quota' && quota !== '' ? Number(quota) : null,
       });
     } catch (error) {
-      const fields = fieldErrors(error);
-      if (!fields) throw error;
-      setErrors(fields);
-      const first = FIELD_ORDER.find((field) => fields[field] !== undefined);
-      if (first) document.getElementById(`${id}-${first}`)?.focus();
       savingRef.current = false;
       setSaving(false);
+      const fields = fieldErrors(error);
+      if (!fields) {
+        setErrors({});
+        setProblem('No pudimos guardar el hábito. Intenta de nuevo.');
+        return;
+      }
+      // Render the messages first, so the field is already marked invalid, and linked to
+      // its message, when it gets the focus and a screen reader announces it.
+      flushSync(() => {
+        setProblem(null);
+        setErrors(fields);
+      });
+      const first = FIELD_ORDER.find((field) => fields[field] !== undefined);
+      if (first) document.getElementById(`${id}-${first}`)?.focus();
     }
   };
 
@@ -178,6 +189,7 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
                   name="weekdays"
                   value={day}
                   aria-label={dayName}
+                  {...(index === 0 ? errorProps('weekdays') : {})}
                   checked={weekdays.includes(day)}
                   onChange={() => {
                     toggleDay(day);
@@ -214,6 +226,11 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         </div>
       )}
 
+      {problem === null ? null : (
+        <p className="field-error" role="alert">
+          {problem}
+        </p>
+      )}
       <div className="form-actions">
         <button type="submit" className="button button-primary" disabled={saving}>
           Guardar
