@@ -2,10 +2,12 @@ import { parseLocalDate } from '@habit-tracker/shared';
 import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { habitsRepo } from '../db/habits-repo';
+import { userEvent } from '@testing-library/user-event';
 import { renderRoute } from '../test/render';
 
 async function anchorList() {
   const section = await screen.findByRole('region', { name: 'Anclas' });
+  await userEvent.click(within(section).getByRole('button', { name: 'Editar anclas' }));
   return within(section);
 }
 
@@ -15,6 +17,17 @@ function listedNames(list: Awaited<ReturnType<typeof anchorList>>): string[] {
 }
 
 describe('AnchorsEditor', () => {
+  it('shows only the anchor names until editing starts', async () => {
+    await renderRoute('/habitos');
+    const section = within(await screen.findByRole('region', { name: 'Anclas' }));
+
+    expect(await section.findByText(/^Al despertar · Mañana/)).toBeTruthy();
+    expect(section.queryByRole('button', { name: 'Renombrar Tarde' })).toBeNull();
+    expect(
+      section.getByRole('button', { name: 'Editar anclas' }).getAttribute('aria-expanded'),
+    ).toBe('false');
+  });
+
   it('adds an anchor', async () => {
     const { user } = await renderRoute('/habitos');
     const list = await anchorList();

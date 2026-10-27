@@ -130,6 +130,7 @@ export function AnchorsEditor() {
   const db = useDb();
   const repo = anchorsRepo(db);
   const query = useTimedLiveQuery(() => db.anchors.orderBy('sortOrder').toArray(), [db]);
+  const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
 
@@ -151,70 +152,90 @@ export function AnchorsEditor() {
 
   return (
     <section className="group" aria-labelledby="anchors-title">
-      <h2 id="anchors-title" className="group-title">
-        Anclas
-      </h2>
-      <AsyncState status={query.state} onRetry={query.retry}>
-        <ul className="rows" aria-label="Anclas activas">
-          {active.map((anchor, index) => (
-            <AnchorRow
-              key={anchor.id}
-              anchor={anchor}
-              first={index === 0}
-              last={index === active.length - 1}
-            />
-          ))}
-        </ul>
-        <form
-          className="inline-form add-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void add();
+      <div className="group-header">
+        <h2 id="anchors-title" className="group-title">
+          Anclas
+        </h2>
+        <button
+          type="button"
+          className="button button-small"
+          aria-expanded={open}
+          aria-controls="anchors-editor"
+          onClick={() => {
+            setOpen((value) => !value);
           }}
         >
-          <label htmlFor="new-anchor">Nueva ancla</label>
-          <input
-            id="new-anchor"
-            value={newName}
-            maxLength={40}
-            autoComplete="off"
-            onChange={(event) => {
-              setNewName(event.target.value);
-            }}
-            {...(problem === null
-              ? {}
-              : { 'aria-invalid': true, 'aria-describedby': 'new-anchor-error' })}
-          />
-          <button type="submit" className="button button-small">
-            Agregar
-          </button>
-          {problem === null ? null : (
-            <p className="field-error row-full" id="new-anchor-error">
-              {problem}
-            </p>
-          )}
-        </form>
-        {archived.length > 0 ? (
-          <>
-            <h3 className="subgroup-title">Archivadas</h3>
-            <ul className="rows" aria-label="Anclas archivadas">
-              {archived.map((anchor) => (
-                <li key={anchor.id} className="row row-archived">
-                  <span className="row-title">{anchor.name}</span>
-                  <button
-                    type="button"
-                    className="button button-small"
-                    aria-label={`Reactivar ${anchor.name}`}
-                    onClick={() => void repo.unarchive(anchor.id)}
-                  >
-                    Reactivar
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        ) : null}
+          {open ? 'Listo' : 'Editar anclas'}
+        </button>
+      </div>
+      <AsyncState status={query.state} onRetry={query.retry}>
+        {open ? null : (
+          <p className="group-summary">{active.map((anchor) => anchor.name).join(' · ')}</p>
+        )}
       </AsyncState>
+      {open ? (
+        <div id="anchors-editor">
+          <ul className="rows" aria-label="Anclas activas">
+            {active.map((anchor, index) => (
+              <AnchorRow
+                key={anchor.id}
+                anchor={anchor}
+                first={index === 0}
+                last={index === active.length - 1}
+              />
+            ))}
+          </ul>
+          <form
+            className="inline-form add-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void add();
+            }}
+          >
+            <label htmlFor="new-anchor">Nueva ancla</label>
+            <input
+              id="new-anchor"
+              value={newName}
+              maxLength={40}
+              autoComplete="off"
+              onChange={(event) => {
+                setNewName(event.target.value);
+              }}
+              {...(problem === null
+                ? {}
+                : { 'aria-invalid': true, 'aria-describedby': 'new-anchor-error' })}
+            />
+            <button type="submit" className="button button-small">
+              Agregar
+            </button>
+            {problem === null ? null : (
+              <p className="field-error row-full" id="new-anchor-error">
+                {problem}
+              </p>
+            )}
+          </form>
+          {archived.length > 0 ? (
+            <>
+              <h3 className="subgroup-title">Archivadas</h3>
+              <ul className="rows" aria-label="Anclas archivadas">
+                {archived.map((anchor) => (
+                  <li key={anchor.id} className="row row-archived">
+                    <span className="row-title">{anchor.name}</span>
+                    <button
+                      type="button"
+                      className="button button-small"
+                      aria-label={`Reactivar ${anchor.name}`}
+                      onClick={() => void repo.unarchive(anchor.id)}
+                    >
+                      Reactivar
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }
