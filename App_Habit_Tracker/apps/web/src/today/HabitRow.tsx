@@ -2,6 +2,7 @@ import type { LocalDate } from '@habit-tracker/shared';
 import { useEffect, useRef, useState } from 'react';
 import { checkInsRepo } from '../db/check-ins-repo';
 import { useDb } from '../db/DatabaseProvider';
+import { habitStats } from './habit-stats';
 import type { TodayRow } from './today-model';
 
 // A second tap this soon after the last one is taken as part of the same gesture, so a
@@ -16,7 +17,7 @@ interface Props {
 
 export function HabitRow({ row, today, onMore }: Props) {
   const repo = checkInsRepo(useDb());
-  const { habit, checkIn, progress } = row;
+  const { habit, checkIn } = row;
   const savedDone = checkIn?.status === 'done';
   // Shown at once, before the write lands; dropped when the saved row agrees.
   const [pending, setPending] = useState<boolean | null>(null);
@@ -35,8 +36,7 @@ export function HabitRow({ row, today, onMore }: Props) {
     void (done ? repo.clear(habit.id, today) : repo.markDone(habit.id, today));
   };
 
-  const detail =
-    progress === null ? null : `${String(progress.done)} de ${String(progress.quota)} esta semana`;
+  const detail = habitStats(row, today);
 
   return (
     <li className="habit" aria-label={habit.name} data-done={done}>
@@ -44,7 +44,7 @@ export function HabitRow({ row, today, onMore }: Props) {
         <span className="check" aria-hidden="true" />
         <span className="habit-name">{habit.name}</span>
       </button>
-      {detail === null ? null : <p className="habit-detail">{detail}</p>}
+      {detail === '' ? null : <p className="habit-detail">{detail}</p>}
       <button
         type="button"
         className="habit-more"
