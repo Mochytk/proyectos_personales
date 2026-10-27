@@ -1,5 +1,5 @@
 import type { LocalDate } from '@habit-tracker/shared';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { checkInsRepo } from '../db/check-ins-repo';
 import { useDb } from '../db/DatabaseProvider';
 import { habitStats } from './habit-stats';
@@ -19,20 +19,17 @@ export function HabitRow({ row, today, onMore }: Props) {
   const repo = checkInsRepo(useDb());
   const { habit, checkIn } = row;
   const savedDone = checkIn?.status === 'done';
-  // Shown at once, before the write lands; dropped when the saved row agrees.
-  const [pending, setPending] = useState<boolean | null>(null);
+  // A tap shows at once, until the saved check-in moves on from the version it was made on.
+  const savedVersion = checkIn?.updatedAt ?? null;
+  const [pending, setPending] = useState<{ done: boolean; base: string | null } | null>(null);
   const lastTap = useRef(-Infinity);
-  const done = pending ?? savedDone;
-
-  useEffect(() => {
-    if (pending === savedDone) setPending(null);
-  }, [pending, savedDone]);
+  const done = pending?.base === savedVersion ? pending.done : savedDone;
 
   const tap = () => {
     const now = Date.now();
     if (now - lastTap.current < TAP_GUARD_MS) return;
     lastTap.current = now;
-    setPending(!done);
+    setPending({ done: !done, base: savedVersion });
     void (done ? repo.clear(habit.id, today) : repo.markDone(habit.id, today));
   };
 

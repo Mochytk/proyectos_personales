@@ -1,6 +1,7 @@
 // @ts-check
 import js from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
@@ -24,6 +25,15 @@ export default defineConfig(
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+  },
+  // Rules of Hooks, effect dependencies and the React Compiler checks, for the React app.
+  {
+    files: ['apps/web/**/*.{ts,tsx}'],
+    extends: [reactHooks.configs.flat.recommended],
+    rules: {
+      // useTimedLiveQuery takes deps like useEffect, so check them the same way.
+      'react-hooks/exhaustive-deps': ['warn', { additionalHooks: '(useTimedLiveQuery)' }],
     },
   },
   // Plain JS config files are not part of any tsconfig, so they get untyped rules only.

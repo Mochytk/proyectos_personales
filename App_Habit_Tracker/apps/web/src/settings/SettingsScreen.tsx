@@ -1,5 +1,5 @@
 import { formatDisplayDate, type StyleSetting } from '@habit-tracker/shared';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useToday } from '../app/useToday';
 import { useDb } from '../db/DatabaseProvider';
 import { updateSettings, type SettingsPatch } from '../db/settings-repo';
@@ -20,28 +20,23 @@ function timeZones(current: string): string[] {
   return zones.includes(current) ? zones : [current, ...zones];
 }
 
-// Every change is saved as soon as it is made; there is no "Guardar" here. The controls
-// show the new value right away, until the saved row catches up.
+// Every change is saved as soon as it is made; there is no "Guardar" here.
 export function SettingsScreen() {
   const db = useDb();
   const today = useToday();
   const query = useTimedLiveQuery(() => db.userSettings.toCollection().first(), [db]);
-  const [pending, setPending] = useState<SettingsPatch>({});
+  // A change shows at once, until the saved row moves on from the version it was made on.
+  const [pending, setPending] = useState<{ patch: SettingsPatch; base: string } | null>(null);
   const saved = query.data;
-  const settings = saved && { ...saved, ...pending };
-
-  useEffect(() => {
-    if (!saved) return;
-    setPending((current) => {
-      const left = Object.entries(current).filter(
-        ([key, value]) => saved[key as keyof SettingsPatch] !== value,
-      );
-      return left.length === Object.keys(current).length ? current : Object.fromEntries(left);
-    });
-  }, [saved]);
+  const settings =
+    saved && (pending?.base === saved.updatedAt ? { ...saved, ...pending.patch } : saved);
 
   const save = (patch: SettingsPatch) => {
-    setPending((current) => ({ ...current, ...patch }));
+    if (!saved) return;
+    setPending((current) => ({
+      patch: { ...(current?.base === saved.updatedAt ? current.patch : {}), ...patch },
+      base: saved.updatedAt,
+    }));
     void updateSettings(db, patch);
   };
 
