@@ -6,6 +6,7 @@ export * from './habits/schedule';
 export * from './habits/streak';
 export * from './habits/weekly';
 export * from './ids';
+export * from './schemas/errors';
 export * from './schemas/habits';
 export * from './schemas/sync-columns';
 export * from './settings/defaults';

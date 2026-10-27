@@ -1,6 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router';
 import { DatabaseProvider } from '../db/DatabaseProvider';
 import { HabitDetailScreen } from '../habits/HabitDetailScreen';
+import { HabitEditScreen } from '../habits/HabitEditScreen';
 import { HabitsScreen } from '../habits/HabitsScreen';
 import { ReviewScreen } from '../review/ReviewScreen';
 import { SettingsScreen } from '../settings/SettingsScreen';
@@ -22,9 +23,23 @@ const TABS = [
 ] as const;
 
 // Applies the saved style; with "rotar" it changes on Mondays at the cutoff (ADR 0009).
-function SavedStyle() {
+export function SavedStyle() {
   useStyle(useSettings().style, useToday());
   return null;
+}
+
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route index element={<TodayScreen />} />
+      <Route path="habitos" element={<HabitsScreen />} />
+      <Route path="habitos/nuevo" element={<HabitEditScreen />} />
+      <Route path="habitos/:id" element={<HabitDetailScreen />} />
+      <Route path="habitos/:id/editar" element={<HabitEditScreen />} />
+      <Route path="revision" element={<ReviewScreen />} />
+      <Route path="ajustes" element={<SettingsScreen />} />
+    </Routes>
+  );
 }
 
 export function App() {
@@ -34,13 +49,7 @@ export function App() {
         <ErrorBoundary>
           <DatabaseProvider>
             <SavedStyle />
-            <Routes>
-              <Route index element={<TodayScreen />} />
-              <Route path="habitos" element={<HabitsScreen />} />
-              <Route path="habitos/:id" element={<HabitDetailScreen />} />
-              <Route path="revision" element={<ReviewScreen />} />
-              <Route path="ajustes" element={<SettingsScreen />} />
-            </Routes>
+            <AppRoutes />
           </DatabaseProvider>
         </ErrorBoundary>
       </main>

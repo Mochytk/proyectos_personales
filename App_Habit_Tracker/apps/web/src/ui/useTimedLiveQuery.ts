@@ -5,7 +5,7 @@ import { LOADING_TIMEOUT_MS, useLoadingTimeout } from './useLoadingTimeout';
 export interface TimedQuery<T> {
   state: 'loading' | 'ready' | 'timeout' | 'error';
   data?: T;
-  retry(): void;
+  retry: () => void;
 }
 
 type Result<T> = { state: 'loading' } | { state: 'ready'; data: T } | { state: 'error' };
