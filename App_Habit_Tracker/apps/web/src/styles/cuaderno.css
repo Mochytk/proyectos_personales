@@ -13,6 +13,7 @@
   --line: #c3cde0;
   --chip: #edf1fa;
   --focus: #d63c3c;
+  --danger: #b42323;
   --grid: #e4eaf5;
   --margin-line: #d63c3c;
   --check-radius: 4px;
@@ -29,6 +30,7 @@
     --line: #34425f;
     --chip: #1a2643;
     --focus: #f07272;
+    --danger: #ff8a8a;
     --grid: #1a2540;
     --margin-line: #f07272;
   }

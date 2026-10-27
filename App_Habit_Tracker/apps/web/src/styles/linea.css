@@ -13,6 +13,7 @@
   --line: #cdd1d9;
   --chip: #e9ecf2;
   --focus: #4c51bf;
+  --danger: #b3261e;
   --anchor-1: #d99a00;
   --anchor-2: #0e8486;
   --anchor-3: #e3560b;
@@ -31,6 +32,7 @@
     --line: #343944;
     --chip: #262a32;
     --focus: #8e93ff;
+    --danger: #ff8f85;
     --anchor-1: #f2b92e;
     --anchor-2: #2cb6b8;
     --anchor-3: #ff7a33;
