@@ -29,6 +29,8 @@ h3 {
   margin: 0;
   font-family: var(--font-display);
   line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 button,
