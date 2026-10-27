@@ -118,6 +118,11 @@ textarea {
   color: var(--text);
 }
 
+.async-problem .async-detail {
+  max-width: 32rem;
+  color: var(--muted);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
