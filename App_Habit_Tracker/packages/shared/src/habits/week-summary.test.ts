@@ -79,6 +79,53 @@ describe('weekSummary', () => {
     expect(summary[0]).toMatchObject({ done: 1, missed: 5, streak: 1 });
   });
 
+  it('breaks the daily streak on a missed last day of a closed week', () => {
+    const doneMonToSat = days(
+      ['2026-10-19', '2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23', '2026-10-24'].map(
+        (date): [string, CheckInStatus] => [date, 'done'],
+      ),
+    );
+    const summary = weekSummary({
+      habits: [habit()],
+      weekStart: WEEK,
+      today: parseLocalDate('2026-10-26'), // Monday after
+      checkIns: new Map([['daily', doneMonToSat]]),
+      overrides: new Map(),
+    });
+    expect(summary[0]).toMatchObject({ done: 6, missed: 1, streak: 0 });
+  });
+
+  it('ignores records after a closed week when counting its streak', () => {
+    const summary = weekSummary({
+      habits: [habit()],
+      weekStart: WEEK,
+      today: parseLocalDate('2026-10-27'),
+      checkIns: new Map([
+        [
+          'daily',
+          days([
+            ['2026-10-25', 'done'],
+            ['2026-10-26', 'done'],
+          ]),
+        ],
+      ]),
+      overrides: new Map(),
+    });
+    expect(summary[0]?.streak).toBe(1);
+  });
+
+  it('lets an unmet closed week break the weekly streak', () => {
+    const quota = habit({ id: 'quota', mode: 'weekly_quota', weeklyQuota: 1 });
+    const summary = weekSummary({
+      habits: [quota],
+      weekStart: WEEK,
+      today: parseLocalDate('2026-10-26'),
+      checkIns: new Map([['quota', days([['2026-10-13', 'done']])]]),
+      overrides: new Map(),
+    });
+    expect(summary[0]).toMatchObject({ done: 0, met: false, streak: 0 });
+  });
+
   it('leaves out archived and deleted habits, and those that start after the week', () => {
     const summary = weekSummary({
       habits: [

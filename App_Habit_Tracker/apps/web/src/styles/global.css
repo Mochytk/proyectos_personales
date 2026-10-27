@@ -9,6 +9,8 @@
 html {
   color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
+  /* Keeps a focused control from scrolling under the fixed tab bar. */
+  scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 5rem);
 }
 
 body {
@@ -27,6 +29,8 @@ h3 {
   margin: 0;
   font-family: var(--font-display);
   line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 button,
@@ -35,6 +39,15 @@ select,
 textarea {
   font: inherit;
   color: inherit;
+}
+
+/* No double-tap zoom delay; each control shows its own pressed state instead of the
+   browser's grey flash. */
+a,
+button,
+label {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 :focus-visible {
@@ -109,6 +122,10 @@ textarea {
   min-height: 44px;
   padding: 0 0.75rem;
   font-size: 0.875rem;
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .button:disabled {
@@ -488,4 +505,24 @@ a.button {
 
 .heatmap-legend .heatmap-cell {
   width: 14px;
+}
+
+/* Hover only where there is a real pointer; on a phone a tap would leave it stuck. */
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background-color: var(--chip);
+  }
+
+  /* Mixing in the ground shows on every accent, the near-black and near-white ones too. */
+  .button-primary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--accent) 80%, var(--ground));
+  }
+
+  .tab:hover {
+    color: var(--text);
+  }
+
+  .row-link:hover {
+    text-decoration-color: currentColor;
+  }
 }

@@ -85,6 +85,20 @@ describe('habitSchema', () => {
     expect(habitSchema.safeParse(dailyHabit({ name })).success).toBe(false);
   });
 
+  it('explains a fractional quota in Spanish', () => {
+    const result = habitSchema.safeParse(dailyHabit({ mode: 'weekly_quota', weeklyQuota: 2.5 }));
+    expect(result.error?.issues.map((issue) => issue.message)).toEqual([
+      'Indica cuántas veces por semana (1 a 7).',
+    ]);
+  });
+
+  it('reports a missing quota together with other field errors', () => {
+    const result = habitSchema.safeParse(
+      dailyHabit({ name: '', mode: 'weekly_quota', weeklyQuota: null }),
+    );
+    expect(result.error?.issues.map((issue) => issue.path[0])).toEqual(['name', 'weeklyQuota']);
+  });
+
   it('asks to choose an anchor when there is none', () => {
     const result = habitSchema.safeParse(dailyHabit({ anchorId: '' }));
     expect(result.error?.issues[0]?.message).toBe('Elige un ancla.');

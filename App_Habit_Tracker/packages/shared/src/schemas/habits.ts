@@ -44,13 +44,15 @@ const isoWeekdaySchema = z
 export const habitModeSchema = z.enum(['daily', 'weekly_quota']);
 export type HabitMode = z.infer<typeof habitModeSchema>;
 
+const QUOTA_MESSAGE = 'Indica cuántas veces por semana (1 a 7).';
+
 export const habitSchema = z
   .object({
     ...syncColumns,
     name: z.string().trim().min(1, 'Escribe un nombre.').max(60, 'Máximo 60 caracteres.'),
     description: z.string().trim().max(280, 'Máximo 280 caracteres.').nullable(),
     mode: habitModeSchema,
-    weeklyQuota: z.number().int().nullable(),
+    weeklyQuota: z.number(QUOTA_MESSAGE).int(QUOTA_MESSAGE).nullable(),
     weekdays: z
       .array(isoWeekdaySchema)
       .min(1, 'Elige al menos un día.')
@@ -69,7 +71,7 @@ export const habitSchema = z
         ctx.addIssue({
           code: 'custom',
           path: ['weeklyQuota'],
-          message: 'Indica cuántas veces por semana (1 a 7).',
+          message: QUOTA_MESSAGE,
           input: quota,
         });
       }

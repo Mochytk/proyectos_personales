@@ -223,6 +223,11 @@
 
 /* Skip sheet */
 
+/* The page behind an open sheet does not scroll. */
+body:has(.sheet-backdrop) {
+  overflow: hidden;
+}
+
 .sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -238,6 +243,7 @@
   max-width: 40rem;
   max-height: 90dvh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -268,4 +274,19 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-end;
+}
+
+@media (hover: hover) {
+  .habit-toggle:hover .check {
+    background-color: var(--chip);
+  }
+
+  .habit[data-done='true'] .habit-toggle:hover .check {
+    background-color: var(--accent);
+  }
+
+  .habit-more:hover {
+    background-color: var(--chip);
+    color: var(--text);
+  }
 }
