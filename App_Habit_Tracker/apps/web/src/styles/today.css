@@ -91,19 +91,6 @@
   background-color: var(--muted);
 }
 
-.habit-toggle:hover .check {
-  background-color: var(--chip);
-}
-
-.habit[data-done='true'] .habit-toggle:hover .check {
-  background-color: var(--accent);
-}
-
-.habit-more:hover {
-  background-color: var(--chip);
-  color: var(--text);
-}
-
 .habit[data-done='true'] .habit-name {
   color: var(--muted);
 }
@@ -236,6 +223,7 @@
 
 /* Skip sheet */
 
+
 .sheet-backdrop {
   position: fixed;
   inset: 0;
@@ -283,4 +271,19 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-end;
+}
+
+@media (hover: hover) {
+  .habit-toggle:hover .check {
+    background-color: var(--chip);
+  }
+
+  .habit[data-done='true'] .habit-toggle:hover .check {
+    background-color: var(--accent);
+  }
+
+  .habit-more:hover {
+    background-color: var(--chip);
+    color: var(--text);
+  }
 }

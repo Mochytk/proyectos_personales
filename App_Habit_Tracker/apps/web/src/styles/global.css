@@ -97,10 +97,6 @@ label {
   color: var(--muted);
 }
 
-.tab:hover {
-  color: var(--text);
-}
-
 .tab[aria-current='page'] {
   color: var(--accent);
   font-weight: 700;
@@ -126,15 +122,6 @@ label {
   min-height: 44px;
   padding: 0 0.75rem;
   font-size: 0.875rem;
-}
-
-.button:hover:not(:disabled) {
-  background-color: var(--chip);
-}
-
-.button-primary:hover:not(:disabled) {
-  background-color: var(--accent);
-  filter: brightness(1.12);
 }
 
 .button:active:not(:disabled) {
@@ -444,10 +431,6 @@ a.button {
   text-underline-offset: 3px;
 }
 
-.row-link:hover {
-  text-decoration-color: currentColor;
-}
-
 /* 90-day history */
 
 .heatmap-wrap {
@@ -522,4 +505,24 @@ a.button {
 
 .heatmap-legend .heatmap-cell {
   width: 14px;
+}
+
+/* Hover only where there is a real pointer; on a phone a tap would leave it stuck. */
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    background-color: var(--chip);
+  }
+
+  /* Mixing in the ground shows on every accent, the near-black and near-white ones too. */
+  .button-primary:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--accent) 80%, var(--ground));
+  }
+
+  .tab:hover {
+    color: var(--text);
+  }
+
+  .row-link:hover {
+    text-decoration-color: currentColor;
+  }
 }
