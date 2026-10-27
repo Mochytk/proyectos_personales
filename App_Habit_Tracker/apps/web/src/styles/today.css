@@ -223,11 +223,14 @@
 
 /* Skip sheet */
 
+/* The page behind an open sheet does not scroll. */
+body:has(.sheet-backdrop) {
+  overflow: hidden;
+}
 
 .sheet-backdrop {
   position: fixed;
   inset: 0;
-  overscroll-behavior: contain;
   z-index: 10;
   display: flex;
   align-items: flex-end;
