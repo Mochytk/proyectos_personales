@@ -14,4 +14,4 @@ Las fechas van en formato DD-MM-AAAA. Cada ADR lista las fuentes que se consulta
 | [0006](0006-sincronizacion.md) | Sincronización offline-first | Aceptada |
 | [0007](0007-fechas-y-zona-horaria.md) | Fechas, zona horaria y día lógico | Aceptada |
 | [0008](0008-app-de-escritorio.md) | App de escritorio para Mac | Aceptada |
-| [0009](0009-identidad-visual.md) | Nombre e identidad visual: tres estilos intercambiables | Propuesta |
+| [0009](0009-identidad-visual.md) | Nombre e identidad visual: tres estilos intercambiables | Aceptada |
