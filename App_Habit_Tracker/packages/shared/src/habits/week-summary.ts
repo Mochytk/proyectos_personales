@@ -14,7 +14,7 @@ export interface HabitWeek {
   missed: number;
   quota: number | null;
   met: boolean | null;
-  // As of the week's last day, or today if the week is still running.
+  // At the end of the week, or as of today if the week is still running.
   streak: number;
 }
 
@@ -32,8 +32,16 @@ export function weekSummary(args: {
 }): HabitWeek[] {
   const { habits, weekStart, today, checkIns, overrides } = args;
   const weekEnd = addDays(weekStart, 6);
-  const lastDay = today < weekEnd ? today : weekEnd;
+  const closed = today > weekEnd;
+  const lastDay = closed ? weekEnd : today;
   const empty = new Map<never, never>();
+  // The streak rules treat "today" and "the current week" as still open. For a closed
+  // week, ask them about the day and week right after it, with nothing recorded there,
+  // so the reviewed week counts as finished.
+  const asOfDay = closed ? addDays(weekEnd, 1) : today;
+  const asOfWeek = closed ? addDays(weekStart, 7) : weekStart;
+  const upToWeekEnd = <V>(entries: ReadonlyMap<LocalDate, V>): ReadonlyMap<LocalDate, V> =>
+    closed ? new Map([...entries].filter(([date]) => date <= weekEnd)) : entries;
 
   return habits
     .filter((h) => h.archivedAt === null && h.deletedAt === null && h.startsOn <= weekEnd)
@@ -52,7 +60,7 @@ export function weekSummary(args: {
       }
 
       if (habit.mode === 'daily') {
-        const streak = dailyStreak({ habit, today: lastDay, checkIns: statuses });
+        const streak = dailyStreak({ habit, today: asOfDay, checkIns: upToWeekEnd(statuses) });
         return { habitId: habit.id, done, skipped, missed, quota: null, met: null, streak };
       }
       const habitOverrides = overrides.get(habit.id) ?? empty;
@@ -64,8 +72,8 @@ export function weekSummary(args: {
       });
       const streak = weeklyStreak({
         habit,
-        currentWeekStart: weekStart,
-        checkIns: statuses,
+        currentWeekStart: asOfWeek,
+        checkIns: upToWeekEnd(statuses),
         overrides: habitOverrides,
       });
       return { habitId: habit.id, done, skipped, missed, quota, met, streak };
