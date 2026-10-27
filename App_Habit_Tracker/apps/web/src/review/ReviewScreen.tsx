@@ -53,12 +53,16 @@ function byHabit<T extends { habitId: string; deletedAt: string | null }, V>(
   return map;
 }
 
+function count(n: number, one: string, many: string): string {
+  return `${String(n)} ${n === 1 ? one : many}`;
+}
+
 function summaryText(line: HabitWeek): string {
   const parts =
     line.quota === null
       ? [
-          `${String(line.done)} hecho`,
-          `${String(line.skipped)} saltado`,
+          count(line.done, 'hecho', 'hechos'),
+          count(line.skipped, 'saltado', 'saltados'),
           `${String(line.missed)} sin hacer`,
         ]
       : [
@@ -67,7 +71,7 @@ function summaryText(line: HabitWeek): string {
         ];
   if (line.streak > 0) {
     const [one, many] = line.quota === null ? ['día', 'días'] : ['semana', 'semanas'];
-    parts.push(`Racha: ${String(line.streak)} ${line.streak === 1 ? one : many}`);
+    parts.push(`Racha: ${count(line.streak, one, many)}`);
   }
   return parts.join(' · ');
 }

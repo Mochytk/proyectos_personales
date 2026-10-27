@@ -43,6 +43,10 @@ describe('ReviewScreen', () => {
 
     const readRow = await screen.findByRole('listitem', { name: 'Leer' });
     expect(await within(readRow).findByText('1 hecho · 1 saltado · 1 sin hacer')).toBeTruthy();
+    await repo.markDone(read.id, parseLocalDate('2026-10-23'));
+    expect(
+      await within(readRow).findByText('2 hechos · 1 saltado · 0 sin hacer · Racha: 2 días'),
+    ).toBeTruthy();
     const gymRow = await screen.findByRole('listitem', { name: 'Gimnasio' });
     expect(await within(gymRow).findByText('3 de 3 · Cumplido · Racha: 1 semana')).toBeTruthy();
   });
