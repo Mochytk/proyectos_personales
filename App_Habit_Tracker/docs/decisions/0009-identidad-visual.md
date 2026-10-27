@@ -1,6 +1,6 @@
 # 0009 · Nombre e identidad visual: tres estilos intercambiables
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (23-10-2026, PR #23)
 - **Fecha:** 23-10-2026
 
 ## Contexto
