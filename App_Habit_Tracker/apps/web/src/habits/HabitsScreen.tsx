@@ -74,7 +74,9 @@ export function HabitsScreen() {
               {group.habits.map((habit) => (
                 <li key={habit.id} className="row">
                   <div className="row-text">
-                    <span className="row-title">{habit.name}</span>
+                    <Link to={`/habitos/${habit.id}`} className="row-title row-link">
+                      {habit.name}
+                    </Link>
                     <span className="row-detail">{scheduleLabel(habit)}</span>
                   </div>
                   <div className="row-actions">
@@ -109,7 +111,9 @@ export function HabitsScreen() {
               {archived.map((habit) => (
                 <li key={habit.id} className="row row-archived">
                   <div className="row-text">
-                    <span className="row-title">{habit.name}</span>
+                    <Link to={`/habitos/${habit.id}`} className="row-title row-link">
+                      {habit.name}
+                    </Link>
                     <span className="row-detail">{scheduleLabel(habit)}</span>
                   </div>
                   <div className="row-actions">
