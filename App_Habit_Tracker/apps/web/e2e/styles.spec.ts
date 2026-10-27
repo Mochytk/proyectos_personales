@@ -20,6 +20,13 @@ for (const style of STYLES) {
       await habitToggle(page, 'Tomar agua').click();
       await habitToggle(page, 'Gimnasio').click();
       await expect(habitToggle(page, 'Gimnasio')).toHaveAttribute('aria-pressed', 'true');
+      // The browser bar matches the page.
+      const colors = await page.evaluate(() => ({
+        meta: document.querySelector('meta[name="theme-color"]')?.getAttribute('content'),
+        body: getComputedStyle(document.body).backgroundColor,
+      }));
+      expect(colors.meta).toBe(colors.body);
+
       await page.screenshot({
         path: testInfo.outputPath(`hoy-${style}-${scheme}-${testInfo.project.name}.png`),
         fullPage: true,
