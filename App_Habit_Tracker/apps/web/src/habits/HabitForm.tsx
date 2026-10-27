@@ -18,6 +18,9 @@ interface Props {
 
 const ALL_DAYS: IsoWeekday[] = [1, 2, 3, 4, 5, 6, 7];
 
+// In the order they appear, so focus lands on the first field with a problem.
+const FIELD_ORDER = ['name', 'description', 'anchorId', 'weekdays', 'weeklyQuota'];
+
 function sameDays(a: readonly IsoWeekday[], b: readonly IsoWeekday[]): boolean {
   return a.length === b.length && a.every((day) => b.includes(day));
 }
@@ -63,6 +66,8 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
       const fields = fieldErrors(error);
       if (!fields) throw error;
       setErrors(fields);
+      const first = FIELD_ORDER.find((field) => fields[field] !== undefined);
+      if (first) document.getElementById(`${id}-${first}`)?.focus();
       savingRef.current = false;
       setSaving(false);
     }
@@ -85,6 +90,7 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         <label htmlFor={`${id}-name`}>Nombre</label>
         <input
           id={`${id}-name`}
+          name="name"
           value={name}
           maxLength={60}
           autoComplete="off"
@@ -100,6 +106,7 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         <label htmlFor={`${id}-description`}>Descripción (opcional)</label>
         <textarea
           id={`${id}-description`}
+          name="description"
           value={description}
           maxLength={280}
           rows={2}
@@ -112,9 +119,10 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
       </div>
 
       <div className="field">
-        <label htmlFor={`${id}-anchor`}>Ancla</label>
+        <label htmlFor={`${id}-anchorId`}>Ancla</label>
         <select
-          id={`${id}-anchor`}
+          id={`${id}-anchorId`}
+          name="anchorId"
           value={anchorId}
           onChange={(event) => {
             setAnchorId(event.target.value);
@@ -162,10 +170,13 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         <fieldset className="field">
           <legend>Días</legend>
           <div className="weekdays">
-            {WEEKDAYS.map(({ day, name: dayName, short }) => (
+            {WEEKDAYS.map(({ day, name: dayName, short }, index) => (
               <label key={day} className="weekday">
                 <input
                   type="checkbox"
+                  id={index === 0 ? `${id}-weekdays` : undefined}
+                  name="weekdays"
+                  value={day}
                   aria-label={dayName}
                   checked={weekdays.includes(day)}
                   onChange={() => {
@@ -185,9 +196,10 @@ export function HabitForm({ habit, anchors, hasCheckIns, onSave }: Props) {
         </fieldset>
       ) : (
         <div className="field">
-          <label htmlFor={`${id}-quota`}>Veces por semana</label>
+          <label htmlFor={`${id}-weeklyQuota`}>Veces por semana</label>
           <input
-            id={`${id}-quota`}
+            id={`${id}-weeklyQuota`}
+            name="weeklyQuota"
             type="number"
             inputMode="numeric"
             min={1}

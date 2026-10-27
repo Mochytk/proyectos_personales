@@ -59,6 +59,16 @@ describe('HabitForm', () => {
     expect(await db.habits.count()).toBe(0);
   });
 
+  it('moves focus to the first invalid field when saving fails', async () => {
+    const { user } = await renderRoute('/habitos/nuevo');
+
+    await user.click(await screen.findByRole('radio', { name: 'Cuota semanal' }));
+    await user.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    expect(await screen.findByText('Escribe un nombre.')).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByLabelText('Nombre'));
+  });
+
   it('creates a single habit when Guardar is clicked twice in a row', async () => {
     const { db, user } = await renderRoute('/habitos/nuevo');
 
