@@ -105,3 +105,21 @@ test('reviews the week on Sunday', async ({ page }) => {
   );
   await expect(page.getByLabel('Gimnasio: veces la semana del 26-10')).toHaveValue('2');
 });
+
+test('explains when the device storage is unavailable, in the right colors', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'indexedDB', { value: undefined });
+  });
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+
+  await expect(page.getByRole('alert')).toContainText(
+    'No pudimos abrir el almacenamiento de este dispositivo.',
+  );
+  const colors = await page.evaluate(() => ({
+    meta: document.querySelector('meta[name="theme-color"]')?.getAttribute('content'),
+    body: getComputedStyle(document.body).backgroundColor,
+  }));
+  expect(colors.meta).toBe(colors.body);
+  expect(colors.body).not.toBe('rgb(255, 255, 255)');
+});
