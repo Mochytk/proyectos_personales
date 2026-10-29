@@ -8,7 +8,8 @@
     "typecheck": "tsc --noEmit",
     "types": "wrangler types",
     "test": "vitest run",
-    "test:tz": "TZ=Asia/Tokyo vitest run"
+    "test:tz": "TZ=Asia/Tokyo vitest run",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.0",
