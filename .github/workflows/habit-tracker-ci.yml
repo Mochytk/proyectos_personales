@@ -63,7 +63,8 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm test:tz
-      - run: pnpm audit
+      # The script, not the bare command: it fails only on high or critical advisories.
+      - run: pnpm run audit
 
   e2e:
     name: End-to-end tests (Chromium)
