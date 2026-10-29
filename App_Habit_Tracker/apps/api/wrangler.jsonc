@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "constancia",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-23",
+  // Better Auth needs AsyncLocalStorage; pg needs the Node TCP and TLS APIs (ADR 0005, 0010).
+  "compatibility_flags": ["nodejs_compat"],
+  // One origin for the web and the API (ADR 0003). Everything outside /api/* is a static
+  // asset, with index.html for unknown paths so the app's router can take them.
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
+  "observability": {
+    "logs": { "enabled": true },
+  },
+  "vars": {
+    "DATABASE_DRIVER": "neon",
+  },
+  // Previews do not inherit the settings above (ADR 0010); secrets are set in the dashboard.
+  "previews": {
+    "vars": {
+      "DATABASE_DRIVER": "neon",
+    },
+  },
+}

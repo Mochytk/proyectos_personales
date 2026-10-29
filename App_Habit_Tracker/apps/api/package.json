@@ -1,0 +1,21 @@
+{
+  "name": "@habit-tracker/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "types": "wrangler types",
+    "test": "vitest run",
+    "test:tz": "TZ=Asia/Tokyo vitest run"
+  },
+  "dependencies": {
+    "hono": "4.13.13"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "vitest": "5.0.5",
+    "wrangler": "4.153.0"
+  }
+}

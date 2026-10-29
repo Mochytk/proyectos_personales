@@ -1,0 +1,2 @@
+# Local values for `wrangler dev`. Copy to .dev.vars (git ignores it) and fill in.
+DATABASE_DRIVER=pg

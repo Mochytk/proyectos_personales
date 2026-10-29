@@ -1,6 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
-import { chooseStyle, createHabit, habitToggle, STYLES } from './helpers';
+import { chooseStyle, createHabit, expect, habitToggle, STYLES, test } from './helpers';
 
 const SCREENS = ['/', '/habitos', '/revision', '/ajustes'];
 
