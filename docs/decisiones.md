@@ -15,3 +15,6 @@ Una linea por decision: `AAAA-MM-DD | decision | por que`.
 - 2026-10-23 | Habit tracker se llama Constancia; tres estilos (Cuaderno, Linea, Disco) elegibles o rotando cada lunes | Gustaron las tres direcciones de la fase 0 (ADR 0009)
 - 2026-10-23 | Habit tracker: recuperacion de contrasena con Brevo gratis y remitente propio, por su API REST sin SDK | Gratis sin dominio; si cae en spam o se bloquea, queda el script de recuperacion (ADR 0005)
 - 2026-10-23 | Habit tracker: el contenido inicial (ajustes y anclas) se guarda con fecha 01-01-2000 | Con IDs fijos y gana la ultima escritura; asi una edicion real en cualquier dispositivo gana a la copia sin tocar que crea otro dispositivo despues
+- 2026-10-29 | Habit tracker: produccion se despliega solo desde la rama release/habit-tracker, con una PR de release que fusiona el dueno | URL estable para el uso diario sin que las PRs toquen datos reales (ADR 0010)
+- 2026-10-29 | Habit tracker: driver de Neon en Cloudflare y pg por TCP en desarrollo, pruebas y CI | Pruebas contra Postgres real sin el proxy de WebSockets de Neon (ADR 0010)
+- 2026-10-29 | Habit tracker: sesion de 30 dias renovable y URL base dinamica en Better Auth | Menos logins en el telefono; el login funciona en produccion y en cada Preview (ADR 0010)

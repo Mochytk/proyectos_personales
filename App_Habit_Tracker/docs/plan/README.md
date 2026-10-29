@@ -1,6 +1,6 @@
 # Plan de implementación
 
-Plan general por fases, ramas y PRs. Cada fase tiene su plan detallado con tareas TDD (prueba que falla, código mínimo, prueba que pasa, commit). El de la fase 1 ya está escrito: [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md). Los demás se escriben al comenzar cada fase, cuando la anterior ya está fusionada y su contexto está claro.
+Plan general por fases, ramas y PRs. Cada fase tiene su plan detallado con tareas TDD (prueba que falla, código mínimo, prueba que pasa, commit): [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md) y [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacion.md). Los demás se escriben al comenzar cada fase, cuando la anterior ya está fusionada y su contexto está claro.
 
 ## Orden acordado (respuesta 16 de la fase 0)
 
@@ -39,6 +39,8 @@ Detalle en [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md).
 
 ## Fase 2 · Backend, cuenta y sincronización
 
+Detalle en [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacion.md).
+
 | Rama | Contenido |
 | --- | --- |
 | `feat/api-skeleton` | Worker con Hono, *static assets*, `wrangler.jsonc`, cabeceras de seguridad básicas y salud |
@@ -52,7 +54,7 @@ Detalle en [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md).
 
 Cierre: revisión de seguridad independiente (un subagente que no vio el código; te aviso cuando lo lance).
 
-**Punto abierto:** el uso diario antes de la fase 6 necesita una URL estable, porque cada rama tiene su propia URL de Preview y la PWA instalada queda atada a una. En la fase 2 te propongo cómo resolverlo, por ejemplo con una rama fija de Preview para el uso diario. También cómo acotar el riesgo de usar datos reales antes de la fase 6: registro cerrado, límite de intentos, cabeceras y tests de aislamiento ya en la fase 2, más exportaciones semanales.
+**Uso diario (resuelto el 29-10-2026, [ADR 0010](../decisions/0010-uso-diario-antes-de-la-fase-6.md)):** producción se despliega solo desde la rama `release/habit-tracker`, y cada despliegue es una PR de *release* que fusionas tú.
 
 ## Fase 4 (básica) · PWA instalable
 
@@ -113,7 +115,7 @@ Antes de agregar cada una reviso su mantenimiento, sus scripts de instalación y
 | 1 | `@testing-library/react`, `@testing-library/dom` y `@testing-library/user-event` (desarrollo) | Pruebas de componentes con clics realistas | Recomendado |
 | 1 | `jsdom` (desarrollo) | DOM simulado para esas pruebas | Recomendado sobre `happy-dom`, que tiene un solo mantenedor |
 | 1 | `@axe-core/playwright` (desarrollo) | Revisar contraste y accesibilidad en los E2E de las 6 combinaciones de estilo | Se revisa al llegar a la tarea 21 |
-| 2 | `pg` (desarrollo) | Postgres local en tests y CI | — |
+| 2 | `pg` y `@types/pg` | Postgres local por TCP en desarrollo, pruebas y CI (ADR 0010) | Aprobado el 29-10-2026 |
 | 5 | `@better-auth/electron` | Login de escritorio | — |
 
 Las dependencias del documento maestro (React, Vite, `vite-plugin-pwa`, Dexie, Zod, Drizzle, Hono, Better Auth, Electron, Playwright) no necesitan aprobación, pero igual se revisan al agregarlas.
