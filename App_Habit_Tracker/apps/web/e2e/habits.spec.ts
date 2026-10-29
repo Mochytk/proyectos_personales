@@ -1,5 +1,4 @@
-import { expect, test } from '@playwright/test';
-import { createHabit, habitToggle } from './helpers';
+import { createHabit, expect, habitToggle, test } from './helpers';
 
 test('creates a daily habit, marks it on Hoy and keeps it after a reload', async ({ page }) => {
   await createHabit(page, { name: 'Leer 20 minutos', anchor: 'Noche' });

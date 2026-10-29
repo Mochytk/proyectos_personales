@@ -1,4 +1,24 @@
-import { expect, type Page } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
+
+// Every test fails on a console error or an uncaught exception, CSP violations included.
+export const test = base.extend<{ consoleErrors: string[] }>({
+  consoleErrors: [
+    async ({ page }, provide) => {
+      const errors: string[] = [];
+      page.on('console', (message) => {
+        if (message.type() === 'error') errors.push(message.text());
+      });
+      page.on('pageerror', (error) => {
+        errors.push(error.message);
+      });
+      await provide(errors);
+      expect(errors).toEqual([]);
+    },
+    { auto: true },
+  ],
+});
+
+export { expect };
 
 export const STYLES = ['cuaderno', 'linea', 'disco'] as const;
 export type Style = (typeof STYLES)[number];
