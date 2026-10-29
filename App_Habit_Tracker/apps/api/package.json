@@ -11,9 +11,14 @@
     "test:tz": "TZ=Asia/Tokyo vitest run"
   },
   "dependencies": {
-    "hono": "4.13.13"
+    "@neondatabase/serverless": "1.2.0",
+    "drizzle-orm": "0.45.4",
+    "hono": "4.13.13",
+    "pg": "8.23.1"
   },
   "devDependencies": {
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "0.31.11",
     "typescript": "6.0.3",
     "vitest": "5.0.5",
     "wrangler": "4.153.0"
