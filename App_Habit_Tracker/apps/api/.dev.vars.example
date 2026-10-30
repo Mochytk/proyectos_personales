@@ -1,2 +1,9 @@
 # Local values for `wrangler dev`. Copy to .dev.vars (git ignores it) and fill in.
 DATABASE_DRIVER=pg
+# A local Postgres, migrated with: DATABASE_URL=... pnpm exec drizzle-kit migrate
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/constancia_dev
+# Generate your own: openssl rand -base64 32
+BETTER_AUTH_SECRET=
+AUTH_ALLOWED_HOSTS=localhost:*
+# "true" opens sign-up; anything else keeps it closed.
+AUTH_SIGNUP_ENABLED=true
