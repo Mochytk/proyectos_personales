@@ -22,8 +22,12 @@ App personal de hábitos y gimnasio, offline-first. Es una PWA para el iPhone y 
 | App web en desarrollo | `pnpm --filter @habit-tracker/web dev` |
 | *Build* de la app web | `pnpm --filter @habit-tracker/web build` |
 | E2E (Playwright, Chromium) | `pnpm --filter @habit-tracker/web e2e`. La primera vez: `pnpm --filter @habit-tracker/web exec playwright install chromium`. Con un Chromium propio: `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/ruta/a/chromium` |
+| API en desarrollo | Copiar `apps/api/.dev.vars.example` a `apps/api/.dev.vars` y llenarlo; después `pnpm --filter @habit-tracker/api dev` (`wrangler dev` en `localhost:8787`, que sirve `apps/web/dist`: primero el *build* de la web) |
+| Migrar la base local | Desde `apps/api/`: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/constancia_dev pnpm exec drizzle-kit migrate` |
+| Nueva migración | `pnpm --filter @habit-tracker/api db:generate` (nunca `drizzle-kit push`) |
+| Pruebas de la API | Necesitan un Postgres 16 o más en `TEST_DATABASE_URL` (por defecto `postgres://postgres:postgres@localhost:5432/postgres`) |
 
-Los comandos para desplegar y migrar se agregan aquí cuando existan (fase 2).
+Los comandos para desplegar y migrar entornos reales se agregan aquí cuando existan (PR 2.7).
 
 ## Convenciones
 
