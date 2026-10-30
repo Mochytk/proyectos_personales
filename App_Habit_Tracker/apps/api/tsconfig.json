@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "lib": ["es2024"],
-    "types": []
+    "types": ["node"]
   },
-  "include": ["src", "worker-configuration.d.ts", "vitest.config.ts"]
+  "include": ["src", "worker-configuration.d.ts", "vitest.config.ts", "drizzle.config.ts"]
 }
