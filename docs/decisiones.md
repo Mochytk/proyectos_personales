@@ -18,3 +18,5 @@ Una linea por decision: `AAAA-MM-DD | decision | por que`.
 - 2026-10-29 | Habit tracker: produccion se despliega solo desde la rama release/habit-tracker, con una PR de release que fusiona el dueno | URL estable para el uso diario sin que las PRs toquen datos reales (ADR 0010)
 - 2026-10-29 | Habit tracker: driver de Neon en Cloudflare y pg por TCP en desarrollo, pruebas y CI | Pruebas contra Postgres real sin el proxy de WebSockets de Neon (ADR 0010)
 - 2026-10-29 | Habit tracker: sesion de 30 dias renovable y URL base dinamica en Better Auth | Menos logins en el telefono; el login funciona en produccion y en cada Preview (ADR 0010)
+- 2026-10-30 | Habit tracker: el Worker abre la base y Better Auth solo en las rutas que los usan (middleware withAuth), no en cada peticion | /api/health y los archivos de la web no abren conexiones a Neon ni lo despiertan
+- 2026-10-30 | Habit tracker: la cookie de sesion lleva Secure en todo host salvo localhost, fijado a mano y no por NODE_ENV | En un Worker NODE_ENV no es confiable; asi produccion y Previews nunca mandan la sesion sin HTTPS
