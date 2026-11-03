@@ -14,6 +14,8 @@ Cada PR sale de `app/habit_tracker` y vuelve a ella. Cada fase termina con PRs f
 
 ## Fase 0 · Descubrimiento y base
 
+**Estado:** completa (etiqueta `phase-0-ok`).
+
 | Rama | Contenido |
 | --- | --- |
 | `chore/remove-mempalace` | Quitar MemPalace de `CLAUDE.md` y `.gitignore` (PR #14, fusionada) |
@@ -24,6 +26,8 @@ Cada PR sale de `app/habit_tracker` y vuelve a ella. Cada fase termina con PRs f
 ## Fase 1 · Núcleo local de hábitos (sin servidor)
 
 Detalle en [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md).
+
+**Estado:** completa (etiqueta `phase-1-ok`).
 
 | # | Rama | Contenido |
 | --- | --- | --- |
@@ -41,12 +45,14 @@ Detalle en [`fase-1-nucleo-de-habitos.md`](fase-1-nucleo-de-habitos.md).
 
 Detalle en [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacion.md).
 
+**Estado:** en curso. Plan detallado en la PR #39. Cada fila lleva el número de su PR, y las casillas del plan detallado marcan lo que ya está hecho.
+
 | Rama | Contenido |
 | --- | --- |
-| `feat/api-skeleton` | Worker con Hono, *static assets*, `wrangler.jsonc`, cabeceras de seguridad básicas y salud |
-| `feat/db-schema` | Esquema Drizzle de las tablas sincronizables. Una migración por commit, con su reversa |
-| `feat/auth` | Better Auth: login, registro cerrado por variable, límite de intentos, logout, cambio de contraseña, cierre en todos los dispositivos. Medición de CPU de `scrypt` |
-| `feat/auth-reset` | Recuperación por correo, si el proveedor queda resuelto (ADR 0005) |
+| `feat/api-skeleton` | Worker con Hono, *static assets*, `wrangler.jsonc`, cabeceras de seguridad y salud (PR #40) |
+| `feat/db-schema` | Esquema Drizzle de las tablas de Better Auth y las sincronizables, y la conexión por petición. Una migración por commit, con su reversa (PR #41) |
+| `feat/auth` | Better Auth: login, registro cerrado por variable, límite de intentos, logout, cambio de contraseña, cierre en todos los dispositivos (PR #42). La medición de CPU de `scrypt` pasó a `ci/preview-deploy`, porque necesita una Preview real |
+| `feat/auth-reset` | Recuperación por correo con Brevo (ADR 0005) (PR #43) |
 | `feat/sync-server` | `push`, `pull` y `version`, con candado por usuario y Durable Object. Tests de aislamiento entre usuarios |
 | `feat/sync-client` | *Outbox*, reintentos con espera creciente, indicador de estado, primera sincronización tras el login |
 | `ci/preview-deploy` | Workers Builds y Previews conectados (con tu ayuda en el panel), y workflow manual de migraciones |
@@ -114,7 +120,8 @@ Antes de agregar cada una reviso su mantenimiento, sus scripts de instalación y
 | 1 | `fake-indexeddb` (desarrollo) | Probar Dexie en Vitest sin navegador | Recomendado |
 | 1 | `@testing-library/react`, `@testing-library/dom` y `@testing-library/user-event` (desarrollo) | Pruebas de componentes con clics realistas | Recomendado |
 | 1 | `jsdom` (desarrollo) | DOM simulado para esas pruebas | Recomendado sobre `happy-dom`, que tiene un solo mantenedor |
-| 1 | `@axe-core/playwright` (desarrollo) | Revisar contraste y accesibilidad en los E2E de las 6 combinaciones de estilo | Se revisa al llegar a la tarea 21 |
+| 1 | `@axe-core/playwright` (desarrollo) | Revisar contraste y accesibilidad en los E2E de las 6 combinaciones de estilo | Aprobado el 27-10-2026 |
+| 1 | `eslint-plugin-react-hooks` (desarrollo) | Reglas de los hooks de React en el lint | Aprobado el 27-10-2026 |
 | 2 | `pg` y `@types/pg` | Postgres local por TCP en desarrollo, pruebas y CI (ADR 0010) | Aprobado el 29-10-2026 |
 | 5 | `@better-auth/electron` | Login de escritorio | — |
 
