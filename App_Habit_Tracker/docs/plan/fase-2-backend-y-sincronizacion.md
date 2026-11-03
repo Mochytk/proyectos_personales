@@ -41,11 +41,11 @@ Las cinco situaciones que la especificación no prueba y que más probablemente 
 
 ---
 
-## PR 2.0 · `docs/phase-2-plan`
+## PR 2.0 · `docs/phase-2-plan` (PR #39)
 
 Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las líneas de `docs/decisiones.md`. Sin código.
 
-## PR 2.1 · `feat/api-skeleton`
+## PR 2.1 · `feat/api-skeleton` (PR #40)
 
 ### Tarea 1: Worker con Hono, archivos de la web y salud
 
@@ -56,16 +56,22 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Produce el `default export` de `src/index.ts`: `{ fetch(request, env, ctx) }`, que arma las dependencias desde `env` y llama a `createApp`.
 - `wrangler.jsonc`: `name: "constancia"`, `main: "src/index.ts"`, `compatibility_flags: ["nodejs_compat"]`, `assets: { directory: "../web/dist", not_found_handling: "single-page-application", binding: "ASSETS", run_worker_first: ["/api/*"] }`, `observability.logs.enabled: true`, `vars.DATABASE_DRIVER: "neon"` y un bloque `previews` con las mismas variables (ADR 0010).
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - `GET /api/health` responde `200` con `{ "status": "ok" }`.
   - `GET /api/no-existe` responde `404` con `{ "error": "not_found" }`.
   - Una ruta que lanza un error responde `500` con `{ "error": "internal" }`, sin traza.
   - Toda respuesta de `/api/*` trae `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY` y `Cache-Control: no-store` (con `hono/secure-headers` y un *middleware* propio para `Cache-Control`).
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: `_headers` de la web.** Para `/*`: `Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`, más `X-Content-Type-Options`, `Referrer-Policy` y `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Verificar con `pnpm --filter @habit-tracker/api exec wrangler dev` que la web carga sin errores de CSP en la consola (Playwright, como en la fase 1).
-- [ ] **Paso 6: commit.** `feat(api): add the Worker with Hono, web assets and health check`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: `_headers` de la web.** Para `/*`: `Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'`, más `X-Content-Type-Options`, `Referrer-Policy` y `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Verificar con `pnpm --filter @habit-tracker/api exec wrangler dev` que la web carga sin errores de CSP en la consola (Playwright, como en la fase 1).
+- [x] **Paso 6: commit.** `feat(api): add the Worker with Hono, web assets and health check`.
 
-## PR 2.2 · `feat/db-schema`
+> **Al implementarla (PR #40):**
+> - `createApp()` empezó sin dependencias: el plan dejaba `AppDeps` vacío, y ESLint no acepta un parámetro sin usar.
+> - Las cabeceras de la web no van en `apps/web/public/_headers`: salen de `apps/web/security-headers.ts`, que escribe `dist/_headers` en el *build* y hace que `vite preview` mande las mismas, así los E2E corren bajo la misma CSP.
+> - La CSP estricta destapó dos cosas: Zod 4 probaba `new Function` al cargar (se apagó con `z.config({ jitless: true })`) y el navegador pedía `/favicon.ico` (ahora `index.html` declara un ícono vacío).
+> - Los E2E fallan ante cualquier error de consola o excepción sin capturar, incluida una violación de la CSP.
+
+## PR 2.2 · `feat/db-schema` (PR #41)
 
 ### Tarea 2: esquema Drizzle y migraciones
 
@@ -76,11 +82,15 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - `schema/sync.ts`: `userSettings`, `anchors`, `habits`, `checkIns`, `weeklyQuotaOverrides` y `weeklyReviews`, con los campos de `packages/shared/src/schemas/habits.ts`, más `userId` (`text`, no nulo) y `serverSeq` (`bigint`, no nulo). Clave primaria `(user_id, id)`, índice `(user_id, server_seq)` y la secuencia `sync_seq`. Columnas en `snake_case` con `casing: "snake_case"` de Drizzle. Sin claves foráneas entre tablas sincronizables (modelo de datos).
 - `src/test/db.ts` produce `createTestDatabase(): Promise<{ url: string; drop(): Promise<void> }>`: crea una base vacía con nombre al azar, le aplica las migraciones con el *migrator* de `drizzle-orm/node-postgres` y la borra al final.
 
-- [ ] **Paso 1: test.** `schema.test.ts`: después de migrar, existen las 11 tablas y la secuencia; la PK de `check_ins` es `(user_id, id)`; insertar dos filas con el mismo `id` y distinto `user_id` funciona.
-- [ ] **Pasos 2 a 4:** ver que falla, escribir el esquema, `drizzle-kit generate` y ver que pasa.
-- [ ] **Paso 5: commits.** Uno por migración:
+- [x] **Paso 1: test.** `schema.test.ts`: después de migrar, existen las 11 tablas y la secuencia; la PK de `check_ins` es `(user_id, id)`; insertar dos filas con el mismo `id` y distinto `user_id` funciona.
+- [x] **Pasos 2 a 4:** ver que falla, escribir el esquema, `drizzle-kit generate` y ver que pasa.
+- [x] **Paso 5: commits.** Uno por migración:
   - `feat(api): add the Better Auth tables` (reversa: `DROP TABLE` de las 5 tablas);
   - `feat(api): add the synced tables` (reversa: `DROP TABLE` de las 6 tablas y `DROP SEQUENCE sync_seq`).
+
+> **Al implementarla (PR #41):**
+> - `createTestDatabase()` también borra la base si una migración falla, para no dejar bases sueltas.
+> - El servicio de Postgres del CI, que el plan dejaba para la tarea 12, se adelantó a esta PR: sin él, sus pruebas no corrían en el CI.
 
 ### Tarea 3: conexión por petición
 
@@ -90,10 +100,12 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Produce `type Db = PgDatabase<...>` (el tipo común de `drizzle-orm/neon-serverless` y `drizzle-orm/node-postgres`) y `openDb(env: { DATABASE_URL: string; DATABASE_DRIVER: 'neon' | 'pg' }): { db: Db; close(): Promise<void> }`.
 - Con `neon`, un `Pool` de `@neondatabase/serverless` creado dentro de la petición; con `pg`, un `Pool` de `pg` con `connectionTimeoutMillis: 15_000`. `src/index.ts` cierra con `ctx.waitUntil(close())`.
 
-- [ ] **Paso 1: tests** (driver `pg` contra la base de prueba): `select 1` funciona; una transacción que lanza no deja filas; `DATABASE_DRIVER` desconocido lanza al arrancar.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): open the database per request`.
+- [x] **Paso 1: tests** (driver `pg` contra la base de prueba): `select 1` funciona; una transacción que lanza no deja filas; `DATABASE_DRIVER` desconocido lanza al arrancar.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): open the database per request`.
 
-## PR 2.3 · `feat/auth`
+> **Al implementarla (PRs #41 y #42):** `src/index.ts` no abre la base. La abre el *middleware* `withAuth` (PR #42), solo en las rutas que la usan, y la cierra con `ctx.waitUntil(close())`. Así `/api/health` y los archivos de la web no despiertan a Neon.
+
+## PR 2.3 · `feat/auth` (PR #42)
 
 ### Tarea 4: Better Auth en el Worker
 
@@ -110,7 +122,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Monta `app.all('/api/auth/*', ...)`.
 - Produce `requireSession`, un *middleware* que deja `c.var.userId` o responde `401 { "error": "unauthenticated" }`.
 
-- [ ] **Paso 1: tests** (contra la base de prueba):
+- [x] **Paso 1: tests** (contra la base de prueba):
   - Con `AUTH_SIGNUP_ENABLED` distinto de `true`, `POST /api/auth/sign-up/email` no crea usuario.
   - Con `true`, sí lo crea. Una contraseña de 11 caracteres se rechaza.
   - El login correcto deja una cookie `HttpOnly` y `SameSite=Lax`.
@@ -119,9 +131,16 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - `revoke-sessions` cierra las otras sesiones del usuario.
   - `change-password` con `revokeOtherSessions: true` cierra las otras sesiones.
   - Una ruta protegida sin sesión responde `401`.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): add Better Auth with closed sign-up and rate limits`.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): add Better Auth with closed sign-up and rate limits`.
 
-## PR 2.4 · `feat/auth-reset`
+> **Al implementarla (PR #42):**
+> - Se usa `betterAuth` de `better-auth/minimal`, que no empaqueta Kysely en el Worker.
+> - `createAuth` recibe además la URL de la petición, para fijar `useSecureCookies`: `Secure` en todo host salvo `localhost`, en vez de depender de `NODE_ENV`.
+> - El test de cerrar las otras sesiones usa `revoke-other-sessions`: `revoke-sessions` cierra también la sesión actual.
+> - Las variables que no salen de `wrangler.jsonc` (secretos y ajustes del panel) se declaran en `src/env.d.ts`.
+> - Las respuestas de error de Better Auth mantienen su propio formato (`{ code, message }`), que espera su cliente.
+
+## PR 2.4 · `feat/auth-reset` (PR #43)
 
 ### Tarea 5: recuperar la contraseña por correo
 
@@ -240,7 +259,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 
 **Archivos:** crear `.github/workflows/habit-tracker-migrate.yml`. Modificar `docs/cuentas.md`, `.github/workflows/habit-tracker-ci.yml` (Postgres como servicio y pruebas de `apps/api`) y `App_Habit_Tracker/CLAUDE.md` (comandos).
 
-- [ ] **Paso 1: CI.** Agregar Postgres 17 como servicio del job de pruebas y `TEST_DATABASE_URL`, para que las pruebas de `apps/api` corran en cada PR.
+- [x] **Paso 1: CI.** Agregar Postgres como servicio del job de pruebas y `TEST_DATABASE_URL`, para que las pruebas de `apps/api` corran en cada PR. Hecho en la PR #41, con Postgres 16.15 fijado por *digest*. En la misma PR, el CI pasó a `pnpm run audit`, que falla solo con vulnerabilidades altas o críticas como dice `CLAUDE.md`: `pnpm audit` a secas fallaba con cualquiera.
 - [ ] **Paso 2: workflow de migraciones.** `workflow_dispatch` con la entrada `environment` (`preview` o `production`). Corre `drizzle-kit migrate` con el secreto `DATABASE_URL` de ese *environment* de GitHub; `production` exige tu aprobación.
 - [ ] **Paso 3: guía paso a paso en `cuentas.md`**, que sigues tú en los paneles:
   - **Neon:** el proyecto y las ramas `production` y `preview`; la URL *pooled* para el Worker y la directa para migrar.
