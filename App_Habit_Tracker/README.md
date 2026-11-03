@@ -4,7 +4,7 @@ App personal para llevar hábitos y entrenamiento de gimnasio, pensada para el i
 
 Es mi primer proyecto de punta a punta: construirlo, publicarlo gratis, revisarlo contra los errores típicos de las apps hechas con IA y usarlo de verdad.
 
-> **Estado:** fase 0. Por ahora hay documentación y un monorepo vacío; todavía no hay app.
+> **Estado (03-11-2026):** la fase 1 está completa: la app de hábitos funciona en el navegador, guardando todo en el dispositivo. La fase 2 (cuenta y sincronización) está en curso: ya están el servidor, la base de datos y el login; falta la sincronización. El avance de cada fase está en [`docs/plan/`](docs/plan/README.md).
 
 ## Qué va a hacer
 
@@ -37,11 +37,16 @@ cd App_Habit_Tracker
 corepack enable
 pnpm install
 pnpm lint && pnpm typecheck && pnpm test
+pnpm --filter @habit-tracker/web dev   # la app web en desarrollo
 ```
+
+Las pruebas de la API necesitan un Postgres 16 o más. Los demás comandos (E2E, API en local, migraciones) están en [`CLAUDE.md`](CLAUDE.md).
 
 ## Documentación
 
 - [`docs/arquitectura.md`](docs/arquitectura.md): cómo encajan las piezas y los límites de los planes gratis.
 - [`docs/modelo-de-datos.md`](docs/modelo-de-datos.md): tablas y reglas (rachas, cuotas, 1RM).
-- [`docs/plan/`](docs/plan/README.md): plan por fases.
+- [`docs/plan/`](docs/plan/README.md): plan por fases y su avance.
+- [`docs/decisions/`](docs/decisions/README.md): por qué se eligió cada cosa (ADR).
+- [`docs/cuentas.md`](docs/cuentas.md): las cuentas gratis que hacen falta y cómo configurarlas.
 - [`CLAUDE.md`](CLAUDE.md): reglas para trabajar en el código.
