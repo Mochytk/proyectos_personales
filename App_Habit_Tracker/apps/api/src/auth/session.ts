@@ -11,7 +11,15 @@ export const withAuth = createMiddleware<AppEnv>(async (c, next) => {
     DATABASE_DRIVER: c.env.DATABASE_DRIVER,
   });
   c.set('db', db);
-  c.set('auth', createAuth(c.env, db, c.req.url));
+  c.set(
+    'auth',
+    createAuth(c.env, db, c.req.url, {
+      email: c.var.email,
+      waitUntil: (promise) => {
+        c.executionCtx.waitUntil(promise);
+      },
+    }),
+  );
   try {
     await next();
   } finally {

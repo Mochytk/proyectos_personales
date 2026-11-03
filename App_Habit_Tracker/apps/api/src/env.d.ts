@@ -8,4 +8,7 @@ interface Env {
   AUTH_ALLOWED_HOSTS: string;
   // Sign-up stays closed unless this is exactly "true" (ADR 0005).
   AUTH_SIGNUP_ENABLED?: string;
+  // Brevo's API key and its verified sender address (ADR 0005).
+  BREVO_API_KEY: string;
+  EMAIL_FROM: string;
 }

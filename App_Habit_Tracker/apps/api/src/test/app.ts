@@ -13,6 +13,8 @@ export function testEnv(databaseUrl: string, overrides: Partial<Env> = {}): Env 
     BETTER_AUTH_SECRET: 'test-secret-that-is-at-least-32-characters-long',
     AUTH_ALLOWED_HOSTS: 'localhost:*',
     AUTH_SIGNUP_ENABLED: 'true',
+    BREVO_API_KEY: 'test-brevo-key',
+    EMAIL_FROM: 'constancia@example.com',
     ...overrides,
   };
 }
