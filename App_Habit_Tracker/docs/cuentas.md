@@ -54,6 +54,7 @@ Ver el [ADR 0005](decisions/0005-autenticacion.md), sección "Actualización 23-
 1. Crea una cuenta gratis en brevo.com. Brevo revisa la cuenta antes de habilitar los envíos.
 2. En **Senders, Domains & Dedicated IPs**, agrega tu correo como remitente y confírmalo con el correo de verificación que te llega.
 3. Crea una clave de API y pégala únicamente como secreto `BREVO_API_KEY` en Cloudflare. Si Brevo permite limitar sus permisos, déjala solo para enviar correos transaccionales.
+4. En Cloudflare, agrega también el secreto `EMAIL_FROM` con el correo que verificaste como remitente. Va como secreto para que tu dirección no quede en el repo.
 
 Si algún día compras un dominio, conviene autenticarlo en Brevo (SPF y DKIM) para que los correos no caigan en spam.
 
