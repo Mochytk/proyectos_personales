@@ -45,6 +45,11 @@ Los comandos para desplegar y migrar entornos reales se agregan aquí cuando exi
 - Un commit por cambio lógico, con Conventional Commits en inglés (asunto de menos de 72 caracteres) y `git push` después de cada uno. Las migraciones van en su propio commit, con su reversa.
 - Nunca `push --force`, ni `rebase` de ramas publicadas, ni `commit --amend` de commits subidos. Para corregir: un commit nuevo o `git revert`.
 - PR hacia `app/habit_tracker`, con descripción en español: qué cambia, por qué, cómo se probó, riesgos y rollback. **La fusiona la dueña o dueño del repo; nunca auto-merge ni merge local.** El CI tiene que estar en verde antes de pedir revisión.
+- **Cada PR se documenta a sí misma** (03-11-2026). Nada de PRs aparte solo para documentar. Antes de pedir revisión, la PR deja al día lo que su cambio toca:
+  - el plan de la fase: marcar sus casillas, poner el número de PR en su encabezado y en la tabla de `docs/plan/README.md`, y anotar bajo su tarea lo que cambió respecto del plan (un bloque "Al implementarla (PR #N)");
+  - `docs/decisiones.md`, una línea por decisión de diseño, arquitectura o flujo;
+  - los ADR: una "Actualización" con fecha si cambia o cierra algo de uno ya aceptado, o un ADR nuevo si la decisión es grande;
+  - `CLAUDE.md` (comandos y reglas), `README.md` (estado), `docs/cuentas.md`, `docs/arquitectura.md` y `docs/modelo-de-datos.md`, si los afecta.
 - Si una skill (por ejemplo, de Superpowers) propone fusionar en local, borrar ramas o hacer preguntas de a una, mandan estas reglas: solo PR, y las preguntas van todas juntas.
 
 ## Seguridad (no negociable)

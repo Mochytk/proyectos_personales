@@ -24,3 +24,4 @@ Una linea por decision: `AAAA-MM-DD | decision | por que`.
 - 2026-10-29 | Habit tracker: Zod con jitless y los E2E fallan ante cualquier error de consola | La CSP sin unsafe-eval registraba como violacion la prueba de new Function de Zod; la guardia de consola atrapa esas violaciones
 - 2026-10-30 | Habit tracker: el Worker abre la base y Better Auth solo en las rutas que los usan (middleware withAuth), no en cada peticion | /api/health y los archivos de la web no abren conexiones a Neon ni lo despiertan
 - 2026-10-30 | Habit tracker: la cookie de sesion lleva Secure en todo host salvo localhost, fijado a mano y no por NODE_ENV | En un Worker NODE_ENV no es confiable; asi produccion y Previews nunca mandan la sesion sin HTTPS
+- 2026-11-03 | Habit tracker: cada PR trae su propia documentacion al dia; no hay PRs aparte solo para documentar | Pedido del dueno: la documentacion no se atrasa y no se llena el repo de ramas
