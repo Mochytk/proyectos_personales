@@ -62,6 +62,14 @@ Con los dominios ya permitidos, el punto pendiente se cierra así:
 - `BETTER_AUTH_SECRET` es un secreto por entorno, generado con `openssl rand -base64 32` y guardado solo en Cloudflare.
 - Better Auth agrega sus tablas (`user`, `session`, `account`, `verification`, `rateLimit`), con su propia migración.
 
+
+## Actualización 30-10-2026: sesión y cookie
+
+- La sesión dura 30 días y se renueva como mucho una vez al día mientras se usa ([ADR 0010](0010-uso-diario-antes-de-la-fase-6.md)).
+- La cookie de sesión lleva `Secure` en todo host salvo `localhost`. Se fija a mano porque Better Auth, si no, lo decide con `NODE_ENV`, que en un Worker no es confiable.
+- `revokeSessions` cierra todas las sesiones, incluida la actual. Para cerrar solo las de los otros dispositivos se usa `revokeOtherSessions`.
+- Quedó implementado en la PR #42.
+
 ## Fuentes (consultadas el 23-10-2026)
 
 - Correo y contraseña, hash: https://better-auth.com/docs/authentication/email-password
