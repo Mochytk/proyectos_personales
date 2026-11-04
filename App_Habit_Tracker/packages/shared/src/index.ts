@@ -13,3 +13,5 @@ export * from './schemas/habits';
 export * from './schemas/sync-columns';
 export * from './settings/defaults';
 export * from './settings/style';
+export * from './sync/conflict';
+export * from './sync/contract';

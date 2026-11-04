@@ -175,8 +175,12 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Produce `wins(incoming: { updatedAt: string }, existing: { updatedAt: string } | undefined): boolean`. Gana el más nuevo; en empate gana el entrante, que llega último (ADR 0006).
 - Produce `clampUpdatedAt(updatedAt: string, now: Date): string`, que recorta a `now + 5 min`.
 
-- [ ] **Paso 1: tests.** Más nuevo gana, más viejo pierde, empate gana el entrante, sin fila existente gana. El recorte a 5 min en el futuro deja intactas las fechas pasadas. Un lote de 201 filas o con una tabla desconocida se rechaza.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(shared): add the sync contract and conflict rule`.
+- [x] **Paso 1: tests.** Más nuevo gana, más viejo pierde, empate gana el entrante, sin fila existente gana. El recorte a 5 min en el futuro deja intactas las fechas pasadas. Un lote de 201 filas o con una tabla desconocida se rechaza.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(shared): add the sync contract and conflict rule`.
+
+> **Al implementarla (PR 2.5):**
+> - `wins` compara instantes y no textos: `07:00-03:00` y `10:00Z` son la misma hora.
+> - El módulo exporta además `SYNC_ROW_SCHEMAS`, `PUSH_BATCH_MAX` (200) y `PULL_PAGE_SIZE` (500), para que el servidor y el cliente usen los mismos límites.
 
 ### Tarea 7: *push* y *pull*
 
