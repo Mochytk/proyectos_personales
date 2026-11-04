@@ -162,7 +162,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - Si Brevo falla, el pedido responde igual (`200`) y solo se registra el código del error. Tiene su propia prueba, que el plan no pedía.
 > - `EMAIL_FROM` es un secreto, como `BREVO_API_KEY`: el remitente verificado en Brevo.
 
-## PR 2.5 · `feat/sync-server`
+## PR 2.5 · `feat/sync-server` (PR #45)
 
 ### Tarea 6: contrato de sincronización compartido
 
@@ -178,7 +178,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - [x] **Paso 1: tests.** Más nuevo gana, más viejo pierde, empate gana el entrante, sin fila existente gana. El recorte a 5 min en el futuro deja intactas las fechas pasadas. Un lote de 201 filas o con una tabla desconocida se rechaza.
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(shared): add the sync contract and conflict rule`.
 
-> **Al implementarla (PR 2.5):**
+> **Al implementarla (PR #45):**
 > - `wins` compara instantes y no textos: `07:00-03:00` y `10:00Z` son la misma hora.
 > - El módulo exporta además `SYNC_ROW_SCHEMAS`, `PUSH_BATCH_MAX` (200) y `PULL_PAGE_SIZE` (500), para que el servidor y el cliente usen los mismos límites.
 
@@ -204,7 +204,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - Sin sesión responde `401`.
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): push and pull synced rows`.
 
-> **Al implementarla (PR 2.5):**
+> **Al implementarla (PR #45):**
 > - **Una fila idéntica no cambia nada**, ni siquiera su `server_seq`, como dice el ADR 0006 ("una fila igual no gana ni pierde"). El empate de `updated_at` con contenido distinto sigue ganándolo la fila entrante.
 > - **El *pull* lee las seis tablas en una sola transacción de solo lectura (`repeatable read`).** Si las leyera una por una, un *push* que se confirma a mitad de camino podría mover el cursor más allá de filas que esa página no vio.
 > - El *push* acepta como máximo 1 MiB (`413 { "error": "payload_too_large" }`). Un cursor que no es un entero responde `400 { "error": "invalid_cursor" }`.
@@ -223,7 +223,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - [x] **Paso 1: tests.** `bump` guarda el máximo, y no baja con un valor menor. `/version` refleja el último *push*. Un `bump` que falla dos veces no hace fallar el *push*. `/version` no abre la base (se prueba con un `Db` que lanza si se usa).
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): announce changes through a Durable Object`.
 
-> **Al implementarla (PR 2.5):**
+> **Al implementarla (PR #45):**
 > - **La sesión de `/version` se valida sin Postgres.** Better Auth guarda una copia firmada de la sesión en una cookie (`cookieCache`, 1 hora), y solo `/version` la acepta. El *push*, el *pull* y todo lo demás revisan la sesión en Postgres (`disableCookieCache`), así que una sesión cerrada desde otro dispositivo no puede escribir ni leer datos. Sí puede seguir viendo el número de versión hasta 1 hora, que es el costo de no despertar Neon cada 15 s. Una prueba fija los dos comportamientos.
 > - La clase `SyncNotifier` vive sola en `src/sync/sync-notifier.ts`, el único archivo que importa `cloudflare:workers`. En las pruebas de Node, Vitest reemplaza ese módulo por un sustituto mínimo (`src/test/cloudflare-workers.ts`). El Durable Object real se probó en `wrangler dev`.
 > - El aviso al Durable Object va con `ctx.waitUntil`, sin demorar la respuesta del *push*.
