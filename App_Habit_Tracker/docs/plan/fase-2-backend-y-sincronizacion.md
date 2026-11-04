@@ -193,7 +193,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - Responde con `pushResponseSchema`. Un lote inválido responde `400 { "error": "invalid_batch" }` sin escribir nada.
 - `GET /api/sync/pull?cursor=N`: filas del usuario con `server_seq > N`, borrados lógicos incluidos, ordenadas, hasta 500, con `pullResponseSchema`.
 
-- [ ] **Paso 1: tests** (contra la base de prueba, con dos usuarios):
+- [x] **Paso 1: tests** (contra la base de prueba, con dos usuarios):
   - Repetir el mismo *push* no cambia nada (idempotencia).
   - Gana la última escritura; en empate gana la que llega después.
   - Un `updated_at` del año 2100 se guarda recortado.
@@ -202,7 +202,14 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - 1.200 filas salen en 3 páginas sin repetir ni saltar ninguna.
   - Una fila inválida en un lote no escribe nada.
   - Sin sesión responde `401`.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): push and pull synced rows`.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): push and pull synced rows`.
+
+> **Al implementarla (PR 2.5):**
+> - **Una fila idéntica no cambia nada**, ni siquiera su `server_seq`, como dice el ADR 0006 ("una fila igual no gana ni pierde"). El empate de `updated_at` con contenido distinto sigue ganándolo la fila entrante.
+> - **El *pull* lee las seis tablas en una sola transacción de solo lectura (`repeatable read`).** Si las leyera una por una, un *push* que se confirma a mitad de camino podría mover el cursor más allá de filas que esa página no vio.
+> - El *push* acepta como máximo 1 MiB (`413 { "error": "payload_too_large" }`). Un cursor que no es un entero responde `400 { "error": "invalid_cursor" }`.
+> - `apps/api` ahora depende de `@habit-tracker/shared` (paquete del propio *workspace*).
+> - Las pruebas usan fechas pasadas: con fechas futuras, el recorte de 5 minutos cambia cada *push* y la prueba de idempotencia no tiene sentido.
 
 ### Tarea 8: `SyncNotifier` y versión
 

@@ -5,6 +5,7 @@ import { withAuth } from './auth/session';
 import type { Db } from './db/client';
 import { brevoSender } from './email/brevo';
 import type { EmailSender } from './email/sender';
+import { syncRoutes } from './sync/routes';
 
 export interface AppEnv {
   Bindings: Env;
@@ -34,6 +35,8 @@ export function createApp({ email = (env) => brevoSender(env) }: AppOptions = {}
   app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
   app.all('/api/auth/*', withAuth, (c) => c.var.auth.handler(c.req.raw));
+
+  app.route('/api/sync', syncRoutes());
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
 
