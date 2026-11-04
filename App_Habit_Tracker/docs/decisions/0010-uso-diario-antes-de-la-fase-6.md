@@ -1,6 +1,6 @@
 # 0010 · Uso diario antes de la fase 6
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada (29-10-2026, PR #39)
 - **Fecha:** 29-10-2026
 
 ## Contexto

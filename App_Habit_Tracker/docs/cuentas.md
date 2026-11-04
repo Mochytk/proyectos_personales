@@ -31,11 +31,12 @@ Opcional pero recomendado: en **Settings → Branches**, una regla para `app/hab
 3. En la fase 2 creas el Worker conectando el repo con **Workers Builds** ("Import a repository"):
    - Se instala la app de Cloudflare en GitHub. Dale acceso **solo** a `proyectos_personales`.
    - Carpeta raíz: `App_Habit_Tracker`. Los comandos de build te los doy en ese momento.
-   - Rama de producción: `app/habit_tracker`, con el despliegue a producción **desactivado** hasta la fase 6.
+   - Rama de producción: `release/habit-tracker` ([ADR 0010](decisions/0010-uso-diario-antes-de-la-fase-6.md)). Solo avanza con una PR de *release* que fusionas tú; las demás ramas, `app/habit_tracker` incluida, generan Previews.
 4. Secretos del Worker (en el panel, separados para Production y para Previews):
    - `DATABASE_URL`: la URL de la rama de Neon de ese entorno.
    - `BETTER_AUTH_SECRET`: genéralo en tu Mac con `openssl rand -base64 32`.
    - `AUTH_SIGNUP_ENABLED`: `true` solo mientras creas tu cuenta; después, `false`.
+   - `AUTH_ALLOWED_HOSTS`: los hosts desde los que se puede iniciar sesión. En producción, `constancia.<tu-subdominio>.workers.dev`; en Previews, el patrón de sus URLs. Va en el panel para que tu subdominio no quede en el repo.
 
 No hace falta crear ningún token de API de Cloudflare: Workers Builds despliega sin que el repo guarde credenciales.
 
@@ -63,6 +64,7 @@ Si algún día compras un dominio, conviene autenticarlo en Brevo (SPF y DKIM) p
 - Node 24 (LTS) y pnpm. Puedes usar `corepack enable`, que lee la versión fijada en `package.json`.
 - Docker Desktop (u OrbStack), para el Postgres local de las pruebas.
 - Un archivo `App_Habit_Tracker/.env.local`, copiado de `.env.example`, con tus valores de desarrollo. Git lo ignora.
+- Para la API en local, `App_Habit_Tracker/apps/api/.dev.vars`, copiado de `.dev.vars.example`. Git también lo ignora. Los comandos están en `App_Habit_Tracker/CLAUDE.md`.
 
 ## Lo que no necesitas
 

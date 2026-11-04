@@ -41,6 +41,11 @@ Hace falta una base de datos gratis, con migraciones versionadas (RNF-15), que f
 - En las pruebas locales y en el CI se usa Postgres normal por TCP, con el driver `pg` de Drizzle, y en el Worker se usa el driver de Neon. Las consultas son las mismas porque el esquema y Drizzle son los mismos. Si aparece alguna diferencia, en la fase 2 se evalúa el proxy de WebSockets de Neon para pruebas.
 - **Respaldo:** la exportación JSON de la app (RF-5.1) más el snapshot manual de Neon antes de cada migración a producción.
 
+
+## Actualización 29-10-2026: driver local
+
+El [ADR 0010](0010-uso-diario-antes-de-la-fase-6.md) cierra el punto de las pruebas locales: en desarrollo, en las pruebas y en el CI se usa `pg` por TCP contra un Postgres normal, y en Cloudflare el `Pool` de `@neondatabase/serverless`. La variable `DATABASE_DRIVER` elige cuál. No hace falta el proxy de WebSockets de Neon. Quedó implementado en la PR #41.
+
 ## Fuentes (consultadas el 23-10-2026)
 
 - Planes y precios de Neon: https://neon.com/pricing

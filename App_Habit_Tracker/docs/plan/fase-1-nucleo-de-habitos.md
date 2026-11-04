@@ -1,12 +1,14 @@
 # Fase 1 · Núcleo local de hábitos: plan de implementación
 
-> **Para agentes:** usar `superpowers:subagent-driven-development` (recomendado) o `superpowers:executing-plans` para implementar este plan tarea por tarea. Los pasos usan casillas (`- [ ]`) para marcar el avance.
+> **Para agentes:** usar `superpowers:subagent-driven-development` (recomendado) o `superpowers:executing-plans` para implementar este plan tarea por tarea. Los pasos usan casillas (`- [x]`) para marcar el avance.
 
 **Objetivo:** una app web que funciona 100 % en local (IndexedDB), con hábitos diarios y de cuota semanal, anclas, pantalla "Hoy", marcar y desmarcar, saltar con motivo, pausar el día, rachas, progreso semanal, historial de 90 días, archivo y revisión del domingo.
 
 **Arquitectura:** la lógica pura (fechas, reglas de hábitos, esquemas) vive en `packages/shared` y se escribe con TDD. La app `apps/web` lee y escribe solo en Dexie: cada escritura marca la fila en la *outbox*, que la fase 2 va a sincronizar. Las pantallas leen con `useLiveQuery`.
 
 **Stack:** TypeScript 6.0 estricto, React 19, Vite 8, Dexie 4, Zod 4, Vitest 5, Playwright. Más las dependencias de la tabla "Dependencias nuevas" de [`README.md`](README.md), que se aprueban antes de agregarlas.
+
+**Estado:** completa (03-11-2026, etiqueta `phase-1-ok`). Todas las casillas están marcadas; lo que cambió respecto del plan al implementar quedó en la descripción de cada PR.
 
 **Especificación:**
 
@@ -39,7 +41,7 @@ Las cinco situaciones que la especificación no prueba y que más probablemente 
 
 ---
 
-## PR 1.1 · `feat/shared-dates`
+## PR 1.1 · `feat/shared-dates` (PR #26)
 
 ### Tarea 1: fecha local con hora de corte
 
@@ -52,7 +54,7 @@ Las cinco situaciones que la especificación no prueba y que más probablemente 
 - Produce `parseLocalDate(value: string): LocalDate`. Lanza `RangeError` si no es una fecha `AAAA-MM-DD` válida.
 - Produce `toLocalDate(instant: Date, timeZone: string, cutoffHour: number): LocalDate`.
 
-- [ ] **Paso 1: escribir los tests que fallan.**
+- [x] **Paso 1: escribir los tests que fallan.**
 
 ```ts
 const TZ = 'America/Santiago';
@@ -80,10 +82,10 @@ it('parseLocalDate rejects impossible dates', () => {
 });
 ```
 
-- [ ] **Paso 2: correr y ver que fallan.** `pnpm --filter @habit-tracker/shared test local-date` debe fallar con "toLocalDate is not defined" o similar.
-- [ ] **Paso 3: implementar.** Con `Intl.DateTimeFormat('en-CA', { timeZone, year, month, day, hour, hourCycle: 'h23' }).formatToParts`. Si la hora local es menor que `cutoffHour`, se resta un día **de calendario** (con `addDays` de la tarea 2, que puede implementarse en este mismo paso), no 24 horas.
-- [ ] **Paso 4: correr los tests en dos zonas.** `pnpm --filter @habit-tracker/shared test local-date` y `TZ=Asia/Tokyo pnpm --filter @habit-tracker/shared test local-date`. Los dos deben pasar (foco de revisión 3). Agregar el segundo comando al script `test:tz` del paquete y al CI.
-- [ ] **Paso 5: commit.** `feat(shared): compute local dates with a day cutoff`.
+- [x] **Paso 2: correr y ver que fallan.** `pnpm --filter @habit-tracker/shared test local-date` debe fallar con "toLocalDate is not defined" o similar.
+- [x] **Paso 3: implementar.** Con `Intl.DateTimeFormat('en-CA', { timeZone, year, month, day, hour, hourCycle: 'h23' }).formatToParts`. Si la hora local es menor que `cutoffHour`, se resta un día **de calendario** (con `addDays` de la tarea 2, que puede implementarse en este mismo paso), no 24 horas.
+- [x] **Paso 4: correr los tests en dos zonas.** `pnpm --filter @habit-tracker/shared test local-date` y `TZ=Asia/Tokyo pnpm --filter @habit-tracker/shared test local-date`. Los dos deben pasar (foco de revisión 3). Agregar el segundo comando al script `test:tz` del paquete y al CI.
+- [x] **Paso 5: commit.** `feat(shared): compute local dates with a day cutoff`.
 
 ### Tarea 2: aritmética de calendario y semanas
 
@@ -96,7 +98,7 @@ it('parseLocalDate rejects impossible dates', () => {
 - Produce `type IsoWeekday = 1 | 2 | 3 | 4 | 5 | 6 | 7` e `isoWeekday(date: LocalDate): IsoWeekday`.
 - Produce `weekStart(date: LocalDate): LocalDate` (el lunes).
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
 
 ```ts
 expect(addDays(d('2026-10-31'), 1)).toBe('2026-11-01');
@@ -113,10 +115,10 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 
 (`d` = `parseLocalDate`.)
 
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar** con `Date.UTC` sobre año, mes y día (UTC no tiene horario de verano).
-- [ ] **Paso 4: ver que pasan** (también con `test:tz`).
-- [ ] **Paso 5: commit.** `feat(shared): add calendar arithmetic and ISO weeks`.
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar** con `Date.UTC` sobre año, mes y día (UTC no tiene horario de verano).
+- [x] **Paso 4: ver que pasan** (también con `test:tz`).
+- [x] **Paso 5: commit.** `feat(shared): add calendar arithmetic and ISO weeks`.
 
 ### Tarea 3: formato visible
 
@@ -126,11 +128,11 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce `formatDisplayDate(date: LocalDate): string`, por ejemplo `'23-10-2026'`.
 - Produce `formatShortDay(date: LocalDate): string`, por ejemplo `'vie 23-10'`.
 
-- [ ] **Paso 1: tests.** `formatDisplayDate(d('2026-10-23')) === '23-10-2026'`, `formatShortDay(d('2026-10-23')) === 'vie 23-10'` y `formatShortDay(d('2026-10-25')) === 'dom 25-10'`.
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar** con un arreglo fijo `['lun','mar','mié','jue','vie','sáb','dom']`. No usar `Intl` aquí: su salida en `es-CL` (por ejemplo `vie.`) puede variar entre motores.
-- [ ] **Paso 4: ver que pasan.**
-- [ ] **Paso 5: commit.** `feat(shared): format dates as DD-MM-AAAA`.
+- [x] **Paso 1: tests.** `formatDisplayDate(d('2026-10-23')) === '23-10-2026'`, `formatShortDay(d('2026-10-23')) === 'vie 23-10'` y `formatShortDay(d('2026-10-25')) === 'dom 25-10'`.
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar** con un arreglo fijo `['lun','mar','mié','jue','vie','sáb','dom']`. No usar `Intl` aquí: su salida en `es-CL` (por ejemplo `vie.`) puede variar entre motores.
+- [x] **Paso 4: ver que pasan.**
+- [x] **Paso 5: commit.** `feat(shared): format dates as DD-MM-AAAA`.
 
 ### Tarea 4: IDs deterministas (UUID v5)
 
@@ -144,16 +146,16 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce `weeklyReviewId(weekStart: LocalDate): Promise<string>`, con `review:{weekStart}`.
 - Produce `seedId(kind: 'anchor' | 'exercise' | 'routine' | 'metric_type' | 'user_settings', slug: string): Promise<string>`, con `{kind}:{slug}`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Vector conocido: `uuidV5('python.org', '6ba7b810-9dad-11d1-80b4-00c04fd430c8')` resuelve a `'886313e1-3b8a-5372-9b90-0c9aee199e5d'`.
   - `checkInId('h1', d('2026-10-23'))` es igual en dos llamadas y distinto del de `'2026-10-24'`.
   - El carácter 14 del resultado es `'5'`.
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar** con `crypto.subtle.digest('SHA-1', ...)`, disponible en Node 24, en los navegadores y en Workers (RFC 9562, sección 5.5). Es asíncrono, así que en Dexie los IDs se calculan **antes** de abrir la transacción.
-- [ ] **Paso 4: ver que pasan.**
-- [ ] **Paso 5: commit.** `feat(shared): add deterministic UUID v5 ids`.
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar** con `crypto.subtle.digest('SHA-1', ...)`, disponible en Node 24, en los navegadores y en Workers (RFC 9562, sección 5.5). Es asíncrono, así que en Dexie los IDs se calculan **antes** de abrir la transacción.
+- [x] **Paso 4: ver que pasan.**
+- [x] **Paso 5: commit.** `feat(shared): add deterministic UUID v5 ids`.
 
-## PR 1.2 · `feat/shared-habit-rules`
+## PR 1.2 · `feat/shared-habit-rules` (PR #27)
 
 ### Tarea 5: esquemas Zod de hábitos
 
@@ -165,7 +167,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce los esquemas y sus tipos (`z.infer`) `userSettingsSchema`, `anchorSchema`, `habitSchema`, `checkInSchema`, `weeklyQuotaOverrideSchema` y `weeklyReviewSchema`. Los campos son los de `modelo-de-datos.md`, en camelCase, y las fechas `LocalDate` se validan con `parseLocalDate`.
 - Produce `type CheckInStatus = 'done' | 'skipped'` y `type SkipReason = 'certamen' | 'enfermedad' | 'viaje' | 'descanso' | 'otro'`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Un hábito diario válido se valida.
   - `mode: 'weekly_quota'` exige `weeklyQuota` entre 1 y 7: rechaza 0, 8 y `null`.
   - `mode: 'daily'` rechaza un `weeklyQuota` que no sea `null`.
@@ -174,10 +176,10 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - Un check-in con `skipReason` y `status: 'done'` se rechaza.
   - `note` de más de 280 caracteres se rechaza.
   - `dayCutoffHour` va de 0 a 6.
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar** con `z.object(...).superRefine(...)` para las reglas entre campos.
-- [ ] **Paso 4: ver que pasan.**
-- [ ] **Paso 5: commit.** `feat(shared): add habit schemas`.
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar** con `z.object(...).superRefine(...)` para las reglas entre campos.
+- [x] **Paso 4: ver que pasan.**
+- [x] **Paso 5: commit.** `feat(shared): add habit schemas`.
 
 ### Tarea 6: qué hábitos tocan un día
 
@@ -187,13 +189,13 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce `isScheduledOn(habit: Pick<Habit, 'mode' | 'weekdays' | 'startsOn'>, date: LocalDate): boolean`.
 - Produce `habitsForDay(habits: Habit[], anchors: Anchor[], date: LocalDate): Array<{ anchor: Anchor; habits: Habit[] }>`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Un hábito de lunes a viernes no aplica el sábado.
   - Un hábito de cuota semanal aplica todos los días.
   - Nada aplica antes de `startsOn`.
   - `habitsForDay` excluye archivados y borrados, ordena por `anchor.sortOrder` y luego `habit.sortOrder`, y omite las anclas sin hábitos.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(shared): decide which habits apply on a day`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(shared): decide which habits apply on a day`.
 
 ### Tarea 7: racha diaria
 
@@ -202,7 +204,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Produce `dailyStreak(args: { habit: Pick<Habit, 'mode' | 'weekdays' | 'startsOn'>; today: LocalDate; checkIns: ReadonlyMap<LocalDate, CheckInStatus> }): number`.
 
-- [ ] **Paso 1: tests.** Hábito de todos los días, `startsOn = 2026-10-01`, `today = 2026-10-23`.
+- [x] **Paso 1: tests.** Hábito de todos los días, `startsOn = 2026-10-01`, `today = 2026-10-23`.
 
 | Check-ins | Racha esperada |
 | --- | --- |
@@ -216,14 +218,14 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 | lunes a viernes: done vie 16, lun 19 a jue 22 (hoy vie 23 sin registro) | 5 |
 | `startsOn = 2026-10-21`, done 21, 22 | 2 |
 
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar.** Recorrer hacia atrás desde hoy hasta `startsOn`, saltando los días no programados:
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar.** Recorrer hacia atrás desde hoy hasta `startsOn`, saltando los días no programados:
   - `done` suma.
   - `skipped` sigue sin sumar.
   - Sin registro en un día pasado, corta.
   - Hoy sin registro no corta.
-- [ ] **Paso 4: ver que pasan.**
-- [ ] **Paso 5: commit.** `feat(shared): compute daily streaks with skips`.
+- [x] **Paso 4: ver que pasan.**
+- [x] **Paso 5: commit.** `feat(shared): compute daily streaks with skips`.
 
 ### Tarea 8: cuota efectiva, progreso y racha semanal
 
@@ -234,7 +236,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce `weeklyProgress(args: { habit: Pick<Habit, 'weeklyQuota'>; weekStart: LocalDate; checkIns: ReadonlyMap<LocalDate, CheckInStatus>; overrides: ReadonlyMap<LocalDate, number> }): { done: number; quota: number; met: boolean }`.
 - Produce `weeklyStreak(args: { habit: Pick<Habit, 'weeklyQuota' | 'startsOn'>; currentWeekStart: LocalDate; checkIns; overrides }): number`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Cuota 3, done lunes y miércoles: `{ done: 2, quota: 3, met: false }`.
   - Con override 2: `met: true`.
   - `skipped` no cuenta como `done`.
@@ -244,10 +246,10 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - Si la actual también se cumple, da 4.
   - Una semana sin cumplir entre medio corta la racha.
   - La primera semana (la que contiene `startsOn`), si no se cumplió, no corta.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(shared): add weekly quota progress and streaks`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(shared): add weekly quota progress and streaks`.
 
-## PR 1.3 · `feat/web-shell`
+## PR 1.3 · `feat/web-shell` (PR #29)
 
 ### Tarea 9: app base, navegación y los tres estilos
 
@@ -265,15 +267,15 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce las rutas `/` (Hoy), `/habitos`, `/habitos/:id`, `/revision` y `/ajustes`.
 - Produce la barra de pestañas inferior: Hoy, Hábitos, Revisión y Ajustes.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - `resolveStyle('linea', d('2026-10-23'))` es `'linea'`.
   - Con `'rotate'`: `2026-10-23` da `'cuaderno'`, `2026-10-26` da `'linea'`, `2026-11-02` da `'disco'`, `2026-11-09` da `'cuaderno'`, y `2026-10-12` (la semana anterior) da `'disco'`.
   - `renders Hoy as the default tab`: el enlace "Hoy" tiene `aria-current="page"` en `/`.
   - `sets data-style on the html element`: al cambiar `userSettings.style`, cambia el atributo.
-- [ ] **Paso 2: ver que fallan.**
-- [ ] **Paso 3: implementar** con el enrutador aprobado. El modo claro u oscuro sale de `prefers-color-scheme`, dentro de cada estilo.
-- [ ] **Paso 4: ver que pasan.** `pnpm --filter @habit-tracker/shared test style`, `pnpm --filter @habit-tracker/web test` y `pnpm --filter @habit-tracker/web build` sin errores. Anotar en la PR el peso de cada fuente en el *build*.
-- [ ] **Paso 5: commits.** `feat(shared): resolve the visual style, including weekly rotation`, `feat(web): add app shell and navigation` y `feat(web): add the Cuaderno, Línea and Disco styles`.
+- [x] **Paso 2: ver que fallan.**
+- [x] **Paso 3: implementar** con el enrutador aprobado. El modo claro u oscuro sale de `prefers-color-scheme`, dentro de cada estilo.
+- [x] **Paso 4: ver que pasan.** `pnpm --filter @habit-tracker/shared test style`, `pnpm --filter @habit-tracker/web test` y `pnpm --filter @habit-tracker/web build` sin errores. Anotar en la PR el peso de cada fuente en el *build*.
+- [x] **Paso 5: commits.** `feat(shared): resolve the visual style, including weekly rotation`, `feat(web): add app shell and navigation` y `feat(web): add the Cuaderno, Línea and Disco styles`.
 
 ### Tarea 10: *error boundary* y estados con tiempo máximo
 
@@ -284,14 +286,14 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Produce `useTimedLiveQuery<T>(query: () => Promise<T>, deps: unknown[], timeoutMs = 8000): { state: 'loading' | 'ready' | 'timeout' | 'error'; data?: T; retry(): void }`.
 - Produce `<AsyncState>`, que decide entre carga, error, vacío y contenido.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Con *fake timers*, una consulta que no responde pasa a `timeout` a los 8000 ms y muestra "Está tardando más de lo normal." con "Reintentar".
   - Un hijo que lanza un error queda contenido por el *boundary*.
   - "Reintentar" lo vuelve a montar.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): add error boundary and timed async states`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): add error boundary and timed async states`.
 
-## PR 1.4 · `feat/web-local-db`
+## PR 1.4 · `feat/web-local-db` (PR #30)
 
 ### Tarea 11: esquema Dexie y apertura segura
 
@@ -309,12 +311,12 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - `syncState: 'id'`
 - Produce `openDb(): Promise<HabitDb>`, que lanza `StorageUnavailableError` si IndexedDB no está disponible o falla al abrir.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Las tablas existen después de `openDb()`.
   - Con `indexedDB` indefinido, `openDb()` rechaza con `StorageUnavailableError`.
   - `App` muestra "No pudimos abrir el almacenamiento de este dispositivo." con una explicación corta (foco de revisión 4).
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): add the local Dexie database`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): add the local Dexie database`.
 
 ### Tarea 12: repositorios, *outbox* y contenido inicial
 
@@ -330,15 +332,15 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - `pauseDay(date, reason, habitIds)`: solo crea `skipped` donde no hay registro.
 - Produce `ensureDefaults(db)`: crea `userSettings` y las 7 anclas por defecto con `seedId`, si no existen.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - `markDone` dos veces deja una fila y una entrada de *outbox*.
   - `clear` fija `deletedAt` y encola.
   - `markDone` después de `clear` deja `deletedAt: null`.
   - `pauseDay` no pisa un `done` existente.
   - `ensureDefaults` dos veces deja 7 anclas.
   - Toda escritura se ve en `outbox`.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan. Los IDs se calculan antes de la transacción.
-- [ ] **Paso 5: commit.** `feat(web): add repositories with an outbox and default anchors`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan. Los IDs se calculan antes de la transacción.
+- [x] **Paso 5: commit.** `feat(web): add repositories with an outbox and default anchors`.
 
 ### Tarea 13: "hoy" que cambia solo
 
@@ -347,11 +349,11 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Produce `useToday(): LocalDate`. Usa `userSettings` y se recalcula con `visibilitychange`, con `focus` y cada 60 s.
 
-- [ ] **Paso 1: test.** Con *fake timers* a las 03:59 del 24-10-2026 (hora de Santiago), devuelve `2026-10-23`. Tras avanzar 2 minutos, devuelve `2026-10-24` sin volver a montar (foco de revisión 2).
-- [ ] **Pasos 2 a 4:** ver que falla, implementar y ver que pasa.
-- [ ] **Paso 5: commit.** `feat(web): roll today over at the day cutoff`.
+- [x] **Paso 1: test.** Con *fake timers* a las 03:59 del 24-10-2026 (hora de Santiago), devuelve `2026-10-23`. Tras avanzar 2 minutos, devuelve `2026-10-24` sin volver a montar (foco de revisión 2).
+- [x] **Pasos 2 a 4:** ver que falla, implementar y ver que pasa.
+- [x] **Paso 5: commit.** `feat(web): roll today over at the day cutoff`.
 
-## PR 1.5 · `feat/habits-crud`
+## PR 1.5 · `feat/habits-crud` (PR #32)
 
 ### Tarea 14: crear, editar y archivar hábitos
 
@@ -360,14 +362,14 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Consume `habitSchema`, `habitsRepo` y `anchors`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Crear un hábito diario guarda una fila con `startsOn` = hoy.
   - En modo cuota, sin cuota, aparece "Indica cuántas veces por semana (1 a 7)."
   - Dos clics rápidos en "Guardar" crean un solo hábito, porque el botón se deshabilita mientras guarda.
   - Al cambiar los días de un hábito con check-ins aparece "Si cambias los días, la racha se recalcula con los días nuevos." antes de guardar (foco de revisión 5).
   - "Archivar" lo saca de la lista activa y lo muestra en "Archivados", con "Reactivar".
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): create, edit and archive habits`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): create, edit and archive habits`.
 
 ### Tarea 15: editar anclas y ajustes
 
@@ -376,7 +378,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Consume `userSettingsSchema`, `writeRows` y `useToday`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Agregar un ancla.
   - Renombrarla.
   - Subir y bajar con botones accesibles (sin arrastrar).
@@ -384,10 +386,10 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - En Ajustes, cambiar la hora de corte a 0 (de 0 a 6) actualiza `useToday` de inmediato.
   - La zona horaria muestra `America/Santiago` por defecto y advierte que solo afecta a los registros nuevos.
   - "Estilo" es un grupo de opciones (Cuaderno, Línea, Disco, Rotar cada semana), con `cuaderno` por defecto. Elegir uno cambia `data-style` al instante y guarda `userSettings.style`.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commits.** `feat(web): edit anchors` y `feat(web): add settings for day cutoff and time zone`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commits.** `feat(web): edit anchors` y `feat(web): add settings for day cutoff and time zone`.
 
-## PR 1.6 · `feat/today-screen`
+## PR 1.6 · `feat/today-screen` (PR #34)
 
 ### Tarea 16: "Hoy" con marcado de un toque
 
@@ -396,7 +398,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Consume `habitsForDay`, `checkInsRepo` y `useToday`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Agrupa por ancla, en orden.
   - Un toque en un hábito lo marca: `aria-pressed="true"`.
   - Otro toque, pasados 400 ms, lo desmarca.
@@ -404,32 +406,32 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - Sin hábitos: "Todavía no tienes hábitos." con el botón "Crear hábito".
   - Los hábitos de cuota muestran "2 de 3 esta semana".
   - Todo lo anterior corre con `describe.each(['cuaderno', 'linea', 'disco'])`, y en cada estilo se dibuja su `StyleSignature`: los cuadritos de la semana, el riel con estaciones o la barra con discos.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): add the Today screen with one-tap check-ins`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): add the Today screen with one-tap check-ins`.
 
 ### Tarea 17: saltar con motivo y pausar el día
 
 **Archivos:** crear `apps/web/src/today/SkipSheet.tsx` y su test.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - El botón "Más opciones" de una fila abre la hoja con Certamen, Enfermedad, Viaje, Descanso y Otro, más una nota opcional.
   - Elegir "Certamen" guarda `skipped` con `skipReason: 'certamen'`.
   - "Pausar el día" salta todos los pendientes de hoy con un solo motivo y no toca los ya marcados.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): skip habits with a reason and pause the day`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): skip habits with a reason and pause the day`.
 
 ### Tarea 18: racha y progreso visibles
 
 **Archivos:** crear `apps/web/src/today/useHabitStats.ts` y su test.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Un diario con racha 5 muestra "Racha: 5 días".
   - Un día saltado muestra "Saltado: certamen".
   - Una cuota cumplida muestra "Cumplido esta semana" y la racha semanal.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat(web): show streaks and weekly progress`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat(web): show streaks and weekly progress`.
 
-## PR 1.7 · `feat/habit-history`
+## PR 1.7 · `feat/habit-history` (PR #36)
 
 ### Tarea 19: mapa de calor de 90 días
 
@@ -440,16 +442,16 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Produce `buildHeatmap(args: { habit; today: LocalDate; checkIns; days?: number }): Array<{ date: LocalDate; state: 'done' | 'skipped' | 'missed' | 'not_scheduled' | 'before_start' | 'today_pending' }>`. Por defecto `days = 90` y el orden va de lo más antiguo a hoy.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Devuelve 90 celdas.
   - Hoy sin registro queda como `today_pending`, no como `missed`.
   - Los días antes de `startsOn` quedan como `before_start`.
   - El fin de semana de un hábito de lunes a viernes queda como `not_scheduled`.
   - El componente da a cada celda una etiqueta accesible, por ejemplo "vie 23-10: hecho", y usa una cuadrícula con el lunes primero.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat: add a 90-day habit history`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat: add a 90-day habit history`.
 
-## PR 1.8 · `feat/weekly-review`
+## PR 1.8 · `feat/weekly-review` (PR #37)
 
 ### Tarea 20: revisión del domingo
 
@@ -460,16 +462,16 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 **Interfaces:**
 - Produce `weekSummary(args: { habits: Habit[]; weekStart: LocalDate; today: LocalDate; checkIns; overrides }): Array<{ habitId: string; done: number; skipped: number; missed: number; quota: number | null; met: boolean | null; streak: number }>`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - Resumen correcto de una semana con hábitos de los dos tipos.
   - El domingo, la pantalla muestra la semana en curso; de lunes a sábado, la última semana cerrada.
   - Guardar la reflexión escribe `weeklyReviews`.
   - Cambiar la cuota de la semana siguiente escribe `weeklyQuotaOverrides` con `quotaOverrideId`.
   - "Marcar revisión como hecha" fija `completedAt`.
-- [ ] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
-- [ ] **Paso 5: commit.** `feat: add the Sunday weekly review`.
+- [x] **Pasos 2 a 4:** ver que fallan, implementar y ver que pasan.
+- [x] **Paso 5: commit.** `feat: add the Sunday weekly review`.
 
-## PR 1.9 · `test/phase-1-review`
+## PR 1.9 · `test/phase-1-review` (PR #38)
 
 ### Tarea 21: E2E y revisión de interfaz
 
@@ -477,7 +479,7 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
 - Crear `apps/web/playwright.config.ts`, con Chromium en 393×852 (`isMobile`, `hasTouch`) y en 1280×800.
 - Crear `apps/web/e2e/habits.spec.ts`.
 
-- [ ] **Paso 1: escribir los E2E.**
+- [x] **Paso 1: escribir los E2E.**
   - Crear un hábito diario, marcarlo en "Hoy", recargar y verlo marcado.
   - Saltar con motivo.
   - Pausar el día.
@@ -486,9 +488,9 @@ expect(weekStart(d('2027-01-01'))).toBe('2026-12-28');
   - Revisión del domingo, con el reloj simulado de Playwright.
   - Capturas de "Hoy" en los 3 estilos × claro y oscuro × móvil y escritorio (12 en total).
   - Si apruebas `@axe-core/playwright`: cero violaciones de contraste y accesibilidad en las 6 combinaciones de estilo y modo.
-- [ ] **Paso 2: correrlos.** `pnpm --filter @habit-tracker/web e2e` debe pasar con Chromium.
-- [ ] **Paso 3: revisión.** Correr la skill `web-design-guidelines` sobre `apps/web/src` y corregir lo que encuentre, con un commit por corrección.
-- [ ] **Paso 4: verificar.** Volver a correr unitarios, E2E, `typecheck`, `lint` y `build`, y confirmar que todo pasa.
-- [ ] **Paso 5: commit.** `test(web): add phase 1 end-to-end tests`.
+- [x] **Paso 2: correrlos.** `pnpm --filter @habit-tracker/web e2e` debe pasar con Chromium.
+- [x] **Paso 3: revisión.** Correr la skill `web-design-guidelines` sobre `apps/web/src` y corregir lo que encuentre, con un commit por corrección.
+- [x] **Paso 4: verificar.** Volver a correr unitarios, E2E, `typecheck`, `lint` y `build`, y confirmar que todo pasa.
+- [x] **Paso 5: commit.** `test(web): add phase 1 end-to-end tests`.
 
 Cierre de la fase: resumen para ti, con capturas, y la etiqueta `phase-1-ok` cuando lo apruebes.

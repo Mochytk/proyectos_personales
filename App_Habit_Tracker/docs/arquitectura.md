@@ -69,7 +69,7 @@ App_Habit_Tracker/
 | `dev` | Vite + `wrangler dev` en tu Mac | Postgres en Docker (o la rama `dev` de Neon) | Desarrollo y pruebas locales |
 | CI | GitHub Actions | Postgres como servicio del job | Cada push y cada PR |
 | `preview` | Preview de Workers por rama (`*.workers.dev`) | Rama `preview` de Neon | Revisar una PR en el iPhone real |
-| `production` | Worker en `*.workers.dev` | Rama `production` de Neon | Desde la fase 6, solo con tu confirmación |
+| `production` | Worker en `constancia.<tu-subdominio>.workers.dev` | Rama `production` de Neon | Solo desde `release/habit-tracker`, cuando fusionas una PR de *release* (ADR 0010) |
 
 Los secretos de cada entorno (URL de la base, secreto de Better Auth) viven solo en Cloudflare, en los secretos de GitHub o en tu `.env.local`. Nunca en el repo (ver [`cuentas.md`](cuentas.md)).
 
@@ -105,7 +105,7 @@ En la fase 4 se vuelven a verificar, con la versión de iOS que tengas.
 | Acceso por usuario en todas las tablas | `user_id` sacado de la sesión. Tests de aislamiento en la API (ADR 0004) |
 | Validación en el servidor | Esquemas Zod de `packages/shared` en cada ruta de Hono |
 | Contraseñas, límite de intentos y cookies | Better Auth: `scrypt`, limitador en la base, cookies `HttpOnly`, `Secure` y `SameSite=Lax` (ADR 0005) |
-| Cabeceras (CSP, `frame-ancestors 'none'`, etc.) | Middleware del Worker, en las fases 2 y 6 |
+| Cabeceras (CSP, `frame-ancestors 'none'`, etc.) | La web: el archivo `_headers` que genera su *build* (`apps/web/security-headers.ts`), con la misma CSP en `vite preview`. La API: middleware del Worker. Desde la fase 2, revisadas en la 6 |
 | Electron endurecido | ADR 0008, verificado en las fases 5 y 6 |
 | Registro público cerrado | `AUTH_SIGNUP_ENABLED=false` en producción, con un test |
-| Dependencias auditadas | `pnpm audit` en el CI |
+| Dependencias auditadas | `pnpm run audit` en el CI (falla con vulnerabilidades altas o críticas) |

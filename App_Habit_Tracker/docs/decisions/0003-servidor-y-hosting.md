@@ -47,6 +47,11 @@ Si se pasa el límite de peticiones, Cloudflare responde con el error 1027 hasta
 - Las URLs de Preview son públicas por defecto. Como el registro está cerrado (ADR 0005), solo verían la pantalla de login. Si quieres cerrarlas del todo, existe Cloudflare Access; se evalúa en la fase 6.
 - Workers Builds necesita instalar la app de Cloudflare en GitHub con acceso a este repo. Eso lo haces tú (ver `docs/cuentas.md`).
 
+
+## Actualización 29-10-2026: producción desde una rama de *release*
+
+El [ADR 0010](0010-uso-diario-antes-de-la-fase-6.md) reemplaza la regla de la rama de producción. Producción ya no queda desactivada hasta la fase 6: se despliega solo desde `release/habit-tracker`, con una PR de *release* que fusionas tú. `app/habit_tracker` y las demás ramas generan Previews. El resto de este ADR sigue igual.
+
 ## Fuentes (consultadas el 23-10-2026)
 
 - Precios de Workers: https://developers.cloudflare.com/workers/platform/pricing/
