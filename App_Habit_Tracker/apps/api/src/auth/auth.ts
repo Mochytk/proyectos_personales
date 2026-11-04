@@ -14,7 +14,8 @@ export interface AuthDeps {
   waitUntil: (promise: Promise<unknown>) => void;
 }
 
-const DAY = 60 * 60 * 24;
+const HOUR = 60 * 60;
+const DAY = 24 * HOUR;
 const RESET_LINK_HOURS = 1;
 
 function resetEmailText(url: string): string {
@@ -65,8 +66,14 @@ export function createAuth(env: AuthEnv, db: Db, requestUrl: string, deps: AuthD
         return Promise.resolve();
       },
     },
-    // 30 days, renewed at most once a day while in use (ADR 0010).
-    session: { expiresIn: 30 * DAY, updateAge: DAY },
+    session: {
+      // 30 days, renewed at most once a day while in use (ADR 0010).
+      expiresIn: 30 * DAY,
+      updateAge: DAY,
+      // A signed copy of the session in a cookie, so /api/sync/version can answer without
+      // waking Neon. Everything else checks Postgres (requireSession).
+      cookieCache: { enabled: true, maxAge: HOUR },
+    },
     // Kept in Postgres: a Worker's memory does not outlive the request. The default rules
     // allow 3 sign-in attempts per 10 s for each IP.
     rateLimit: { enabled: true, storage: 'database' },

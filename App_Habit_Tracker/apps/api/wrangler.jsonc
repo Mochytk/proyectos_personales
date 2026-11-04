@@ -19,10 +19,19 @@
   "vars": {
     "DATABASE_DRIVER": "neon",
   },
+  // One SyncNotifier per user announces new changes (ADR 0006). SQLite-backed, the only
+  // kind the free plan offers.
+  "durable_objects": {
+    "bindings": [{ "name": "SYNC_NOTIFIER", "class_name": "SyncNotifier" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SyncNotifier"] }],
   // Previews do not inherit the settings above (ADR 0010); secrets are set in the dashboard.
   "previews": {
     "vars": {
       "DATABASE_DRIVER": "neon",
+    },
+    "durable_objects": {
+      "bindings": [{ "name": "SYNC_NOTIFIER", "class_name": "SyncNotifier" }],
     },
   },
 }

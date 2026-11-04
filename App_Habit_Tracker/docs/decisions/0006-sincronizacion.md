@@ -70,6 +70,12 @@ El indicador de sincronización (RF-4.3) tiene cuatro estados:
 
 Repetir el mismo *push* deja la base igual, porque la regla de conflicto compara `updated_at` y una fila igual no gana ni pierde. Si la conexión se corta antes del *commit*, no se aplicó nada y el cliente reintenta. Si se corta después del *commit*, el reintento no cambia nada, y el *pull* trae el estado final.
 
+### Actualización 04-11-2026: la sesión de `/version`
+
+`/version` valida la sesión con la copia firmada que Better Auth guarda en una cookie (`cookieCache`, 1 hora), sin consultar Postgres. Así la consulta cada 15 s no despierta Neon. El *push* y el *pull* siguen revisando la sesión en Postgres, de modo que una sesión cerrada desde otro dispositivo deja de leer y escribir datos al instante; solo puede seguir viendo el número de versión hasta 1 hora.
+
+Una sola transacción de solo lectura (`repeatable read`) lee las seis tablas en cada página del *pull*, para que un *push* que se confirma a mitad de camino no mueva el cursor más allá de filas que esa página no vio.
+
 ## Alternativas
 
 - **Dexie Cloud.** Es el servicio de sincronización de los autores de Dexie. El plan gratis tiene 3 usuarios de producción, autenticación incluida y 10 bases.

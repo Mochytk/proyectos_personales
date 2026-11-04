@@ -2,7 +2,8 @@ import { pushRequestSchema } from '@habit-tracker/shared';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { AppEnv } from '../app';
-import { requireSession, withAuth } from '../auth/session';
+import { requireCachedSession, requireSession, withAuth } from '../auth/session';
+import { announce } from './notifier';
 import { pull } from './pull';
 import { push } from './push';
 
@@ -24,7 +25,10 @@ export function syncRoutes(): Hono<AppEnv> {
       const body: unknown = await c.req.json().catch(() => null);
       const parsed = pushRequestSchema.safeParse(body);
       if (!parsed.success) return c.json({ error: 'invalid_batch' }, 400);
-      return c.json(await push(c.var.db, c.var.userId, parsed.data));
+      const result = await push(c.var.db, c.var.userId, parsed.data);
+      // After the commit, without holding up the response.
+      c.executionCtx.waitUntil(announce(c.var.services.notifier(), c.var.userId, result.version));
+      return c.json(result);
     },
   );
 
@@ -36,6 +40,12 @@ export function syncRoutes(): Hono<AppEnv> {
     }
     return c.json(await pull(c.var.db, c.var.userId, cursor));
   });
+
+  // Polled every 15 s while the app is open (ADR 0006): answered by the Durable Object,
+  // with the session from its signed cookie, so Neon can stay asleep.
+  sync.get('/version', withAuth, requireCachedSession, async (c) =>
+    c.json({ version: await c.var.services.notifier().version(c.var.userId) }),
+  );
 
   return sync;
 }

@@ -220,8 +220,15 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Produce `interface ChangeNotifier { bump(userId: string, seq: number): Promise<void>; version(userId: string): Promise<number> }`, con `durableNotifier(ns)` (un objeto por usuario, `idFromName(userId)`) y `memoryNotifier()` para las pruebas.
 - Después del *commit* del *push*: `bump`, con un reintento si falla, sin hacer fallar el *push*. `GET /api/sync/version` responde `{ "version": n }` sin tocar Postgres.
 
-- [ ] **Paso 1: tests.** `bump` guarda el máximo, y no baja con un valor menor. `/version` refleja el último *push*. Un `bump` que falla dos veces no hace fallar el *push*. `/version` no abre la base (se prueba con un `Db` que lanza si se usa).
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): announce changes through a Durable Object`.
+- [x] **Paso 1: tests.** `bump` guarda el máximo, y no baja con un valor menor. `/version` refleja el último *push*. Un `bump` que falla dos veces no hace fallar el *push*. `/version` no abre la base (se prueba con un `Db` que lanza si se usa).
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): announce changes through a Durable Object`.
+
+> **Al implementarla (PR 2.5):**
+> - **La sesión de `/version` se valida sin Postgres.** Better Auth guarda una copia firmada de la sesión en una cookie (`cookieCache`, 1 hora), y solo `/version` la acepta. El *push*, el *pull* y todo lo demás revisan la sesión en Postgres (`disableCookieCache`), así que una sesión cerrada desde otro dispositivo no puede escribir ni leer datos. Sí puede seguir viendo el número de versión hasta 1 hora, que es el costo de no despertar Neon cada 15 s. Una prueba fija los dos comportamientos.
+> - La clase `SyncNotifier` vive sola en `src/sync/sync-notifier.ts`, el único archivo que importa `cloudflare:workers`. En las pruebas de Node, Vitest reemplaza ese módulo por un sustituto mínimo (`src/test/cloudflare-workers.ts`). El Durable Object real se probó en `wrangler dev`.
+> - El aviso al Durable Object va con `ctx.waitUntil`, sin demorar la respuesta del *push*.
+> - `createApp` recibe además `notifier` y `connect`, que construye solo la ruta que los usa. Así `/api/health` no lee ningún *binding*.
+> - Los tipos de `wrangler types` se regeneraron con el *binding* `SYNC_NOTIFIER`.
 
 ## PR 2.6 · `feat/sync-client`
 
