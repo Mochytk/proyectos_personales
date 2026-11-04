@@ -7,3 +7,8 @@ BETTER_AUTH_SECRET=
 AUTH_ALLOWED_HOSTS=localhost:*
 # "true" opens sign-up; anything else keeps it closed.
 AUTH_SIGNUP_ENABLED=true
+# Brevo, for password reset emails. Leave empty locally: the reset still answers 200 and
+# the Worker only logs that the email failed.
+BREVO_API_KEY=
+# A sender you verified in Brevo.
+EMAIL_FROM=

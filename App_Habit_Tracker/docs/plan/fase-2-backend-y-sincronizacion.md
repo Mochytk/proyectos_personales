@@ -132,10 +132,16 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Produce `brevoSender(env: { BREVO_API_KEY: string; EMAIL_FROM: string }, fetchImpl = fetch): EmailSender`, que hace `POST https://api.brevo.com/v3/smtp/email` con la cabecera `api-key`. Antes de escribirlo se revisa la documentación vigente de la API. `EMAIL_FROM` es tu correo y va como secreto, no en el repo.
 - `createAuth` recibe un `EmailSender`. `sendResetPassword` manda el asunto "Restablecer tu contraseña de Constancia" y un texto con el enlace, que vence en 1 hora. `revokeSessionsOnPasswordReset: true`.
 
-- [ ] **Paso 1: tests.**
+- [x] **Paso 1: tests.**
   - `brevoSender` arma la petición esperada (con un `fetch` falso) y lanza si Brevo no responde `2xx`, sin incluir la clave en el error.
   - `reset.test.ts`, con un `EmailSender` falso: pedir el enlace, restablecer con el token, la contraseña vieja falla, la nueva funciona y las otras sesiones quedan cerradas. Un token usado no sirve dos veces.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): reset passwords by email through Brevo`.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(api): reset passwords by email through Brevo`.
+
+> **Al implementarla (PR #43):**
+> - `createApp({ email })` recibe una función que arma el emisor desde `env`; por defecto, Brevo. Las pruebas pasan uno falso.
+> - El correo se manda con `ctx.waitUntil`, sin esperarlo, como recomienda Better Auth contra los ataques de tiempo.
+> - Si Brevo falla, el pedido responde igual (`200`) y solo se registra el código del error. Tiene su propia prueba, que el plan no pedía.
+> - `EMAIL_FROM` es un secreto, como `BREVO_API_KEY`: el remitente verificado en Brevo.
 
 ## PR 2.5 · `feat/sync-server`
 

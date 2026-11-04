@@ -3,20 +3,29 @@ import { secureHeaders } from 'hono/secure-headers';
 import type { Auth } from './auth/auth';
 import { withAuth } from './auth/session';
 import type { Db } from './db/client';
+import { brevoSender } from './email/brevo';
+import type { EmailSender } from './email/sender';
 
 export interface AppEnv {
   Bindings: Env;
-  // Set by withAuth and requireSession, on the routes that use them.
-  Variables: { db: Db; auth: Auth; userId: string };
+  // email is set for every /api/* request; the rest by withAuth and requireSession, on the
+  // routes that use them.
+  Variables: { email: EmailSender; db: Db; auth: Auth; userId: string };
 }
 
-export function createApp(): Hono<AppEnv> {
+export interface AppOptions {
+  // Tests pass a fake; the Worker sends through Brevo.
+  email?: (env: Env) => EmailSender;
+}
+
+export function createApp({ email = (env) => brevoSender(env) }: AppOptions = {}): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
 
   app.use(
     '/api/*',
     secureHeaders({ xFrameOptions: 'DENY', referrerPolicy: 'no-referrer' }),
     async (c, next) => {
+      c.set('email', email(c.env));
       await next();
       c.header('Cache-Control', 'no-store');
     },
