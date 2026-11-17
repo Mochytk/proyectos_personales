@@ -227,6 +227,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - **La sesión de `/version` se valida sin Postgres.** Better Auth guarda una copia firmada de la sesión en una cookie (`cookieCache`, 1 hora), y solo `/version` la acepta. El *push*, el *pull* y todo lo demás revisan la sesión en Postgres (`disableCookieCache`), así que una sesión cerrada desde otro dispositivo no puede escribir ni leer datos. Sí puede seguir viendo el número de versión hasta 1 hora, que es el costo de no despertar Neon cada 15 s. Una prueba fija los dos comportamientos.
 > - La clase `SyncNotifier` vive sola en `src/sync/sync-notifier.ts`, el único archivo que importa `cloudflare:workers`. En las pruebas de Node, Vitest reemplaza ese módulo por un sustituto mínimo (`src/test/cloudflare-workers.ts`). El Durable Object real se probó en `wrangler dev`.
 > - El aviso al Durable Object va con `ctx.waitUntil`, sin demorar la respuesta del *push*.
+> - `durableNotifier` usa `getByName(userId)` en vez de `idFromName(userId)`: es la forma que recomienda hoy la documentación de Cloudflare y da el mismo objeto por usuario.
 > - `createApp` recibe además `notifier` y `connect`, que construye solo la ruta que los usa. Así `/api/health` no lee ningún *binding*.
 > - Los tipos de `wrangler types` se regeneraron con el *binding* `SYNC_NOTIFIER`.
 

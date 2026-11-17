@@ -109,6 +109,13 @@ Producción solo con tu confirmación. Cierre: revisión final independiente.
 
 Revisión final con las Web Interface Guidelines, rendimiento, README con capturas y ADRs al día. Los opcionales (notificaciones push, atajos, recordatorios, temas, más gráficos) los eliges tú.
 
+### Pendientes que pediste
+
+- **Widget para el teléfono y el reloj** (pedido el 17-11-2026). Mostraría los hábitos de hoy en la pantalla de inicio del iPhone y en el Apple Watch.
+  - **Una PWA no puede hacerlo.** Los widgets del iPhone se hacen con WidgetKit y las apps del reloj con watchOS, las dos en Swift: hace falta una app nativa compilada con Xcode en tu Mac, que lea los datos de la API.
+  - **Costo:** con tu Apple ID gratis, la app se instala en tus dispositivos pero vence a los 7 días y hay que reinstalarla desde Xcode. Para que no venza hace falta el Apple Developer Program (99 USD al año), que rompe la regla de costo cero y lo que supone el ADR 0008. Se decide contigo antes de empezar.
+  - **Alternativa gratis a evaluar:** un widget de la app Atajos que abra Constancia, sin mostrar datos.
+
 ## Dependencias nuevas que pediré aprobar
 
 Antes de agregar cada una reviso su mantenimiento, sus scripts de instalación y sus vulnerabilidades conocidas, y te cuento lo que encontré. Las apruebas de a una. La revisión de las de la fase 1 se hizo el 23-10-2026: ninguna tiene vulnerabilidades conocidas (`npm audit`) ni scripts que corran al instalarse desde npm.
