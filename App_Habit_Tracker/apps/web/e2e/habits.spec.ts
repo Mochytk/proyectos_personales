@@ -8,6 +8,11 @@ test('creates a daily habit, marks it on Hoy and keeps it after a reload', async
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  // The button turns at once; the streak only shows once the tap is saved, so a reload
+  // after it cannot beat the write.
+  await expect(page.getByRole('listitem', { name: 'Leer 20 minutos' })).toContainText(
+    'Racha: 1 día',
+  );
 
   await page.reload();
   await expect(habitToggle(page, 'Leer 20 minutos')).toHaveAttribute('aria-pressed', 'true');

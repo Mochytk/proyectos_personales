@@ -87,3 +87,7 @@ export const pullResponseSchema = z.object({
   hasMore: z.boolean(),
 });
 export type PullResponse = z.infer<typeof pullResponseSchema>;
+
+// GET /api/sync/version: the user's highest server_seq, from the Durable Object.
+export const versionResponseSchema = z.object({ version: serverSeqSchema });
+export type VersionResponse = z.infer<typeof versionResponseSchema>;

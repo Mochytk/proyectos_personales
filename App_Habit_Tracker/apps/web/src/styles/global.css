@@ -200,6 +200,14 @@ a.button {
   font-weight: 700;
 }
 
+.sync-status {
+  min-height: 1.25em;
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
 .field-note {
   margin: 0;
   color: var(--muted);

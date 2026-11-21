@@ -131,6 +131,24 @@ describe('password reset by email', () => {
     expect((await signIn('olvido@example.com', NEW_PASSWORD)).status).toBe(200);
   });
 
+  it('sends the link through the Worker on to /restablecer with the token', async () => {
+    sent = [];
+    const response = await post('/api/auth/request-password-reset', {
+      email: 'olvido@example.com',
+      redirectTo: '/restablecer',
+    });
+    expect(response.status).toBe(200);
+    const link = /(http\S+\/reset-password\/\S+)/.exec(sent[0]?.text ?? '')?.[1] ?? '';
+    const opened = await request(app(), testEnv(database.url), link, {
+      ip: nextIp(),
+      redirect: 'manual',
+    });
+    expect(opened.status).toBe(302);
+    const location = new URL(opened.headers.get('location') ?? '', 'http://localhost:8787');
+    expect(location.pathname).toBe('/restablecer');
+    expect(location.searchParams.get('token')).toBe(tokenFrom(sent[0]));
+  });
+
   it('answers the same when Brevo fails, and logs only the error code', async () => {
     const failing = createApp({
       email: () => ({ send: () => Promise.reject(new Error('Brevo answered 401 (unauthorized)')) }),

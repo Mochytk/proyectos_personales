@@ -1,5 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router';
-import { DatabaseProvider } from '../db/DatabaseProvider';
+import { AccountScreen } from '../account/AccountScreen';
+import { ResetPasswordScreen } from '../account/ResetPasswordScreen';
+import { DatabaseProvider, useDb } from '../db/DatabaseProvider';
 import { HabitDetailScreen } from '../habits/HabitDetailScreen';
 import { HabitEditScreen } from '../habits/HabitEditScreen';
 import { HabitsScreen } from '../habits/HabitsScreen';
@@ -7,6 +9,8 @@ import { ReviewScreen } from '../review/ReviewScreen';
 import { SettingsScreen } from '../settings/SettingsScreen';
 import { TodayScreen } from '../today/TodayScreen';
 import { useSettings } from '../settings/useSettings';
+import { SyncStatus } from '../sync/SyncStatus';
+import { useSync } from '../sync/useSync';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { useStyle } from './useStyle';
 import { useToday } from './useToday';
@@ -28,6 +32,12 @@ export function SavedStyle() {
   return null;
 }
 
+// Keeps this device in sync while the app is open, and says how it is going.
+export function SyncBar() {
+  const { result, pending } = useSync(useDb());
+  return <SyncStatus result={result} pending={pending} />;
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -38,6 +48,8 @@ export function AppRoutes() {
       <Route path="habitos/:id/editar" element={<HabitEditScreen />} />
       <Route path="revision" element={<ReviewScreen />} />
       <Route path="ajustes" element={<SettingsScreen />} />
+      <Route path="cuenta" element={<AccountScreen />} />
+      <Route path="restablecer" element={<ResetPasswordScreen />} />
     </Routes>
   );
 }
@@ -49,6 +61,7 @@ export function App() {
         <ErrorBoundary>
           <DatabaseProvider>
             <SavedStyle />
+            <SyncBar />
             <AppRoutes />
           </DatabaseProvider>
         </ErrorBoundary>

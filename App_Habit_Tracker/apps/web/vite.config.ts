@@ -17,6 +17,8 @@ export default defineConfig({
       },
     },
   ],
+  // In development the API runs apart, in `wrangler dev`; in production one Worker serves both.
+  server: { proxy: { '/api': 'http://localhost:8787' } },
   preview: { headers: SECURITY_HEADERS },
   test: {
     environment: 'jsdom',

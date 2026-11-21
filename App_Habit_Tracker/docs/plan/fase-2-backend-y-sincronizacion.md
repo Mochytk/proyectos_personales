@@ -231,7 +231,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - `createApp` recibe además `notifier` y `connect`, que construye solo la ruta que los usa. Así `/api/health` no lee ningún *binding*.
 > - Los tipos de `wrangler types` se regeneraron con el *binding* `SYNC_NOTIFIER`.
 
-## PR 2.6 · `feat/sync-client`
+## PR 2.6 · `feat/sync-client` (PR #46)
 
 ### Tarea 9: cuenta en la web
 
@@ -242,8 +242,14 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Textos: "Iniciar sesión", "Cerrar sesión", "Cerrar sesión en todos los dispositivos", "Cambiar contraseña", "¿Olvidaste tu contraseña?". Para el 429: "Demasiados intentos. Espera unos segundos." Para un error de red: "Sin conexión. Inténtalo de nuevo cuando vuelva la señal."
 - La app sigue funcionando sin sesión: solo la sincronización la necesita.
 
-- [ ] **Paso 1: tests** (con `fetch` falso): el login correcto lleva a "Sesión iniciada como …"; el 429 y el error de red muestran su texto; cerrar sesión en todos los dispositivos pide confirmación; restablecer con un token vencido muestra "El enlace venció. Pide uno nuevo."
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sign in, sign out and reset the password`.
+- [x] **Paso 1: tests** (con `fetch` falso): el login correcto lleva a "Sesión iniciada como …"; el 429 y el error de red muestran su texto; cerrar sesión en todos los dispositivos pide confirmación; restablecer con un token vencido muestra "El enlace venció. Pide uno nuevo."
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sign in, sign out and reset the password`.
+
+> **Al implementarla (PR #46):**
+> - "Cerrar sesión en todos los dispositivos" usa `/revoke-sessions`, que cierra también la sesión de este dispositivo, así que la pantalla vuelve al login. La confirmación va en la misma pantalla, no en un diálogo.
+> - "¿Olvidaste tu contraseña?" abre el pedido del enlace en la pantalla de cuenta. El enlace pasa por el Worker, que valida el token y redirige a `/restablecer?token=…` (o `?error=INVALID_TOKEN` si venció). Una prueba nueva en `apps/api` comprueba esa redirección con un `redirectTo` relativo.
+> - Iniciar o cerrar sesión dispara el evento `constancia:session`, que escucha la sincronización (tarea 11).
+> - En desarrollo, Vite manda `/api` a `wrangler dev` (`localhost:8787`).
 
 ### Tarea 10: motor de sincronización
 
@@ -255,13 +261,19 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - ***Pull*:** desde `syncState.cursor`, hasta `hasMore = false`. Aplica cada fila con `wins`, sin pasar por `writeRows` (no encola), y guarda el cursor.
 - `SyncResult = { status: 'synced' | 'offline' | 'unauthenticated' | 'error'; message?: string }`. Cada `fetch` tiene un tiempo máximo de 15 s.
 
-- [ ] **Paso 1: tests** (Dexie con `fake-indexeddb` y una `SyncApi` falsa):
+- [x] **Paso 1: tests** (Dexie con `fake-indexeddb` y una `SyncApi` falsa):
   - Las filas subidas salen de la *outbox*; una fila editada mientras viajaba se queda.
   - Una fila remota más nueva pisa la local; una más vieja no.
   - Tres páginas de *pull* dejan el cursor en la última.
   - Un `401` da `unauthenticated` y conserva la *outbox*; un corte de red da `offline`.
   - Un `push` repetido tras perder la respuesta deja todo igual.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sync the outbox with the server`.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sync the outbox with the server`.
+
+> **Al implementarla (PR #46):**
+> - Las filas que el servidor marca `stale` (otra edición más nueva ganó allá) también salen de la *outbox*: el *pull* trae la copia ganadora. Si al aplicar el *pull* una fila remota pisa una local pendiente, esa entrada de la *outbox* se borra, porque esa edición ya perdió en todas partes.
+> - El esquema de la respuesta de `/version` (`versionResponseSchema`) pasó a `packages/shared`, junto a los demás.
+> - `syncState.cursor` ahora es un número (antes `string | null`, sin uso). No hace falta migrar Dexie, porque nada lo había escrito.
+> - Si el servidor rechaza un lote por una fila inválida (`400 invalid_batch`), todo el envío queda detenido y el estado muestra el error. No debería pasar, porque las filas locales se validan con los mismos esquemas al escribirlas.
 
 ### Tarea 11: cuándo sincronizar y estado visible
 
@@ -275,8 +287,15 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Reintenta con espera creciente: 1 s, 2 s, 4 s… hasta 5 min, con ±20 % de azar.
 - `SyncStatus`, con `role="status"`, muestra "Sincronizado", "Pendiente", "Sin conexión", "Inicia sesión para sincronizar" o "Error: …".
 
-- [ ] **Paso 1: tests** (con *fake timers*): una escritura sincroniza a los 2 s; tres fallos esperan 1, 2 y 4 s; con la app oculta no se consulta `/version`; el estado cambia de "Pendiente" a "Sincronizado".
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): schedule sync and show its status`.
+- [x] **Paso 1: tests** (con *fake timers*): una escritura sincroniza a los 2 s; tres fallos esperan 1, 2 y 4 s; con la app oculta no se consulta `/version`; el estado cambia de "Pendiente" a "Sincronizado".
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): schedule sync and show its status`.
+
+> **Al implementarla (PR #46):**
+> - Cuándo sincronizar vive en `SyncScheduler` (`src/sync/scheduler.ts`), una clase sin React ni Dexie que se prueba con *fake timers*. `useSync` solo la conecta con el navegador: los eventos `online`, `visibilitychange` y `constancia:session`, y la *outbox* vía `liveQuery`.
+> - Antes de cada sincronización se pregunta si hay sesión (`get-session`, que responde desde la cookie firmada sin tocar Postgres). Sin cuenta, el dispositivo nunca manda un *push* que el servidor rechazaría, y el estado dice "Inicia sesión para sincronizar", con un enlace a la cuenta. Una sesión cerrada no se reintenta hasta el próximo inicio de sesión.
+> - `SyncStatus` va arriba a la derecha de cada pantalla, en letra chica y del color secundario de cada estilo. Pasa axe en las 6 combinaciones.
+> - Los E2E corren sin API (`vite preview`), así que una *fixture* automática responde "sin sesión" a `get-session`.
+> - Probado en `wrangler dev` con dos navegadores: un hábito creado en el "teléfono" apareció en el "Mac" al iniciar sesión, y uno creado en el "Mac" llegó al "teléfono" en 15,5 s, con la consulta de versión cada 15 s.
 
 ## PR 2.7 · `ci/preview-deploy`
 
