@@ -231,7 +231,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - `createApp` recibe además `notifier` y `connect`, que construye solo la ruta que los usa. Así `/api/health` no lee ningún *binding*.
 > - Los tipos de `wrangler types` se regeneraron con el *binding* `SYNC_NOTIFIER`.
 
-## PR 2.6 · `feat/sync-client`
+## PR 2.6 · `feat/sync-client` (PR #46)
 
 ### Tarea 9: cuenta en la web
 
@@ -245,7 +245,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - [x] **Paso 1: tests** (con `fetch` falso): el login correcto lleva a "Sesión iniciada como …"; el 429 y el error de red muestran su texto; cerrar sesión en todos los dispositivos pide confirmación; restablecer con un token vencido muestra "El enlace venció. Pide uno nuevo."
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sign in, sign out and reset the password`.
 
-> **Al implementarla (PR 2.6):**
+> **Al implementarla (PR #46):**
 > - "Cerrar sesión en todos los dispositivos" usa `/revoke-sessions`, que cierra también la sesión de este dispositivo, así que la pantalla vuelve al login. La confirmación va en la misma pantalla, no en un diálogo.
 > - "¿Olvidaste tu contraseña?" abre el pedido del enlace en la pantalla de cuenta. El enlace pasa por el Worker, que valida el token y redirige a `/restablecer?token=…` (o `?error=INVALID_TOKEN` si venció). Una prueba nueva en `apps/api` comprueba esa redirección con un `redirectTo` relativo.
 > - Iniciar o cerrar sesión dispara el evento `constancia:session`, que escucha la sincronización (tarea 11).
@@ -269,7 +269,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - Un `push` repetido tras perder la respuesta deja todo igual.
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sync the outbox with the server`.
 
-> **Al implementarla (PR 2.6):**
+> **Al implementarla (PR #46):**
 > - Las filas que el servidor marca `stale` (otra edición más nueva ganó allá) también salen de la *outbox*: el *pull* trae la copia ganadora. Si al aplicar el *pull* una fila remota pisa una local pendiente, esa entrada de la *outbox* se borra, porque esa edición ya perdió en todas partes.
 > - El esquema de la respuesta de `/version` (`versionResponseSchema`) pasó a `packages/shared`, junto a los demás.
 > - `syncState.cursor` ahora es un número (antes `string | null`, sin uso). No hace falta migrar Dexie, porque nada lo había escrito.
@@ -290,7 +290,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - [x] **Paso 1: tests** (con *fake timers*): una escritura sincroniza a los 2 s; tres fallos esperan 1, 2 y 4 s; con la app oculta no se consulta `/version`; el estado cambia de "Pendiente" a "Sincronizado".
 - [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): schedule sync and show its status`.
 
-> **Al implementarla (PR 2.6):**
+> **Al implementarla (PR #46):**
 > - Cuándo sincronizar vive en `SyncScheduler` (`src/sync/scheduler.ts`), una clase sin React ni Dexie que se prueba con *fake timers*. `useSync` solo la conecta con el navegador: los eventos `online`, `visibilitychange` y `constancia:session`, y la *outbox* vía `liveQuery`.
 > - Antes de cada sincronización se pregunta si hay sesión (`get-session`, que responde desde la cookie firmada sin tocar Postgres). Sin cuenta, el dispositivo nunca manda un *push* que el servidor rechazaría, y el estado dice "Inicia sesión para sincronizar", con un enlace a la cuenta. Una sesión cerrada no se reintenta hasta el próximo inicio de sesión.
 > - `SyncStatus` va arriba a la derecha de cada pantalla, en letra chica y del color secundario de cada estilo. Pasa axe en las 6 combinaciones.
