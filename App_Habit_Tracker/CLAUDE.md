@@ -27,7 +27,14 @@ App personal de hábitos y gimnasio, offline-first. Es una PWA para el iPhone y 
 | Nueva migración | `pnpm --filter @habit-tracker/api db:generate` (nunca `drizzle-kit push`) |
 | Pruebas de la API | Necesitan un Postgres 16 o más en `TEST_DATABASE_URL` (por defecto `postgres://postgres:postgres@localhost:5432/postgres`) |
 
-Los comandos para desplegar y migrar entornos reales se agregan aquí cuando existan (PR 2.7).
+Los entornos reales no se tocan desde la terminal (ADR 0010):
+
+| Para | Cómo |
+| --- | --- |
+| Migrar `preview` o `production` | En GitHub, **Actions → Habit tracker migrations → Run workflow**. Producción pide aprobación y solo corre desde `app/habit_tracker` o `release/habit-tracker` |
+| Desplegar una Preview | Automático: cada `push` a una rama que no sea `release/habit-tracker` (Workers Builds corre `pnpm --filter @habit-tracker/api run deploy:preview`) |
+| Desplegar producción | Fusionar una PR de `app/habit_tracker` hacia `release/habit-tracker`, que hace la dueña o dueño del repo. Antes, las migraciones (paso 8 de `docs/cuentas.md`) |
+| Configurar cuentas y secretos | `docs/cuentas.md`, paso a paso |
 
 ## Convenciones
 

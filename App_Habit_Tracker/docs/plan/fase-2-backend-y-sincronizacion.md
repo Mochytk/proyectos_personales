@@ -304,14 +304,23 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 **Archivos:** crear `.github/workflows/habit-tracker-migrate.yml`. Modificar `docs/cuentas.md`, `.github/workflows/habit-tracker-ci.yml` (Postgres como servicio y pruebas de `apps/api`) y `App_Habit_Tracker/CLAUDE.md` (comandos).
 
 - [x] **Paso 1: CI.** Agregar Postgres como servicio del job de pruebas y `TEST_DATABASE_URL`, para que las pruebas de `apps/api` corran en cada PR. Hecho en la PR #41, con Postgres 16.15 fijado por *digest*. En la misma PR, el CI pasó a `pnpm run audit`, que falla solo con vulnerabilidades altas o críticas como dice `CLAUDE.md`: `pnpm audit` a secas fallaba con cualquiera.
-- [ ] **Paso 2: workflow de migraciones.** `workflow_dispatch` con la entrada `environment` (`preview` o `production`). Corre `drizzle-kit migrate` con el secreto `DATABASE_URL` de ese *environment* de GitHub; `production` exige tu aprobación.
-- [ ] **Paso 3: guía paso a paso en `cuentas.md`**, que sigues tú en los paneles:
+- [x] **Paso 2: workflow de migraciones.** `workflow_dispatch` con la entrada `environment` (`preview` o `production`). Corre `drizzle-kit migrate` con el secreto `DATABASE_URL` de ese *environment* de GitHub; `production` exige tu aprobación.
+- [x] **Paso 3: guía paso a paso en `cuentas.md`**, que sigues tú en los paneles:
   - **Neon:** el proyecto y las ramas `production` y `preview`; la URL *pooled* para el Worker y la directa para migrar.
   - **Cloudflare:** Workers Builds con la carpeta raíz `App_Habit_Tracker`, el comando de *build* y la rama de producción `release/habit-tracker` (ADR 0010); los secretos de Production y de Previews.
   - **GitHub:** los *environments* y sus secretos.
-- [ ] **Paso 4: crear la rama `release/habit-tracker`** desde `app/habit_tracker`. Es un `git push` normal de una rama nueva.
+- [x] **Paso 4: crear la rama `release/habit-tracker`** desde `app/habit_tracker`. Es un `git push` normal de una rama nueva.
 - [ ] **Paso 5: medir el CPU de `scrypt`** en una Preview: con Workers Logs, el `cpuTime` de 10 logins. Anotarlo en una actualización fechada del ADR 0005 y, si se pasa de 10 ms de forma sostenida, seguir su plan B.
 - [ ] **Paso 6: commits.** `ci: run the api tests against Postgres`, `ci: add a manual migration workflow`, `docs: add the phase 2 account steps`.
+
+> **Al implementarla (PR 2.7):**
+> - **Producción también se migra desde `app/habit_tracker`,** justo antes de fusionar la PR de *release*, porque fusionarla despliega al tiro. Antes el workflow solo aceptaba `release/habit-tracker`, lo que dejaba un rato con código nuevo sobre el esquema viejo. Las migraciones solo agregan, así que la versión en producción sigue funcionando con el esquema nuevo.
+> - **En Cloudflare todo va como secreto**, también `AUTH_ALLOWED_HOSTS` y `AUTH_SIGNUP_ENABLED`, porque cada *deploy* reemplaza las variables del panel por las de `wrangler.jsonc`.
+> - **Las Previews se despliegan con `wrangler preview`** (Worker Previews, en beta abierta) y no heredan nada de producción. Sus secretos se fijan una vez en la configuración base, desde la terminal. `wrangler.jsonc` activa `preview_urls`, y `apps/api` tiene los *scripts* `deploy` y `deploy:preview`.
+> - **`AUTH_ALLOWED_HOSTS` de las Previews es `*-constancia.<sub>.workers.dev`.** Una prueba nueva en `apps/api` comprueba que ese patrón y el de producción inician sesión, y que otro host no.
+> - **Pantalla "Crear cuenta"** en la web: el plan suponía crear la cuenta con una petición desde la terminal, que deja la contraseña en el historial. Solo funciona mientras `AUTH_SIGNUP_ENABLED` es `"true"`.
+> - El paso 5 (medir el CPU de `scrypt`) queda para cuando tengas la primera Preview. Está en el paso 7 de `cuentas.md`.
+> - Los commits quedaron con otros nombres; el del CI con Postgres ya estaba en la PR #41.
 
 ## PR 2.8 · `test/sync-e2e`
 
