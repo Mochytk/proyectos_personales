@@ -31,12 +31,16 @@ jobs:
     env:
       COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
     steps:
-      # Production only migrates what is about to be released (ADR 0010).
-      - name: Refuse production outside the release branch
-        if: inputs.environment == 'production' && github.ref != 'refs/heads/release/habit-tracker'
+      # Production only migrates what is released or about to be (ADR 0010): the release
+      # branch, or app/habit_tracker right before merging its release PR.
+      - name: Refuse production from a work branch
+        if: >-
+          inputs.environment == 'production' &&
+          github.ref != 'refs/heads/release/habit-tracker' &&
+          github.ref != 'refs/heads/app/habit_tracker'
         working-directory: .
         run: |
-          echo "Production migrations run only from release/habit-tracker (got $GITHUB_REF)."
+          echo "Production migrations run only from release/habit-tracker or app/habit_tracker (got $GITHUB_REF)."
           exit 1
 
       # Actions pinned to commit SHAs; the comment names the release.
