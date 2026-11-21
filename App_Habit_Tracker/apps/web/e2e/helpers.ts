@@ -1,7 +1,15 @@
 import { test as base, expect, type Page } from '@playwright/test';
 
 // Every test fails on a console error or an uncaught exception, CSP violations included.
-export const test = base.extend<{ consoleErrors: string[] }>({
+// `vite preview` has no API, so the app sees a device that never signed in.
+export const test = base.extend<{ consoleErrors: string[]; signedOut: undefined }>({
+  signedOut: [
+    async ({ page }, provide) => {
+      await page.route('**/api/auth/get-session', (route) => route.fulfill({ json: null }));
+      await provide(undefined);
+    },
+    { auto: true },
+  ],
   consoleErrors: [
     async ({ page }, provide) => {
       const errors: string[] = [];

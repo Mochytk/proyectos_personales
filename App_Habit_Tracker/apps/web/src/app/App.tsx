@@ -1,7 +1,7 @@
 import { NavLink, Route, Routes } from 'react-router';
 import { AccountScreen } from '../account/AccountScreen';
 import { ResetPasswordScreen } from '../account/ResetPasswordScreen';
-import { DatabaseProvider } from '../db/DatabaseProvider';
+import { DatabaseProvider, useDb } from '../db/DatabaseProvider';
 import { HabitDetailScreen } from '../habits/HabitDetailScreen';
 import { HabitEditScreen } from '../habits/HabitEditScreen';
 import { HabitsScreen } from '../habits/HabitsScreen';
@@ -9,6 +9,8 @@ import { ReviewScreen } from '../review/ReviewScreen';
 import { SettingsScreen } from '../settings/SettingsScreen';
 import { TodayScreen } from '../today/TodayScreen';
 import { useSettings } from '../settings/useSettings';
+import { SyncStatus } from '../sync/SyncStatus';
+import { useSync } from '../sync/useSync';
 import { ErrorBoundary } from '../ui/ErrorBoundary';
 import { useStyle } from './useStyle';
 import { useToday } from './useToday';
@@ -28,6 +30,12 @@ const TABS = [
 export function SavedStyle() {
   useStyle(useSettings().style, useToday());
   return null;
+}
+
+// Keeps this device in sync while the app is open, and says how it is going.
+export function SyncBar() {
+  const { result, pending } = useSync(useDb());
+  return <SyncStatus result={result} pending={pending} />;
 }
 
 export function AppRoutes() {
@@ -53,6 +61,7 @@ export function App() {
         <ErrorBoundary>
           <DatabaseProvider>
             <SavedStyle />
+            <SyncBar />
             <AppRoutes />
           </DatabaseProvider>
         </ErrorBoundary>

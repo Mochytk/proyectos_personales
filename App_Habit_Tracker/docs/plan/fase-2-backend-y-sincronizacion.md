@@ -287,8 +287,15 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Reintenta con espera creciente: 1 s, 2 s, 4 s… hasta 5 min, con ±20 % de azar.
 - `SyncStatus`, con `role="status"`, muestra "Sincronizado", "Pendiente", "Sin conexión", "Inicia sesión para sincronizar" o "Error: …".
 
-- [ ] **Paso 1: tests** (con *fake timers*): una escritura sincroniza a los 2 s; tres fallos esperan 1, 2 y 4 s; con la app oculta no se consulta `/version`; el estado cambia de "Pendiente" a "Sincronizado".
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): schedule sync and show its status`.
+- [x] **Paso 1: tests** (con *fake timers*): una escritura sincroniza a los 2 s; tres fallos esperan 1, 2 y 4 s; con la app oculta no se consulta `/version`; el estado cambia de "Pendiente" a "Sincronizado".
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): schedule sync and show its status`.
+
+> **Al implementarla (PR 2.6):**
+> - Cuándo sincronizar vive en `SyncScheduler` (`src/sync/scheduler.ts`), una clase sin React ni Dexie que se prueba con *fake timers*. `useSync` solo la conecta con el navegador: los eventos `online`, `visibilitychange` y `constancia:session`, y la *outbox* vía `liveQuery`.
+> - Antes de cada sincronización se pregunta si hay sesión (`get-session`, que responde desde la cookie firmada sin tocar Postgres). Sin cuenta, el dispositivo nunca manda un *push* que el servidor rechazaría, y el estado dice "Inicia sesión para sincronizar", con un enlace a la cuenta. Una sesión cerrada no se reintenta hasta el próximo inicio de sesión.
+> - `SyncStatus` va arriba a la derecha de cada pantalla, en letra chica y del color secundario de cada estilo. Pasa axe en las 6 combinaciones.
+> - Los E2E corren sin API (`vite preview`), así que una *fixture* automática responde "sin sesión" a `get-session`.
+> - Probado en `wrangler dev` con dos navegadores: un hábito creado en el "teléfono" apareció en el "Mac" al iniciar sesión, y uno creado en el "Mac" llegó al "teléfono" en 15,5 s, con la consulta de versión cada 15 s.
 
 ## PR 2.7 · `ci/preview-deploy`
 
