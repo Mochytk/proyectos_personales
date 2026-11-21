@@ -242,8 +242,14 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - Textos: "Iniciar sesión", "Cerrar sesión", "Cerrar sesión en todos los dispositivos", "Cambiar contraseña", "¿Olvidaste tu contraseña?". Para el 429: "Demasiados intentos. Espera unos segundos." Para un error de red: "Sin conexión. Inténtalo de nuevo cuando vuelva la señal."
 - La app sigue funcionando sin sesión: solo la sincronización la necesita.
 
-- [ ] **Paso 1: tests** (con `fetch` falso): el login correcto lleva a "Sesión iniciada como …"; el 429 y el error de red muestran su texto; cerrar sesión en todos los dispositivos pide confirmación; restablecer con un token vencido muestra "El enlace venció. Pide uno nuevo."
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sign in, sign out and reset the password`.
+- [x] **Paso 1: tests** (con `fetch` falso): el login correcto lleva a "Sesión iniciada como …"; el 429 y el error de red muestran su texto; cerrar sesión en todos los dispositivos pide confirmación; restablecer con un token vencido muestra "El enlace venció. Pide uno nuevo."
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sign in, sign out and reset the password`.
+
+> **Al implementarla (PR 2.6):**
+> - "Cerrar sesión en todos los dispositivos" usa `/revoke-sessions`, que cierra también la sesión de este dispositivo, así que la pantalla vuelve al login. La confirmación va en la misma pantalla, no en un diálogo.
+> - "¿Olvidaste tu contraseña?" abre el pedido del enlace en la pantalla de cuenta. El enlace pasa por el Worker, que valida el token y redirige a `/restablecer?token=…` (o `?error=INVALID_TOKEN` si venció). Una prueba nueva en `apps/api` comprueba esa redirección con un `redirectTo` relativo.
+> - Iniciar o cerrar sesión dispara el evento `constancia:session`, que escucha la sincronización (tarea 11).
+> - En desarrollo, Vite manda `/api` a `wrangler dev` (`localhost:8787`).
 
 ### Tarea 10: motor de sincronización
 

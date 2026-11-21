@@ -19,7 +19,7 @@ App personal de hábitos y gimnasio, offline-first. Es una PWA para el iPhone y 
 | Tipos | `pnpm typecheck` |
 | Pruebas | `pnpm test` y `pnpm test:tz` (las mismas pruebas con `TZ=Asia/Tokyo`) |
 | Auditoría | `pnpm run audit` (falla con vulnerabilidades altas o críticas; `pnpm audit` a secas falla con cualquiera) |
-| App web en desarrollo | `pnpm --filter @habit-tracker/web dev` |
+| App web en desarrollo | `pnpm --filter @habit-tracker/web dev`. Manda `/api` a `wrangler dev` (`localhost:8787`), así que para la cuenta y la sincronización levanta también la API |
 | *Build* de la app web | `pnpm --filter @habit-tracker/web build` |
 | E2E (Playwright, Chromium) | `pnpm --filter @habit-tracker/web e2e`. La primera vez: `pnpm --filter @habit-tracker/web exec playwright install chromium`. Con un Chromium propio: `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/ruta/a/chromium` |
 | API en desarrollo | Copiar `apps/api/.dev.vars.example` a `apps/api/.dev.vars` y llenarlo; después `pnpm --filter @habit-tracker/api dev` (`wrangler dev` en `localhost:8787`, que sirve `apps/web/dist`: primero el *build* de la web) |

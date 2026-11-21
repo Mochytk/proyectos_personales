@@ -1,5 +1,6 @@
 import { formatDisplayDate, type StyleSetting } from '@habit-tracker/shared';
 import { useState } from 'react';
+import { Link } from 'react-router';
 import { useToday } from '../app/useToday';
 import { useDb } from '../db/DatabaseProvider';
 import { updateSettings, type SettingsPatch } from '../db/settings-repo';
@@ -113,6 +114,12 @@ export function SettingsScreen() {
           </div>
         ) : null}
       </AsyncState>
+      <h2 className="page-subtitle">Sincronización</h2>
+      <p>
+        <Link to="/cuenta" className="button">
+          Cuenta
+        </Link>
+      </p>
     </>
   );
 }

@@ -1,4 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router';
+import { AccountScreen } from '../account/AccountScreen';
+import { ResetPasswordScreen } from '../account/ResetPasswordScreen';
 import { DatabaseProvider } from '../db/DatabaseProvider';
 import { HabitDetailScreen } from '../habits/HabitDetailScreen';
 import { HabitEditScreen } from '../habits/HabitEditScreen';
@@ -38,6 +40,8 @@ export function AppRoutes() {
       <Route path="habitos/:id/editar" element={<HabitEditScreen />} />
       <Route path="revision" element={<ReviewScreen />} />
       <Route path="ajustes" element={<SettingsScreen />} />
+      <Route path="cuenta" element={<AccountScreen />} />
+      <Route path="restablecer" element={<ResetPasswordScreen />} />
     </Routes>
   );
 }
