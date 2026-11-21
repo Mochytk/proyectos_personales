@@ -29,6 +29,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@habit-tracker/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@neondatabase/serverless':
         specifier: 1.2.0
         version: 1.2.0

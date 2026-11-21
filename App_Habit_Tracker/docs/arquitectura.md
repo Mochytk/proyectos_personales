@@ -43,7 +43,7 @@ flowchart LR
 
 - **El dispositivo manda.** La interfaz solo lee y escribe en Dexie. La sincronización corre aparte y nunca bloquea una pantalla (ADR 0002 y 0006).
 - **Un solo origen.** El Worker entrega la web y la API, así que la PWA usa cookies del propio sitio y no necesita CORS (ADR 0003).
-- **Neon duerme casi siempre.** El "¿hay algo nuevo?" lo responde el Durable Object. Neon solo despierta para un *push* o un *pull* real (ADR 0004 y 0006).
+- **Neon duerme casi siempre.** El "¿hay algo nuevo?" lo responde el Durable Object, con la sesión tomada de una copia firmada en una cookie. Neon despierta para un *push* o un *pull* real, y para renovar esa copia como mucho una vez por hora (ADR 0004 y 0006).
 
 ## Estructura del repositorio
 

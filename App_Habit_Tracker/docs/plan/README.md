@@ -53,7 +53,7 @@ Detalle en [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacio
 | `feat/db-schema` | Esquema Drizzle de las tablas de Better Auth y las sincronizables, y la conexión por petición. Una migración por commit, con su reversa (PR #41) |
 | `feat/auth` | Better Auth: login, registro cerrado por variable, límite de intentos, logout, cambio de contraseña, cierre en todos los dispositivos (PR #42). La medición de CPU de `scrypt` pasó a `ci/preview-deploy`, porque necesita una Preview real |
 | `feat/auth-reset` | Recuperación por correo con Brevo (ADR 0005) (PR #43) |
-| `feat/sync-server` | `push`, `pull` y `version`, con candado por usuario y Durable Object. Tests de aislamiento entre usuarios |
+| `feat/sync-server` | `push`, `pull` y `version`, con candado por usuario y Durable Object. Tests de aislamiento entre usuarios (PR #45) |
 | `feat/sync-client` | *Outbox*, reintentos con espera creciente, indicador de estado, primera sincronización tras el login |
 | `ci/preview-deploy` | Workers Builds y Previews conectados (con tu ayuda en el panel), y workflow manual de migraciones |
 | `test/sync-e2e` | Dos contextos de Playwright: cambio en uno, visible en el otro en menos de 30 s; corte de red a mitad de un *push* |
@@ -108,6 +108,13 @@ Producción solo con tu confirmación. Cierre: revisión final independiente.
 ## Fase 7 · Pulido y opcionales
 
 Revisión final con las Web Interface Guidelines, rendimiento, README con capturas y ADRs al día. Los opcionales (notificaciones push, atajos, recordatorios, temas, más gráficos) los eliges tú.
+
+### Pendientes que pediste
+
+- **Widget para el teléfono y el reloj** (pedido el 17-11-2026). Mostraría los hábitos de hoy en la pantalla de inicio del iPhone y en el Apple Watch.
+  - **Una PWA no puede hacerlo.** Los widgets del iPhone se hacen con WidgetKit y las apps del reloj con watchOS, las dos en Swift: hace falta una app nativa compilada con Xcode en tu Mac, que lea los datos de la API.
+  - **Costo:** con tu Apple ID gratis, la app se instala en tus dispositivos pero vence a los 7 días y hay que reinstalarla desde Xcode. Para que no venza hace falta el Apple Developer Program (99 USD al año), que rompe la regla de costo cero y lo que supone el ADR 0008. Se decide contigo antes de empezar.
+  - **Alternativa gratis a evaluar:** un widget de la app Atajos que abra Constancia, sin mostrar datos.
 
 ## Dependencias nuevas que pediré aprobar
 

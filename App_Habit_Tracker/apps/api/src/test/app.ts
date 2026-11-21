@@ -13,6 +13,8 @@ export function testEnv(databaseUrl: string, overrides: Partial<Env> = {}): Env 
     BETTER_AUTH_SECRET: 'test-secret-that-is-at-least-32-characters-long',
     AUTH_ALLOWED_HOSTS: 'localhost:*',
     AUTH_SIGNUP_ENABLED: 'true',
+    // Tests pass their own notifier; the namespace is never reached.
+    SYNC_NOTIFIER: {} as never,
     BREVO_API_KEY: 'test-brevo-key',
     EMAIL_FROM: 'constancia@example.com',
     ...overrides,
@@ -60,4 +62,13 @@ export function sessionCookie(response: Response): string {
     .find((header) => header.includes('session_token='));
   if (!cookie) throw new Error('No session cookie in the response');
   return cookie.split(';')[0] ?? '';
+}
+
+// Every `name=value` pair the response sets: the session token and, with the cookie cache,
+// the cached session.
+export function cookies(response: Response): string {
+  return response.headers
+    .getSetCookie()
+    .map((header) => header.split(';')[0] ?? '')
+    .join('; ');
 }
