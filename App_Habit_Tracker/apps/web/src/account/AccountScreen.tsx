@@ -7,6 +7,7 @@ import {
   revokeAllSessions,
   signIn,
   signOut,
+  signUp,
   type AuthFailure,
   type AuthResult,
   type Session,
@@ -56,7 +57,7 @@ function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
   const id = useId();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [forgot, setForgot] = useState(false);
+  const [open, setOpen] = useState<'forgot' | 'create' | null>(null);
   const action = useAction();
 
   const submit = async (event: SubmitEvent<HTMLFormElement>) => {
@@ -107,17 +108,89 @@ function SignInForm({ onSignedIn }: { onSignedIn: () => void }) {
           <button
             type="button"
             className="button"
-            aria-expanded={forgot}
+            aria-expanded={open === 'forgot'}
             onClick={() => {
-              setForgot((open) => !open);
+              setOpen((current) => (current === 'forgot' ? null : 'forgot'));
             }}
           >
             ¿Olvidaste tu contraseña?
           </button>
+          <button
+            type="button"
+            className="button"
+            aria-expanded={open === 'create'}
+            onClick={() => {
+              setOpen((current) => (current === 'create' ? null : 'create'));
+            }}
+          >
+            Crear cuenta
+          </button>
         </div>
       </form>
-      {forgot ? <ForgotPasswordForm initialEmail={email} /> : null}
+      {open === 'forgot' ? <ForgotPasswordForm initialEmail={email} /> : null}
+      {open === 'create' ? <CreateAccountForm onSignedIn={onSignedIn} /> : null}
     </>
+  );
+}
+
+// For the one account this app has: it only works while sign-up is open in Cloudflare.
+function CreateAccountForm({ onSignedIn }: { onSignedIn: () => void }) {
+  const id = useId();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const action = useAction();
+
+  const submit = async (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (await action.run(() => signUp(email.trim(), password))) {
+      setPassword('');
+      onSignedIn();
+    }
+  };
+
+  return (
+    <form className="form" onSubmit={(event) => void submit(event)}>
+      <div className="field">
+        <label htmlFor={`${id}-email`}>Correo para la cuenta</label>
+        <input
+          id={`${id}-email`}
+          name="new-email"
+          type="email"
+          autoComplete="email"
+          spellCheck={false}
+          required
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+        />
+      </div>
+      <div className="field">
+        <label htmlFor={`${id}-password`}>Contraseña para la cuenta</label>
+        <input
+          id={`${id}-password`}
+          name="new-account-password"
+          type="password"
+          autoComplete="new-password"
+          minLength={12}
+          required
+          aria-describedby={`${id}-password-help`}
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+        />
+        <p className="field-note" id={`${id}-password-help`}>
+          Al menos 12 caracteres.
+        </p>
+      </div>
+      <ErrorText message={action.error} />
+      <div className="form-actions">
+        <button type="submit" className="button" disabled={action.pending}>
+          Crear la cuenta
+        </button>
+      </div>
+    </form>
   );
 }
 

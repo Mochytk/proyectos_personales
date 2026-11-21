@@ -5,7 +5,12 @@ const BASE = '/api/auth';
 const TIMEOUT_MS = 15_000;
 
 export type AuthFailure =
-  'invalid_credentials' | 'too_many_requests' | 'expired_token' | 'offline' | 'unknown';
+  | 'invalid_credentials'
+  | 'too_many_requests'
+  | 'expired_token'
+  | 'signup_closed'
+  | 'offline'
+  | 'unknown';
 
 export type AuthResult<T = undefined> = { ok: true; data: T } | { ok: false; error: AuthFailure };
 
@@ -33,6 +38,7 @@ async function failure(response: Response | 'offline'): Promise<AuthFailure> {
   if (response.status === 401) return 'invalid_credentials';
   const body = (await response.json().catch(() => ({}))) as { code?: unknown };
   if (body.code === 'INVALID_TOKEN') return 'expired_token';
+  if (body.code === 'EMAIL_PASSWORD_SIGN_UP_DISABLED') return 'signup_closed';
   if (body.code === 'INVALID_PASSWORD' || body.code === 'INVALID_EMAIL_OR_PASSWORD') {
     return 'invalid_credentials';
   }
@@ -54,6 +60,11 @@ export async function getSession(): Promise<AuthResult<Session | null>> {
   if (body === undefined) return { ok: false, error: 'unknown' };
   const email = body?.user?.email;
   return { ok: true, data: typeof email === 'string' ? { email } : null };
+}
+
+// Only works while AUTH_SIGNUP_ENABLED is "true" (ADR 0005); Better Auth signs in on success.
+export function signUp(email: string, password: string): Promise<AuthResult> {
+  return post('/sign-up/email', { email, password, name: email.split('@')[0] ?? email });
 }
 
 export function signIn(email: string, password: string): Promise<AuthResult> {
@@ -87,6 +98,7 @@ export const AUTH_MESSAGES: Record<AuthFailure, string> = {
   invalid_credentials: 'El correo o la contraseña no coinciden.',
   too_many_requests: 'Demasiados intentos. Espera unos segundos.',
   expired_token: 'El enlace venció. Pide uno nuevo.',
+  signup_closed: 'El registro está cerrado.',
   offline: 'Sin conexión. Inténtalo de nuevo cuando vuelva la señal.',
   unknown: 'No pudimos completar esto. Intenta de nuevo.',
 };
