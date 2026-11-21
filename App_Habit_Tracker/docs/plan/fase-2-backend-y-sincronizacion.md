@@ -261,13 +261,19 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
   - ***Pull*:** desde `syncState.cursor`, hasta `hasMore = false`. Aplica cada fila con `wins`, sin pasar por `writeRows` (no encola), y guarda el cursor.
 - `SyncResult = { status: 'synced' | 'offline' | 'unauthenticated' | 'error'; message?: string }`. Cada `fetch` tiene un tiempo máximo de 15 s.
 
-- [ ] **Paso 1: tests** (Dexie con `fake-indexeddb` y una `SyncApi` falsa):
+- [x] **Paso 1: tests** (Dexie con `fake-indexeddb` y una `SyncApi` falsa):
   - Las filas subidas salen de la *outbox*; una fila editada mientras viajaba se queda.
   - Una fila remota más nueva pisa la local; una más vieja no.
   - Tres páginas de *pull* dejan el cursor en la última.
   - Un `401` da `unauthenticated` y conserva la *outbox*; un corte de red da `offline`.
   - Un `push` repetido tras perder la respuesta deja todo igual.
-- [ ] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sync the outbox with the server`.
+- [x] **Pasos 2 a 4** y **paso 5: commit.** `feat(web): sync the outbox with the server`.
+
+> **Al implementarla (PR 2.6):**
+> - Las filas que el servidor marca `stale` (otra edición más nueva ganó allá) también salen de la *outbox*: el *pull* trae la copia ganadora. Si al aplicar el *pull* una fila remota pisa una local pendiente, esa entrada de la *outbox* se borra, porque esa edición ya perdió en todas partes.
+> - El esquema de la respuesta de `/version` (`versionResponseSchema`) pasó a `packages/shared`, junto a los demás.
+> - `syncState.cursor` ahora es un número (antes `string | null`, sin uso). No hace falta migrar Dexie, porque nada lo había escrito.
+> - Si el servidor rechaza un lote por una fila inválida (`400 invalid_batch`), todo el envío queda detenido y el estado muestra el error. No debería pasar, porque las filas locales se validan con los mismos esquemas al escribirlas.
 
 ### Tarea 11: cuándo sincronizar y estado visible
 

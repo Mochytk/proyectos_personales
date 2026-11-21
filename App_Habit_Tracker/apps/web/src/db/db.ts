@@ -31,7 +31,7 @@ export interface OutboxEntry {
 // Filled in by the sync engine (phase 2).
 export interface SyncStateRow {
   id: 'sync';
-  cursor: string | null;
+  cursor: number | null;
   lastSuccessAt: string | null;
   lastErrorAt: string | null;
   lastError: string | null;
