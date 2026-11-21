@@ -119,6 +119,46 @@ describe('AccountScreen', () => {
   });
 });
 
+describe('creating the account', () => {
+  async function fillCreate(user: Awaited<ReturnType<typeof renderRoute>>['user']) {
+    await user.click(await screen.findByRole('button', { name: 'Crear cuenta' }));
+    await user.type(screen.getByLabelText('Correo para la cuenta'), 'tu@example.com');
+    await user.type(screen.getByLabelText('Contraseña para la cuenta'), 'correct horse battery');
+    await user.click(screen.getByRole('button', { name: 'Crear la cuenta' }));
+  }
+
+  it('creates the account and signs in', async () => {
+    let signedIn = false;
+    const { calls } = fakeFetch({
+      'GET /api/auth/get-session': () => json(signedIn ? SIGNED_IN : null),
+      'POST /api/auth/sign-up/email': () => {
+        signedIn = true;
+        return json({ token: 'x' });
+      },
+    });
+    const { user } = await renderRoute('/cuenta');
+    await fillCreate(user);
+
+    expect(await screen.findByText('Sesión iniciada como tu@example.com')).toBeTruthy();
+    expect(calls.find((c) => c.key === 'POST /api/auth/sign-up/email')?.body).toEqual({
+      email: 'tu@example.com',
+      password: 'correct horse battery',
+      name: 'tu',
+    });
+  });
+
+  it('says when sign-up is closed', async () => {
+    fakeFetch({
+      'GET /api/auth/get-session': () => json(null),
+      'POST /api/auth/sign-up/email': () =>
+        json({ code: 'EMAIL_PASSWORD_SIGN_UP_DISABLED', message: 'disabled' }, 400),
+    });
+    const { user } = await renderRoute('/cuenta');
+    await fillCreate(user);
+    expect(await screen.findByText('El registro está cerrado.')).toBeTruthy();
+  });
+});
+
 describe('ResetPasswordScreen', () => {
   it('sets the new password with the token from the link', async () => {
     const { calls } = fakeFetch({

@@ -1,0 +1,62 @@
+name: Habit tracker migrations
+
+# Run by hand from the Actions tab (ADR 0004, 0010). Each GitHub environment holds the
+# direct (not pooled) Neon URL of its branch; `production` asks for your approval first.
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Database to migrate'
+        required: true
+        type: choice
+        options: [preview, production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: habit-tracker-migrate-${{ inputs.environment }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: App_Habit_Tracker
+
+jobs:
+  migrate:
+    name: Migrate ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ inputs.environment }}
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+    steps:
+      # Production only migrates what is released or about to be (ADR 0010): the release
+      # branch, or app/habit_tracker right before merging its release PR.
+      - name: Refuse production from a work branch
+        if: >-
+          inputs.environment == 'production' &&
+          github.ref != 'refs/heads/release/habit-tracker' &&
+          github.ref != 'refs/heads/app/habit_tracker'
+        working-directory: .
+        run: |
+          echo "Production migrations run only from release/habit-tracker or app/habit_tracker (got $GITHUB_REF)."
+          exit 1
+
+      # Actions pinned to commit SHAs; the comment names the release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: App_Habit_Tracker/.nvmrc
+          package-manager-cache: false
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+
+      - name: Apply the pending migrations
+        run: pnpm --filter @habit-tracker/api exec drizzle-kit migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
