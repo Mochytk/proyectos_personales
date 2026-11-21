@@ -113,6 +113,34 @@ describe('sign-in', () => {
     expect(cookie).toMatch(/; Secure/i);
   });
 
+  it('accepts the production host and Preview hosts, and no other', async () => {
+    // What cuentas.md says to set in Cloudflare (ADR 0010).
+    const hosts = 'constancia.ejemplo.workers.dev,*-constancia.ejemplo.workers.dev';
+    const attempt = (base: string) =>
+      request(
+        app(),
+        testEnv(database.url, { AUTH_ALLOWED_HOSTS: hosts }),
+        `${base}/api/auth/sign-in/email`,
+        {
+          method: 'POST',
+          ip: nextIp(),
+          json: { email: 'login@example.com', password: PASSWORD },
+        },
+      );
+
+    for (const base of [
+      'https://constancia.ejemplo.workers.dev',
+      'https://feat-sync-client-constancia.ejemplo.workers.dev',
+    ]) {
+      const response = await attempt(base);
+      expect(response.status).toBe(200);
+      expect(response.headers.getSetCookie().join()).toMatch(/session_token=.*; Secure/i);
+    }
+    const stranger = await attempt('https://constancia.otro.workers.dev');
+    expect(stranger.ok).toBe(false);
+    expect(stranger.headers.getSetCookie().join()).not.toContain('session_token=');
+  });
+
   it('answers 429 to the fourth failed attempt within 10 seconds', async () => {
     const ip = nextIp();
     const statuses: number[] = [];
