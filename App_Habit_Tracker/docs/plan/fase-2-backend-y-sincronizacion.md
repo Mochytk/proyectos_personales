@@ -297,7 +297,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - Los E2E corren sin API (`vite preview`), así que una *fixture* automática responde "sin sesión" a `get-session`.
 > - Probado en `wrangler dev` con dos navegadores: un hábito creado en el "teléfono" apareció en el "Mac" al iniciar sesión, y uno creado en el "Mac" llegó al "teléfono" en 15,5 s, con la consulta de versión cada 15 s.
 
-## PR 2.7 · `ci/preview-deploy`
+## PR 2.7 · `ci/preview-deploy` (PR #47)
 
 ### Tarea 12: despliegue y migraciones
 
@@ -313,7 +313,7 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 - [ ] **Paso 5: medir el CPU de `scrypt`** en una Preview: con Workers Logs, el `cpuTime` de 10 logins. Anotarlo en una actualización fechada del ADR 0005 y, si se pasa de 10 ms de forma sostenida, seguir su plan B.
 - [ ] **Paso 6: commits.** `ci: run the api tests against Postgres`, `ci: add a manual migration workflow`, `docs: add the phase 2 account steps`.
 
-> **Al implementarla (PR 2.7):**
+> **Al implementarla (PR #47):**
 > - **Producción también se migra desde `app/habit_tracker`,** justo antes de fusionar la PR de *release*, porque fusionarla despliega al tiro. Antes el workflow solo aceptaba `release/habit-tracker`, lo que dejaba un rato con código nuevo sobre el esquema viejo. Las migraciones solo agregan, así que la versión en producción sigue funcionando con el esquema nuevo.
 > - **En Cloudflare todo va como secreto**, también `AUTH_ALLOWED_HOSTS` y `AUTH_SIGNUP_ENABLED`, porque cada *deploy* reemplaza las variables del panel por las de `wrangler.jsonc`.
 > - **Las Previews se despliegan con `wrangler preview`** (Worker Previews, en beta abierta) y no heredan nada de producción. Sus secretos se fijan una vez en la configuración base, desde la terminal. `wrangler.jsonc` activa `preview_urls`, y `apps/api` tiene los *scripts* `deploy` y `deploy:preview`.
