@@ -4,7 +4,7 @@ App personal para llevar hábitos y entrenamiento de gimnasio, pensada para el i
 
 Es mi primer proyecto de punta a punta: construirlo, publicarlo gratis, revisarlo contra los errores típicos de las apps hechas con IA y usarlo de verdad.
 
-> **Estado (21-11-2026):** la fase 1 está completa: la app de hábitos funciona en el navegador, guardando todo en el dispositivo. La fase 2 (cuenta y sincronización) está casi lista: la cuenta y la sincronización entre dispositivos funcionan en local; falta desplegarla en Cloudflare con tus cuentas. El avance de cada fase está en [`docs/plan/`](docs/plan/README.md).
+> **Estado (25-11-2026):** la fase 1 está completa: la app de hábitos funciona en el navegador, guardando todo en el dispositivo. La fase 2 (cuenta y sincronización) está casi lista: la cuenta y la sincronización entre dispositivos funcionan en local, con pruebas de punta a punta en dos navegadores; falta desplegarla en Cloudflare con tus cuentas. El avance de cada fase está en [`docs/plan/`](docs/plan/README.md).
 
 ## Qué va a hacer
 
