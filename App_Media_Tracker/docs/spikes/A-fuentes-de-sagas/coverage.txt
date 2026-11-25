@@ -1,0 +1,27 @@
+kind series                              found members ordered parent es_label  ol_id tmdb rawg
+book Red Rising Saga                    yes       9       0                                          6    0    0
+book Harry Potter                       yes      20       0                    Videojuegos de Har    0    0    2
+book The Hunger Games                   yes       6       0                    tetralogía de Los     0    6    0
+book Mistborn                           yes       9       0                    Nacidos de la brum    8    0    0
+book The Stormlight Archive             yes       8       0                    El archivo de las     7    0    0
+book A Song of Ice and Fire             yes      15       0                    Canción de hielo y   10    0    0
+book Dune                               yes       7       0                    Dune                 10    0    0
+book The Witcher                        yes      36       0                    The Witcher           0    0    0
+book The Expanse                        yes      69       0                    The Expanse           0    0    0
+book Percy Jackson & the Olympians      yes      11       0                    Percy Jackson y lo    9    0    0
+book Six of Crows                       yes       2       0                    Seis de cuervos       2    0    0
+book Discworld                          yes      64       0                    Mundodisco           53    0    0
+book Foundation series                  yes       7       0                    Serie de la Fundac    7    0    0
+book Throne of Glass                    yes       8       0                    Trono de cristal      8    0    0
+book The Lord of the Rings              yes      11       0                    El Señor de los An    8    0    0
+film Marvel Cinematic Universe          yes      49       0                    Universo cinematog    0   48    0
+film Star Wars                          yes      17       0                                          8    0    0
+film Harry Potter film series           NO
+film The Lord of the Rings film series  NO
+film John Wick                          yes       5       0                                          0    5    0
+tv   Star Trek                          yes     265       0                                        193    0    0
+game The Legend of Zelda                yes      56       0                    The Legend of Zeld    0    0   15
+game Mass Effect                        yes       4       0                                          2    0    0
+game Final Fantasy                      yes       1       0                    Final Fantasy         0    0    0
+game The Witcher video game series      NO
+game Dark Souls                         yes       3       0                    Dark Souls            0    0    3
