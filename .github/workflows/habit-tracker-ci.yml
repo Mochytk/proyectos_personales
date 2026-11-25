@@ -87,3 +87,41 @@ jobs:
       # The Chromium build that matches the pinned @playwright/test, plus its system libraries.
       - run: pnpm --filter @habit-tracker/web exec playwright install --with-deps chromium
       - run: pnpm --filter @habit-tracker/web e2e
+
+  sync-e2e:
+    name: End-to-end sync tests (Worker and Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: '0'
+      # A throwaway server; the tests create and drop their own database on it.
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      WRANGLER_SEND_METRICS: 'false'
+    services:
+      postgres:
+        # Pinned by digest; the tag names the release.
+        image: postgres:16.15-alpine@sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: App_Habit_Tracker/.nvmrc
+          package-manager-cache: false
+
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @habit-tracker/web exec playwright install --with-deps chromium
+      # Two browsers, one Worker in `wrangler dev`, a fresh migrated database.
+      - run: pnpm --filter @habit-tracker/web e2e:sync
