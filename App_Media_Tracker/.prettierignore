@@ -1,0 +1,10 @@
+# Legacy Expo app and reference material: frozen.
+MediaTracker/
+Referencias/
+pnpm-lock.yaml
+dist/
+coverage/
+.wrangler/
+release/
+# Docs keep hand-written tables; Prettier would pad every column.
+*.md
