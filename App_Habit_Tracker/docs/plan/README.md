@@ -55,7 +55,7 @@ Detalle en [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacio
 | `feat/auth-reset` | Recuperación por correo con Brevo (ADR 0005) (PR #43) |
 | `feat/sync-server` | `push`, `pull` y `version`, con candado por usuario y Durable Object. Tests de aislamiento entre usuarios (PR #45) |
 | `feat/sync-client` | *Outbox*, reintentos con espera creciente, indicador de estado, primera sincronización tras el login (PR #46) |
-| `ci/preview-deploy` | Workers Builds y Previews conectados (con tu ayuda en el panel), y workflow manual de migraciones |
+| `ci/preview-deploy` | Workers Builds y Previews conectados (con tu ayuda en el panel), y workflow manual de migraciones (PR #47) |
 | `test/sync-e2e` | Dos contextos de Playwright: cambio en uno, visible en el otro en menos de 30 s; corte de red a mitad de un *push* |
 
 Cierre: revisión de seguridad independiente (un subagente que no vio el código; te aviso cuando lo lance).

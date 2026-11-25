@@ -1,65 +1,125 @@
-# Cuentas y permisos que necesitas
+# Cuentas y despliegue: paso a paso
 
-Nada de esto hace falta antes de la **fase 2**. La fase 1 corre 100 % en local. Todo es gratis: Neon indica que su plan Free no pide tarjeta, y los planes gratis de Cloudflare y GitHub tampoco deberían pedirla. Si algún servicio te pide una tarjeta, avísame antes de ingresarla.
+Esta guía pone Constancia en Cloudflare con tus cuentas. La sigues tú en los paneles; yo no tengo acceso a ninguno. Todo es gratis: Neon indica que su plan Free no pide tarjeta, y los planes gratis de Cloudflare, GitHub y Brevo tampoco deberían pedirla. **Si algún servicio te pide una tarjeta, detente y avísame antes de ingresarla.**
 
-Los nombres de los menús pueden cambiar un poco. En la fase 2 te guío paso a paso, con la documentación vigente de cada servicio.
+Los nombres de los menús pueden cambiar un poco. Los pasos se escribieron el 21-11-2026 con la documentación vigente de cada servicio. Si algo no calza, dime qué ves y lo ajustamos.
 
-**Regla fija:** las claves y las URLs con contraseña se pegan solo en los paneles de cada servicio, en los secretos de GitHub o en tu `.env.local`. Nunca en el chat, en un commit, en una issue ni en una PR.
+**Regla fija:** las claves y las URLs con contraseña se pegan solo en los paneles de cada servicio, en los secretos de GitHub o en un *prompt* de la terminal. Nunca en el chat, en un commit, en una issue ni en una PR.
 
-## 1. GitHub (ya la tienes)
+Hazlos en este orden: cada paso usa algo del anterior.
 
-En **Settings → Code security** del repo `proyectos_personales` (en algunas cuentas aparece como "Advanced Security"):
-
-1. Activa **Secret scanning** y **Push protection**. Son gratis en repos públicos: GitHub bloquea un push si detecta una clave conocida.
-2. Activa las **Dependabot alerts**.
-
-En **Settings → Environments**:
-
-3. Crea dos entornos: `preview` y `production`.
-4. A `production` agrégale una regla **Required reviewers** contigo. Así ninguna migración a producción corre sin tu aprobación.
-
-En la fase 2 te pido que agregues estos secretos de entorno, uno por entorno:
-
-5. `DATABASE_URL`, con la URL de la rama de Neon correspondiente. La usa el workflow manual de migraciones.
-
-Opcional pero recomendado: en **Settings → Branches**, una regla para `app/habit_tracker` que exija PR y CI en verde antes de fusionar.
-
-## 2. Cloudflare
-
-1. Crea una cuenta gratis en cloudflare.com. No necesitas dominio.
-2. En **Workers & Pages**, elige un subdominio de `workers.dev`. Aparece en la URL de la app, así que conviene que no tenga tu nombre real.
-3. En la fase 2 creas el Worker conectando el repo con **Workers Builds** ("Import a repository"):
-   - Se instala la app de Cloudflare en GitHub. Dale acceso **solo** a `proyectos_personales`.
-   - Carpeta raíz: `App_Habit_Tracker`. Los comandos de build te los doy en ese momento.
-   - Rama de producción: `release/habit-tracker` ([ADR 0010](decisions/0010-uso-diario-antes-de-la-fase-6.md)). Solo avanza con una PR de *release* que fusionas tú; las demás ramas, `app/habit_tracker` incluida, generan Previews.
-4. Secretos del Worker (en el panel, separados para Production y para Previews):
-   - `DATABASE_URL`: la URL de la rama de Neon de ese entorno.
-   - `BETTER_AUTH_SECRET`: genéralo en tu Mac con `openssl rand -base64 32`.
-   - `AUTH_SIGNUP_ENABLED`: `true` solo mientras creas tu cuenta; después, `false`.
-   - `AUTH_ALLOWED_HOSTS`: los hosts desde los que se puede iniciar sesión. En producción, `constancia.<tu-subdominio>.workers.dev`; en Previews, el patrón de sus URLs. Va en el panel para que tu subdominio no quede en el repo.
-
-No hace falta crear ningún token de API de Cloudflare: Workers Builds despliega sin que el repo guarde credenciales.
-
-## 3. Neon
+## 1. Neon: la base de datos
 
 1. Crea una cuenta gratis en neon.com (puedes entrar con GitHub).
 2. Crea un proyecto `habit-tracker` en la región **AWS São Paulo (`aws-sa-east-1`)**, con Postgres en su última versión.
 3. En la rama por defecto (renómbrala `production`), deja el tamaño de cómputo en **0,25 CU** como mínimo y como máximo.
-4. Crea dos ramas desde `production`: `preview` y `dev`.
-5. Copia la *connection string* de cada rama (la "pooled" o la directa, como te indique en la fase 2) y pégala solo en Cloudflare, en GitHub o en tu `.env.local`.
+4. Crea la rama `preview` desde `production`. Ahí van los datos de prueba de las Previews.
+5. De cada rama vas a necesitar **dos URLs**, que salen del botón **Connect**:
+   - **Pooled** (el host termina en `-pooler`, con el interruptor *Connection pooling* encendido): la usa el Worker.
+   - **Directa** (sin `-pooler`): la usan las migraciones. Neon advierte que migrar por la URL *pooled* puede fallar.
 
-## 4. Brevo (correo para recuperar la contraseña)
+   No las copies a ningún archivo: las pegas directo en los pasos 2 y 5.
 
-Ver el [ADR 0005](decisions/0005-autenticacion.md), sección "Actualización 23-10-2026". En la fase 2:
+## 2. GitHub: entornos y migraciones
+
+En el repo `proyectos_personales`:
+
+1. **Settings → Code security** (en algunas cuentas, "Advanced Security"): activa **Secret scanning**, **Push protection** y **Dependabot alerts**. Son gratis en repos públicos.
+2. **Settings → Environments:** crea los entornos `preview` y `production`.
+   - A `production` agrégale **Required reviewers** contigo, para que ninguna migración a producción corra sin tu aprobación.
+   - En cada uno, agrega el secreto **`DATABASE_URL`** con la URL **directa** de la rama de Neon del mismo nombre.
+3. **Recomendado:** en **Settings → Branches**, una regla para `app/habit_tracker` y otra para `release/habit-tracker` que exijan PR y CI en verde antes de fusionar.
+
+## 3. Primera migración
+
+Crea las tablas en las dos bases:
+
+1. En **Actions → Habit tracker migrations → Run workflow**, elige la rama `app/habit_tracker` y el entorno `preview`. Debe terminar en verde.
+2. Repite con la rama **`release/habit-tracker`** y el entorno `production`. GitHub te pide aprobarlo. El workflow se niega a migrar producción desde una rama de trabajo: solo acepta `release/habit-tracker` o `app/habit_tracker`.
+
+Más adelante, cada vez que una PR traiga una migración nueva, se repite: `preview` al fusionarla y `production` justo antes de cada *release* (paso 8).
+
+## 4. Brevo: el correo para recuperar la contraseña
+
+Ver el [ADR 0005](decisions/0005-autenticacion.md), sección "Actualización 23-10-2026".
 
 1. Crea una cuenta gratis en brevo.com. Brevo revisa la cuenta antes de habilitar los envíos.
 2. En **Senders, Domains & Dedicated IPs**, agrega tu correo como remitente y confírmalo con el correo de verificación que te llega.
-3. Crea una clave de API y pégala únicamente como secreto `BREVO_API_KEY` en Cloudflare. Si Brevo permite limitar sus permisos, déjala solo para enviar correos transaccionales.
-4. En Cloudflare, agrega también el secreto `EMAIL_FROM` con el correo que verificaste como remitente. Va como secreto para que tu dirección no quede en el repo.
+3. Crea una clave de API. Si Brevo permite limitar sus permisos, déjala solo para correos transaccionales. La pegas en el paso 5.
 
 Si algún día compras un dominio, conviene autenticarlo en Brevo (SPF y DKIM) para que los correos no caigan en spam.
 
-## 5. En tu Mac
+## 5. Cloudflare: el Worker
+
+1. Crea una cuenta gratis en cloudflare.com. No necesitas dominio.
+2. En **Workers & Pages**, elige un subdominio de `workers.dev`. Aparece en la URL de la app, así que conviene que no tenga tu nombre real. En esta guía lo llamo `<sub>`.
+3. **Workers & Pages → Create → Import a repository.** Se instala la app de Cloudflare en GitHub: dale acceso **solo** a `proyectos_personales`. Configura:
+
+   | Campo | Valor |
+   | --- | --- |
+   | Nombre del Worker | `constancia` (tiene que coincidir con `wrangler.jsonc`) |
+   | Rama de producción | `release/habit-tracker` ([ADR 0010](decisions/0010-uso-diario-antes-de-la-fase-6.md)) |
+   | Carpeta raíz | `App_Habit_Tracker` |
+   | Comando de *build* | `pnpm --filter @habit-tracker/web build` |
+   | Comando de *deploy* | `pnpm --filter @habit-tracker/api run deploy` |
+   | Previews / builds de otras ramas | Activadas |
+   | Comando de Preview | `pnpm --filter @habit-tracker/api run deploy:preview` |
+
+   No hace falta crear un token de API: Workers Builds lo genera solo.
+
+4. **Secretos de producción:** en el Worker, **Settings → Variables and Secrets → Add**, cada uno de tipo **Secret**. Van como secretos y no como variables porque cada *deploy* reemplaza las variables con las de `wrangler.jsonc`.
+
+   | Secreto | Valor |
+   | --- | --- |
+   | `DATABASE_URL` | La URL **pooled** de la rama `production` de Neon |
+   | `BETTER_AUTH_SECRET` | Generado en tu Mac con `openssl rand -base64 32` |
+   | `AUTH_ALLOWED_HOSTS` | `constancia.<sub>.workers.dev` |
+   | `AUTH_SIGNUP_ENABLED` | `true` solo mientras creas tu cuenta (paso 6); después, `false` |
+   | `BREVO_API_KEY` | La clave del paso 4 |
+   | `EMAIL_FROM` | El correo que verificaste en Brevo |
+
+   El primer *deploy* corre apenas conectas el repo. Hasta que agregues los secretos, la app abre pero el login responde con error.
+
+5. **Secretos de las Previews.** Las Previews no heredan nada de producción. Sus secretos se fijan una vez en la "configuración base", y cada Preview nueva los recibe al crearse. Eso se hace desde la terminal de tu Mac, en una copia del repo con `pnpm install` hecho:
+
+   ```sh
+   cd App_Habit_Tracker/apps/api
+   pnpm exec wrangler login
+   pnpm exec wrangler preview base-config secret put DATABASE_URL
+   ```
+
+   Repite el último comando con `BETTER_AUTH_SECRET` (uno distinto del de producción), `AUTH_ALLOWED_HOSTS`, `AUTH_SIGNUP_ENABLED`, `BREVO_API_KEY` y `EMAIL_FROM`. Wrangler te pide cada valor sin mostrarlo ni guardarlo en el historial. Para las Previews:
+   - `DATABASE_URL`: la URL **pooled** de la rama `preview` de Neon;
+   - `AUTH_ALLOWED_HOSTS`: `*-constancia.<sub>.workers.dev`, porque cada Preview tiene una URL `<rama>-constancia.<sub>.workers.dev`;
+   - `AUTH_SIGNUP_ENABLED`: `true`, porque la base `preview` es solo de prueba.
+
+   Los cambios a la configuración base solo llegan a las Previews nuevas.
+
+## 6. Tu cuenta
+
+1. Abre `https://constancia.<sub>.workers.dev/cuenta`, toca **Crear cuenta** y créala con tu correo y una contraseña de 12 caracteres o más.
+2. En Cloudflare, cambia `AUTH_SIGNUP_ENABLED` a `false`. Desde ahí, nadie más puede registrarse.
+3. En el iPhone y en el Mac, inicia sesión en la misma URL. El estado arriba a la derecha pasa a "Sincronizado".
+
+## 7. Medir el login (una vez)
+
+El plan gratis de Workers da 10 ms de CPU por petición, y el *hash* de contraseñas es lo único que puede pasarse (ADR 0005). En una Preview:
+
+1. Inicia sesión 10 veces. Espera unos segundos entre intentos, porque el límite es de 3 cada 10 s.
+2. En el Worker, **Observability → Logs**, filtra las peticiones a `/api/auth/sign-in/email` y anota su `cpuTime`.
+3. Pásame los números. Los anoto en el ADR 0005, y si se pasan de 10 ms de forma sostenida, aplicamos su plan B.
+
+## 8. Cada *release* a producción
+
+Producción solo cambia cuando tú lo decides (ADR 0010):
+
+1. Abre (o te abro yo) una PR de `app/habit_tracker` hacia `release/habit-tracker`. Su descripción dice si trae migraciones.
+2. Si trae migraciones:
+   1. en Neon, crea una rama de respaldo desde `production` (por ejemplo `respaldo-AAAA-MM-DD`; borra las viejas, el plan gratis tiene un máximo de ramas);
+   2. corre el workflow de migraciones con `production` desde **`app/habit_tracker`**, antes de fusionar. Las migraciones solo agregan (tablas, columnas con valor por defecto), así que la versión que está en producción sigue funcionando con el esquema nuevo.
+3. Fusionar esa PR despliega producción. Workers Builds muestra el resultado en el panel del Worker.
+
+## 9. En tu Mac
 
 - Node 24 (LTS) y pnpm. Puedes usar `corepack enable`, que lee la versión fijada en `package.json`.
 - Docker Desktop (u OrbStack), para el Postgres local de las pruebas.

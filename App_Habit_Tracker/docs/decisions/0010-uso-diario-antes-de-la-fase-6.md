@@ -46,6 +46,13 @@ El 29-10-2026 respondiste las preguntas de la fase 2: rama de *release*, `pg` ap
 - Antes de la fase 6, la app no tiene exportación propia (RF-5.1). El respaldo es el historial y el *snapshot* de Neon.
 - El *bundle* del Worker incluye los dos drivers. Se mide en la PR 2.1; si molesta, el de desarrollo se excluye del *build* de producción.
 
+## Actualización 21-11-2026: orden de cada *release* y secretos
+
+- Producción se migra **antes** de fusionar la PR de *release*, desde `app/habit_tracker`, porque fusionarla despliega de inmediato. El workflow de migraciones acepta producción solo desde `app/habit_tracker` o `release/habit-tracker`, y siempre con tu aprobación.
+- Las migraciones solo agregan (tablas, columnas con valor por defecto), para que la versión que sigue en producción funcione con el esquema nuevo mientras se despliega la siguiente.
+- En Cloudflare, todos los valores que no están en el repo van como secretos. Los de las Previews se fijan una vez en su configuración base (`wrangler preview base-config secret put`).
+- La guía completa está en `docs/cuentas.md`.
+
 ## Fuentes (consultadas el 29-10-2026)
 
 - Neon, cómo elegir la conexión: https://neon.com/docs/connect/choose-connection
