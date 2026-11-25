@@ -51,9 +51,10 @@ async function post(path: string, body: unknown): Promise<AuthResult> {
   return { ok: false, error: await failure(response) };
 }
 
-// null when nobody is signed in.
-export async function getSession(): Promise<AuthResult<Session | null>> {
-  const response = await call('/get-session');
+// null when nobody is signed in. By default it trusts the signed cookie cache, which
+// never wakes Neon; `fresh` asks Postgres, so a session closed elsewhere shows as closed.
+export async function getSession({ fresh = false } = {}): Promise<AuthResult<Session | null>> {
+  const response = await call(fresh ? '/get-session?disableCookieCache=true' : '/get-session');
   if (response === 'offline' || !response.ok) return { ok: false, error: await failure(response) };
   const body = (await response.json().catch(() => undefined)) as
     { user?: { email?: unknown } } | null | undefined;
@@ -76,8 +77,12 @@ export function signOut(): Promise<AuthResult> {
 }
 
 // Every session of the account, this one included.
-export function revokeAllSessions(): Promise<AuthResult> {
-  return post('/revoke-sessions', {});
+export async function revokeAllSessions(): Promise<AuthResult> {
+  const revoked = await post('/revoke-sessions', {});
+  // The server forgot every session, but this device still holds its cookies, cache
+  // included; signing out clears them. Its own result does not matter.
+  if (revoked.ok) await post('/sign-out', {});
+  return revoked;
 }
 
 export function changePassword(currentPassword: string, newPassword: string): Promise<AuthResult> {
