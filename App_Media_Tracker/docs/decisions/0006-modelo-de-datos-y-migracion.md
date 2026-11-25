@@ -38,7 +38,7 @@ Va en `packages/shared/src/import/legacy.ts` y es una función pura:
 3. Lo convierte al modelo nuevo:
    - `listId` pasa a `list_entries`;
    - `saga: { name, number }` pasa a una `collection` por nombre normalizado (con la misma regla que `sagaKey`) y a su `collection_entry`;
-   - se calculan `externalKeys` desde `externalId` y el tipo;
+   - `externalId` pasa a ser el primer valor de `externalKeys`, con el mismo formato (`tmdb:movie:603`, `openlibrary:OL45804W`);
    - las papeleras se respetan, así que lo borrado no revive.
 4. Devuelve un **plan de importación** con lo que se va a añadir, actualizar y omitir, y con los posibles duplicados (ADR 0008). Ese plan se muestra antes de escribir en Dexie.
 
