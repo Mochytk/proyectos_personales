@@ -3,7 +3,8 @@ import PressableScale from '@/components/PressableScale';
 import { Text, View } from '@/components/Themed';
 import { SymbolView } from '@/components/AppIcon';
 import ItemCover from '@/components/ItemCover';
-import { describeProgress, hasSeasonSplit } from '@/store/seasons';
+import { progressText } from '@/store/progress';
+import { selectEnjoying } from '@/store/tray';
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useNavigation, Link } from 'expo-router';
@@ -17,14 +18,7 @@ export default function EnjoyingScreen() {
 
   const allItems = useStore(state => state.items);
   
-  // Filter items that are in progress
-  const enjoyingItems = useMemo(() => {
-    return allItems.filter(item => 
-      item.status !== 'completed' && (item.status === 'in_progress' || 
-      (item.currentCheckpoint && item.currentCheckpoint > 0) || 
-      item.progress > 0)
-    );
-  }, [allItems]);
+  const enjoyingItems = useMemo(() => selectEnjoying(allItems), [allItems]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -51,20 +45,9 @@ export default function EnjoyingScreen() {
   };
 
   const getSubtitle = (item: MediaItem) => {
-    if (item.checkpointType === 'percentage') {
-      return `${item.subtitle ? item.subtitle + ' · ' : ''}${item.currentCheckpoint || 0}% Completado`;
-    }
-    if (hasSeasonSplit(item)) {
-      return `${item.subtitle ? item.subtitle + ' · ' : ''}${describeProgress(item.currentCheckpoint || 0, item.seasons)}`;
-    }
-    if (item.totalCheckpoints && item.totalCheckpoints > 0) {
-      const unitES: Record<string, string> = { episodes: 'Episodio', chapters: 'Capítulo', pages: 'Página', levels: 'Nivel' };
-      const typeLabel = item.checkpointType
-        ? (unitES[item.checkpointType] ?? item.checkpointType.charAt(0).toUpperCase() + item.checkpointType.slice(1))
-        : (item.type === 'tv_show' ? 'Episodio' : 'Capítulo');
-      return `${item.subtitle ? item.subtitle + ' · ' : ''}${typeLabel} ${item.currentCheckpoint || 0} de ${item.totalCheckpoints}`;
-    }
-    return item.subtitle || 'Recién empezando';
+    const progress = progressText(item);
+    if (!progress) return item.subtitle || 'Recién empezando';
+    return `${item.subtitle ? item.subtitle + ' · ' : ''}${progress}`;
   };
 
   return (

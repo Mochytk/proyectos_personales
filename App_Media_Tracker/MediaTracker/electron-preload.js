@@ -30,3 +30,14 @@ contextBridge.exposeInMainWorld('mediaTrackerSync', {
     return () => ipcRenderer.removeListener('sync:changed', listener);
   },
 });
+
+// Menu bar icon (macOS). The page sends the text its menu shows, and hears what was chosen in it.
+// Calling `update` also tells the main process the page is listening, so register `onAction` first.
+contextBridge.exposeInMainWorld('mediaTrackerTray', {
+  update: (snapshot) => ipcRenderer.send('tray:update', snapshot),
+  onAction: (callback) => {
+    const listener = (_event, action) => callback(action);
+    ipcRenderer.on('tray:action', listener);
+    return () => ipcRenderer.removeListener('tray:action', listener);
+  },
+});

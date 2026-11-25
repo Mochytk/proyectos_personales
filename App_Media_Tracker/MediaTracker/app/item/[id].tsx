@@ -11,7 +11,7 @@ import { useState } from 'react';
 import DateField from '@/components/DateField';
 import { fromInputs, toDateInput, toTimeInput } from '@/store/dates';
 import SeasonTracker from '@/components/SeasonTracker';
-import { clampProgress, usesCounter } from '@/store/progress';
+import { PAGE_STEP, PERCENT_STEP, clampProgress, usesCounter } from '@/store/progress';
 import { formatPosition, hasSeasonSplit, refreshUpdates, upcomingEpisode, airDateTimestamp } from '@/store/seasons';
 import { getTvDetails } from '@/services/tmdb';
 import SagaField from '@/components/SagaField';
@@ -163,15 +163,15 @@ export default function ItemDetailScreen() {
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <PressableScale 
               style={[styles.actionButton, { flex: 1, backgroundColor: colors.cardBackground, padding: 12 }]} 
-              onPress={() => updateItem(item.id, { currentCheckpoint: Math.max(0, current - 10), status: current - 10 > 0 ? 'in_progress' : 'unstarted' })}
+              onPress={() => updateItem(item.id, { currentCheckpoint: Math.max(0, current - PERCENT_STEP), status: current - PERCENT_STEP > 0 ? 'in_progress' : 'unstarted' })}
             >
-              <Text style={{ color: colors.text, fontWeight: 'bold' }}>- 10%</Text>
+              <Text style={{ color: colors.text, fontWeight: 'bold' }}>- {PERCENT_STEP}%</Text>
             </PressableScale>
             <PressableScale 
               style={[styles.actionButton, { flex: 1, backgroundColor: colors.tint, padding: 12 }]} 
-              onPress={() => updateItem(item.id, { currentCheckpoint: Math.min(total, current + 10), status: 'in_progress' })}
+              onPress={() => updateItem(item.id, { currentCheckpoint: Math.min(total, current + PERCENT_STEP), status: 'in_progress' })}
             >
-              <Text style={{ color: '#fff', fontWeight: 'bold' }}>+ 10%</Text>
+              <Text style={{ color: '#fff', fontWeight: 'bold' }}>+ {PERCENT_STEP}%</Text>
             </PressableScale>
           </View>
         </View>
@@ -211,7 +211,7 @@ export default function ItemDetailScreen() {
             <View style={[styles.progressFill, { backgroundColor: colors.tint, width: `${Math.round((current / total) * 100)}%` }]} />
           </View>
           <View style={styles.counterRow}>
-            {[-10, -1, 1, 10].map((delta) => (
+            {[-PAGE_STEP, -1, 1, PAGE_STEP].map((delta) => (
               <PressableScale
                 key={delta}
                 style={[styles.actionButton, { flex: 1, padding: 12, backgroundColor: delta > 0 ? colors.tint : colors.cardBackground }]}
