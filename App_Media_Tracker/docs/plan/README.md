@@ -15,9 +15,9 @@ No se empieza la fase siguiente sin tu "ok". `develop` recibe `app/Media_Tracker
 
 | Entrega | Rama | PR |
 | --- | --- | --- |
-| Documento maestro, ADRs 0001 a 0009, amenazas, arquitectura, modelo de datos, plan y convenciones | `docs/media-phase-0-adrs` | por abrir |
+| Documento maestro, ADRs 0001 a 0009, amenazas, arquitectura, modelo de datos, plan y convenciones | `docs/media-phase-0-adrs` | #52 |
 | Monorepo vacío con CI | `chore/media-monorepo-setup` | #51 |
-| Spike A: fuentes de sagas (Wikidata) | `spike/saga-sources` | por abrir |
+| Spike A: fuentes de sagas (Wikidata) | `spike/saga-sources` | #53 |
 | Tres direcciones visuales y tres nombres (página para elegir) | — | — |
 | ADR de identidad visual, cuando elijas | `docs/media-visual-identity` | — |
 
