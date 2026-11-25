@@ -35,10 +35,12 @@ function isTimestamp(table: SyncTable, key: string): boolean {
 
 // Wire row (ISO strings) to column values (Date), with the user from the session.
 export function toDbValues(table: SyncTable, row: SyncRow['row'], userId: string): DbRow {
-  const values: DbRow = { userId };
+  const values: DbRow = {};
   for (const [key, value] of Object.entries(row)) {
     values[key] = isTimestamp(table, key) && typeof value === 'string' ? new Date(value) : value;
   }
+  // Last, so no key of the row can ever replace it.
+  values.userId = userId;
   return values;
 }
 
