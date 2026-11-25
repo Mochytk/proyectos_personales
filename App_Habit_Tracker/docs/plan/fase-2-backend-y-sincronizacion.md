@@ -322,19 +322,26 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - El paso 5 (medir el CPU de `scrypt`) queda para cuando tengas la primera Preview. Está en el paso 7 de `cuentas.md`.
 > - Los commits quedaron con otros nombres; el del CI con Postgres ya estaba en la PR #41.
 
-## PR 2.8 · `test/sync-e2e`
+## PR 2.8 · `test/sync-e2e` (PR #48)
 
 ### Tarea 13: E2E de sincronización
 
 **Archivos:** crear `apps/web/e2e/sync.spec.ts` y `apps/web/playwright.sync.config.ts` (un `webServer` con `wrangler dev`, `DATABASE_DRIVER=pg` y la base de prueba ya migrada). Modificar el job de E2E del CI.
 
-- [ ] **Paso 1: E2E.**
+- [x] **Paso 1: E2E.**
   - Dos contextos con el mismo usuario: marcar un hábito en uno y verlo en el otro en menos de 30 s.
   - Cortar la red (`page.route` que aborta) a mitad de un *push*; al volver, todo llega una sola vez.
   - Un segundo usuario no ve nada del primero.
   - Cerrar sesión en todos los dispositivos deja al otro contexto en "Inicia sesión para sincronizar", sin perder sus pendientes.
-- [ ] **Paso 2: correrlos** local y en el CI.
-- [ ] **Paso 3: commit.** `test(web): add end-to-end sync tests`.
+- [x] **Paso 2: correrlos** local y en el CI.
+- [x] **Paso 3: commit.** `test(web): add end-to-end sync tests`.
+
+> **Al implementarla (PR #48):**
+> - **La prueba 4 encontró un error real:** después de cerrar todas las sesiones, la pantalla de cuenta seguía mostrando la sesión, porque `get-session` respondía desde la cookie en caché (1 hora). Ahora esa pantalla pregunta con `disableCookieCache=true`, y "Cerrar sesión en todos los dispositivos" también cierra la propia. Va en su propio commit (`fix(web): …`).
+> - **El corte de red** se prueba con el caso más difícil: el servidor recibe y aplica el *push*, pero el navegador nunca recibe la respuesta (`route.fetch()` y después `route.abort()`). El reintento no lo duplica.
+> - **Cada navegador manda su propia IP** en `cf-connecting-ip` (`wrangler dev` la deja pasar), para que el límite de intentos de login los trate como dispositivos distintos.
+> - **El servidor lo levanta `apps/api/scripts/e2e-server.mjs`:** borra y crea la base `constancia_e2e` en `TEST_DATABASE_URL`, la migra y escribe un `.wrangler/e2e.vars` con un secreto aleatorio de esa corrida.
+> - **El CI tiene un job aparte (`sync-e2e`)** con su propio Postgres, en vez de modificar el job de E2E: así el E2E de siempre sigue corriendo sin servidor.
 
 ## Cierre de la fase
 

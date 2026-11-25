@@ -6,6 +6,8 @@ const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
 
 export default defineConfig({
   testDir: './e2e',
+  // Sync needs the API and Postgres: playwright.sync.config.ts runs it.
+  testIgnore: 'sync.spec.ts',
   fullyParallel: true,
   forbidOnly: ci,
   reporter: 'list',

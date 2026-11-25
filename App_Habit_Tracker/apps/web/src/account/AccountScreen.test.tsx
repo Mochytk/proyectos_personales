@@ -29,6 +29,10 @@ describe('AccountScreen', () => {
     await fillSignIn(user);
 
     expect(await screen.findByText('Sesión iniciada como tu@example.com')).toBeTruthy();
+    // The account screen asks Postgres, not the cookie cache, so a closed session shows.
+    expect(calls.filter((c) => c.key === 'GET /api/auth/get-session').map((c) => c.search)).toEqual(
+      ['?disableCookieCache=true', '?disableCookieCache=true'],
+    );
     expect(calls.find((c) => c.key === 'POST /api/auth/sign-in/email')?.body).toEqual({
       email: 'tu@example.com',
       password: 'correct horse battery',
@@ -65,6 +69,7 @@ describe('AccountScreen', () => {
         signedIn = false;
         return json({ status: true });
       },
+      'POST /api/auth/sign-out': () => json({ success: true }),
     });
     const { user } = await renderRoute('/cuenta');
     await user.click(
@@ -75,6 +80,8 @@ describe('AccountScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Sí, cerrar todas' }));
     expect(await screen.findByRole('button', { name: 'Iniciar sesión' })).toBeTruthy();
     expect(calls.some((c) => c.key === 'POST /api/auth/revoke-sessions')).toBe(true);
+    // Then this device drops its own cookies too.
+    expect(calls.some((c) => c.key === 'POST /api/auth/sign-out')).toBe(true);
   });
 
   it('changes the password and closes the other sessions', async () => {

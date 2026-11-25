@@ -370,7 +370,7 @@ export function AccountScreen() {
 
   useEffect(() => {
     let active = true;
-    void getSession().then((result) => {
+    void getSession({ fresh: true }).then((result) => {
       if (!active) return;
       setState(
         result.ok
