@@ -158,6 +158,20 @@ describe('anchors, quota overrides and reviews', () => {
     expect(anchorSchema.safeParse(anchor).success).toBe(false);
   });
 
+  it('keeps sortOrder within a Postgres integer, which a sync push writes as is', () => {
+    const anchor = (sortOrder: number) => ({
+      ...sync,
+      name: 'Al despertar',
+      sortOrder,
+      archivedAt: null,
+    });
+    expect(anchorSchema.safeParse(anchor(2_147_483_647)).success).toBe(true);
+    expect(anchorSchema.safeParse(anchor(-2_147_483_648)).success).toBe(true);
+    expect(anchorSchema.safeParse(anchor(2_147_483_648)).success).toBe(false);
+    expect(anchorSchema.safeParse(anchor(-2_147_483_649)).success).toBe(false);
+    expect(habitSchema.safeParse(dailyHabit({ sortOrder: 2_147_483_648 })).success).toBe(false);
+  });
+
   it('rejects a quota override whose week does not start on Monday', () => {
     const override = { ...sync, habitId: ANCHOR_ID, weekStart: '2026-10-20', quota: 2 };
     expect(weeklyQuotaOverrideSchema.safeParse(override).success).toBe(false);

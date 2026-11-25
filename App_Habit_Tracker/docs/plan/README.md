@@ -58,7 +58,7 @@ Detalle en [`fase-2-backend-y-sincronizacion.md`](fase-2-backend-y-sincronizacio
 | `ci/preview-deploy` | Workers Builds y Previews conectados (con tu ayuda en el panel), y workflow manual de migraciones (PR #47) |
 | `test/sync-e2e` | Dos contextos de Playwright: cambio en uno, visible en el otro en menos de 30 s; corte de red a mitad de un *push*; otra cuenta no ve nada; cerrar todas las sesiones no pierde pendientes (PR #48) |
 
-Cierre: revisión de seguridad independiente (un subagente que no vio el código; te aviso cuando lo lance).
+Cierre: revisión de seguridad independiente (un subagente que no vio el código; te aviso cuando lo lance). Hecha el 25-11-2026; sus arreglos van en la PR #49.
 
 **Uso diario (resuelto el 29-10-2026, [ADR 0010](../decisions/0010-uso-diario-antes-de-la-fase-6.md)):** producción se despliega solo desde la rama `release/habit-tracker`, y cada despliegue es una PR de *release* que fusionas tú.
 

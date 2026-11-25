@@ -345,7 +345,9 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 
 ## Cierre de la fase
 
-- **Revisión de seguridad independiente** de la rama completa, por un subagente que no vio el código. Te aviso al lanzarla.
+- [x] **Revisión de seguridad independiente** de la rama completa, por un subagente que no vio el código. Te aviso al lanzarla.
+
+  > **Al hacerla (PR #49):** se hizo el 25-11-2026, sin hallazgos críticos ni altos. Se arreglaron una falla media (cualquiera podía mantener Neon despierto con `get-session`) y cuatro bajas: `/version` volvía a Postgres pasada la hora, un *push* en `text/plain` desde una Preview entraba con tu cookie, el log de errores incluía los parámetros de las consultas, y `sortOrder` no tenía tope. Lo que depende de tus paneles (las ramas del *environment* `production`, las Previews sin clave de Brevo y con el registro cerrado) quedó en `docs/cuentas.md`. Como las Previews quedan con el registro cerrado, el CPU de `scrypt` (Tarea 12, paso 5) se mide en producción, con tu cuenta (paso 7 de `cuentas.md`). Queda sin verificar si Workers Builds construye Previews para las PR desde *forks*. La documentación de Cloudflare no lo dice; lo revisamos en el panel cuando conectes el repo.
 - **Primer *release*:** una PR de `app/habit_tracker` hacia `release/habit-tracker`, que fusionas tú (ADR 0010).
 - **Tu cuenta:** creas la cuenta en producción con `AUTH_SIGNUP_ENABLED=true` y lo vuelves a `false`. Luego instalas la app en el iPhone (la guía de la PWA es de la fase 4 básica).
 - **Resumen para ti** y la etiqueta `phase-2-ok` cuando lo apruebes.

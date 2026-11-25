@@ -26,10 +26,13 @@ export const userSettingsSchema = z.object({
 });
 export type UserSettings = z.infer<typeof userSettingsSchema>;
 
+// The column is a Postgres integer; a larger number would fail the whole push batch.
+const sortOrderSchema = z.int32();
+
 export const anchorSchema = z.object({
   ...syncColumns,
   name: z.string().trim().min(1, 'Escribe un nombre.').max(40, 'Máximo 40 caracteres.'),
-  sortOrder: z.number().int(),
+  sortOrder: sortOrderSchema,
   archivedAt: nullableDatetime,
 });
 export type Anchor = z.infer<typeof anchorSchema>;
@@ -61,7 +64,7 @@ export const habitSchema = z
     anchorId: z.uuid('Elige un ancla.'),
     color: z.string().min(1).max(30),
     icon: z.string().max(40).nullable(),
-    sortOrder: z.number().int(),
+    sortOrder: sortOrderSchema,
     archivedAt: nullableDatetime,
   })
   .superRefine((habit, ctx) => {

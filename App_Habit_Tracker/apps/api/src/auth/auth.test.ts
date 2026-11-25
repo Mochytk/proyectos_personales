@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../app';
+import type { Db } from '../db/client';
 import { createTestDatabase, type TestDatabase } from '../test/db';
 import { request, sessionCookie, testEnv } from '../test/app';
 import { requireSession, withAuth } from './session';
@@ -153,6 +154,26 @@ describe('sign-in', () => {
 });
 
 describe('sessions', () => {
+  it('answers get-session without a session cookie without touching Postgres', async () => {
+    // Anyone can call it, so it must not wake Neon: no rate-limit row, no session lookup.
+    const unusable = new Proxy(
+      {},
+      {
+        get() {
+          throw new Error('The database must not be used');
+        },
+      },
+    ) as Db;
+    const offline = createApp({
+      connect: () => ({ db: unusable, close: () => Promise.resolve() }),
+    });
+    const response = await request(offline, testEnv(database.url), '/api/auth/get-session', {
+      ip: nextIp(),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toBeNull();
+  });
+
   it('answers 401 on a protected route without a session', async () => {
     const response = await me();
     expect(response.status).toBe(401);
