@@ -29,6 +29,10 @@ describe('AccountScreen', () => {
     await fillSignIn(user);
 
     expect(await screen.findByText('Sesión iniciada como tu@example.com')).toBeTruthy();
+    // The account screen asks Postgres, not the cookie cache, so a closed session shows.
+    expect(calls.filter((c) => c.key === 'GET /api/auth/get-session').map((c) => c.search)).toEqual(
+      ['?disableCookieCache=true', '?disableCookieCache=true'],
+    );
     expect(calls.find((c) => c.key === 'POST /api/auth/sign-in/email')?.body).toEqual({
       email: 'tu@example.com',
       password: 'correct horse battery',
@@ -65,6 +69,7 @@ describe('AccountScreen', () => {
         signedIn = false;
         return json({ status: true });
       },
+      'POST /api/auth/sign-out': () => json({ success: true }),
     });
     const { user } = await renderRoute('/cuenta');
     await user.click(
@@ -75,6 +80,8 @@ describe('AccountScreen', () => {
     await user.click(screen.getByRole('button', { name: 'Sí, cerrar todas' }));
     expect(await screen.findByRole('button', { name: 'Iniciar sesión' })).toBeTruthy();
     expect(calls.some((c) => c.key === 'POST /api/auth/revoke-sessions')).toBe(true);
+    // Then this device drops its own cookies too.
+    expect(calls.some((c) => c.key === 'POST /api/auth/sign-out')).toBe(true);
   });
 
   it('changes the password and closes the other sessions', async () => {
@@ -116,6 +123,46 @@ describe('AccountScreen', () => {
       email: 'tu@example.com',
       redirectTo: '/restablecer',
     });
+  });
+});
+
+describe('creating the account', () => {
+  async function fillCreate(user: Awaited<ReturnType<typeof renderRoute>>['user']) {
+    await user.click(await screen.findByRole('button', { name: 'Crear cuenta' }));
+    await user.type(screen.getByLabelText('Correo para la cuenta'), 'tu@example.com');
+    await user.type(screen.getByLabelText('Contraseña para la cuenta'), 'correct horse battery');
+    await user.click(screen.getByRole('button', { name: 'Crear la cuenta' }));
+  }
+
+  it('creates the account and signs in', async () => {
+    let signedIn = false;
+    const { calls } = fakeFetch({
+      'GET /api/auth/get-session': () => json(signedIn ? SIGNED_IN : null),
+      'POST /api/auth/sign-up/email': () => {
+        signedIn = true;
+        return json({ token: 'x' });
+      },
+    });
+    const { user } = await renderRoute('/cuenta');
+    await fillCreate(user);
+
+    expect(await screen.findByText('Sesión iniciada como tu@example.com')).toBeTruthy();
+    expect(calls.find((c) => c.key === 'POST /api/auth/sign-up/email')?.body).toEqual({
+      email: 'tu@example.com',
+      password: 'correct horse battery',
+      name: 'tu',
+    });
+  });
+
+  it('says when sign-up is closed', async () => {
+    fakeFetch({
+      'GET /api/auth/get-session': () => json(null),
+      'POST /api/auth/sign-up/email': () =>
+        json({ code: 'EMAIL_PASSWORD_SIGN_UP_DISABLED', message: 'disabled' }, 400),
+    });
+    const { user } = await renderRoute('/cuenta');
+    await fillCreate(user);
+    expect(await screen.findByText('El registro está cerrado.')).toBeTruthy();
   });
 });
 

@@ -22,12 +22,20 @@ App personal de hábitos y gimnasio, offline-first. Es una PWA para el iPhone y 
 | App web en desarrollo | `pnpm --filter @habit-tracker/web dev`. Manda `/api` a `wrangler dev` (`localhost:8787`), así que para la cuenta y la sincronización levanta también la API |
 | *Build* de la app web | `pnpm --filter @habit-tracker/web build` |
 | E2E (Playwright, Chromium) | `pnpm --filter @habit-tracker/web e2e`. La primera vez: `pnpm --filter @habit-tracker/web exec playwright install chromium`. Con un Chromium propio: `PLAYWRIGHT_CHROMIUM_EXECUTABLE=/ruta/a/chromium` |
+| E2E de sincronización | `pnpm --filter @habit-tracker/web e2e:sync`. Necesita un Postgres en `TEST_DATABASE_URL`; crea la base `constancia_e2e`, la migra y levanta `wrangler dev` en `localhost:8788` |
 | API en desarrollo | Copiar `apps/api/.dev.vars.example` a `apps/api/.dev.vars` y llenarlo; después `pnpm --filter @habit-tracker/api dev` (`wrangler dev` en `localhost:8787`, que sirve `apps/web/dist`: primero el *build* de la web) |
 | Migrar la base local | Desde `apps/api/`: `DATABASE_URL=postgres://postgres:postgres@localhost:5432/constancia_dev pnpm exec drizzle-kit migrate` |
 | Nueva migración | `pnpm --filter @habit-tracker/api db:generate` (nunca `drizzle-kit push`) |
 | Pruebas de la API | Necesitan un Postgres 16 o más en `TEST_DATABASE_URL` (por defecto `postgres://postgres:postgres@localhost:5432/postgres`) |
 
-Los comandos para desplegar y migrar entornos reales se agregan aquí cuando existan (PR 2.7).
+Los entornos reales no se tocan desde la terminal (ADR 0010):
+
+| Para | Cómo |
+| --- | --- |
+| Migrar `preview` o `production` | En GitHub, **Actions → Habit tracker migrations → Run workflow**. Producción pide aprobación y solo corre desde `app/habit_tracker` o `release/habit-tracker` |
+| Desplegar una Preview | Automático: cada `push` a una rama que no sea `release/habit-tracker` (Workers Builds corre `pnpm --filter @habit-tracker/api run deploy:preview`) |
+| Desplegar producción | Fusionar una PR de `app/habit_tracker` hacia `release/habit-tracker`, que hace la dueña o dueño del repo. Antes, las migraciones (paso 8 de `docs/cuentas.md`) |
+| Configurar cuentas y secretos | `docs/cuentas.md`, paso a paso |
 
 ## Convenciones
 

@@ -70,6 +70,13 @@ Con los dominios ya permitidos, el punto pendiente se cierra así:
 - `revokeSessions` cierra todas las sesiones, incluida la actual. Para cerrar solo las de los otros dispositivos se usa `revokeOtherSessions`.
 - Quedó implementado en la PR #42.
 
+## Actualización 25-11-2026: revisión de seguridad de la fase 2
+
+- **`get-session` no cuenta en el límite de intentos.** Con el límite guardado en Postgres, cada `get-session` (incluso sin cookie) escribía en `rate_limit`, y un GET anónimo cada pocos minutos impedía que Neon se suspendiera. No adivina nada, así que no necesita límite. Sigue habiendo rutas públicas que consultan la base (el login, el restablecimiento), así que alguien insistente todavía puede mantener Neon despierto. Si eso gastara la cuota del plan gratis, Neon se suspende sin cobrar: la sincronización para hasta fin de mes y la app local sigue funcionando.
+- **Los logs no llevan el mensaje de los errores.** El de un error de Drizzle trae el SQL y todos sus parámetros (filas, `user_id`, el hash en el login). Se registran solo el nombre del error y el código de Postgres.
+- **Previews:** registro cerrado salvo cuando se prueba, y sin clave de Brevo (`docs/cuentas.md`, paso 5).
+- Quedó implementado en la PR #49.
+
 ## Fuentes (consultadas el 23-10-2026)
 
 - Correo y contraseña, hash: https://better-auth.com/docs/authentication/email-password

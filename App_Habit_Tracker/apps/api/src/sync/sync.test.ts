@@ -220,6 +220,21 @@ describe('pull', () => {
   });
 });
 
+describe('a push from another site', () => {
+  it('is refused unless it is JSON, which a cross-site page cannot send without CORS', async () => {
+    // What a page on a sibling *.workers.dev site can send with mode: 'no-cors'.
+    const response = await request(createApp(), testEnv(database.url), '/api/sync/push', {
+      method: 'POST',
+      ip: nextIp(),
+      cookie: alice,
+      headers: { 'content-type': 'text/plain;charset=UTF-8' },
+      body: JSON.stringify({ rows: [anchor(uuid(80))] }),
+    });
+    expect(response.status).toBe(415);
+    expect(await storedAnchor('alice@example.com', uuid(80))).toBeUndefined();
+  });
+});
+
 describe('without a session', () => {
   it('answers 401 to push and pull', async () => {
     expect((await push('', [anchor(uuid(70))])).status).toBe(401);

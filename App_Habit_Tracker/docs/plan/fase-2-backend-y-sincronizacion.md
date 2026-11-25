@@ -297,39 +297,57 @@ Este plan, el ADR 0010, la tabla de la fase 2 en [`README.md`](README.md) y las 
 > - Los E2E corren sin API (`vite preview`), así que una *fixture* automática responde "sin sesión" a `get-session`.
 > - Probado en `wrangler dev` con dos navegadores: un hábito creado en el "teléfono" apareció en el "Mac" al iniciar sesión, y uno creado en el "Mac" llegó al "teléfono" en 15,5 s, con la consulta de versión cada 15 s.
 
-## PR 2.7 · `ci/preview-deploy`
+## PR 2.7 · `ci/preview-deploy` (PR #47)
 
 ### Tarea 12: despliegue y migraciones
 
 **Archivos:** crear `.github/workflows/habit-tracker-migrate.yml`. Modificar `docs/cuentas.md`, `.github/workflows/habit-tracker-ci.yml` (Postgres como servicio y pruebas de `apps/api`) y `App_Habit_Tracker/CLAUDE.md` (comandos).
 
 - [x] **Paso 1: CI.** Agregar Postgres como servicio del job de pruebas y `TEST_DATABASE_URL`, para que las pruebas de `apps/api` corran en cada PR. Hecho en la PR #41, con Postgres 16.15 fijado por *digest*. En la misma PR, el CI pasó a `pnpm run audit`, que falla solo con vulnerabilidades altas o críticas como dice `CLAUDE.md`: `pnpm audit` a secas fallaba con cualquiera.
-- [ ] **Paso 2: workflow de migraciones.** `workflow_dispatch` con la entrada `environment` (`preview` o `production`). Corre `drizzle-kit migrate` con el secreto `DATABASE_URL` de ese *environment* de GitHub; `production` exige tu aprobación.
-- [ ] **Paso 3: guía paso a paso en `cuentas.md`**, que sigues tú en los paneles:
+- [x] **Paso 2: workflow de migraciones.** `workflow_dispatch` con la entrada `environment` (`preview` o `production`). Corre `drizzle-kit migrate` con el secreto `DATABASE_URL` de ese *environment* de GitHub; `production` exige tu aprobación.
+- [x] **Paso 3: guía paso a paso en `cuentas.md`**, que sigues tú en los paneles:
   - **Neon:** el proyecto y las ramas `production` y `preview`; la URL *pooled* para el Worker y la directa para migrar.
   - **Cloudflare:** Workers Builds con la carpeta raíz `App_Habit_Tracker`, el comando de *build* y la rama de producción `release/habit-tracker` (ADR 0010); los secretos de Production y de Previews.
   - **GitHub:** los *environments* y sus secretos.
-- [ ] **Paso 4: crear la rama `release/habit-tracker`** desde `app/habit_tracker`. Es un `git push` normal de una rama nueva.
+- [x] **Paso 4: crear la rama `release/habit-tracker`** desde `app/habit_tracker`. Es un `git push` normal de una rama nueva.
 - [ ] **Paso 5: medir el CPU de `scrypt`** en una Preview: con Workers Logs, el `cpuTime` de 10 logins. Anotarlo en una actualización fechada del ADR 0005 y, si se pasa de 10 ms de forma sostenida, seguir su plan B.
 - [ ] **Paso 6: commits.** `ci: run the api tests against Postgres`, `ci: add a manual migration workflow`, `docs: add the phase 2 account steps`.
 
-## PR 2.8 · `test/sync-e2e`
+> **Al implementarla (PR #47):**
+> - **Producción también se migra desde `app/habit_tracker`,** justo antes de fusionar la PR de *release*, porque fusionarla despliega al tiro. Antes el workflow solo aceptaba `release/habit-tracker`, lo que dejaba un rato con código nuevo sobre el esquema viejo. Las migraciones solo agregan, así que la versión en producción sigue funcionando con el esquema nuevo.
+> - **En Cloudflare todo va como secreto**, también `AUTH_ALLOWED_HOSTS` y `AUTH_SIGNUP_ENABLED`, porque cada *deploy* reemplaza las variables del panel por las de `wrangler.jsonc`.
+> - **Las Previews se despliegan con `wrangler preview`** (Worker Previews, en beta abierta) y no heredan nada de producción. Sus secretos se fijan una vez en la configuración base, desde la terminal. `wrangler.jsonc` activa `preview_urls`, y `apps/api` tiene los *scripts* `deploy` y `deploy:preview`.
+> - **`AUTH_ALLOWED_HOSTS` de las Previews es `*-constancia.<sub>.workers.dev`.** Una prueba nueva en `apps/api` comprueba que ese patrón y el de producción inician sesión, y que otro host no.
+> - **Pantalla "Crear cuenta"** en la web: el plan suponía crear la cuenta con una petición desde la terminal, que deja la contraseña en el historial. Solo funciona mientras `AUTH_SIGNUP_ENABLED` es `"true"`.
+> - El paso 5 (medir el CPU de `scrypt`) queda para cuando tengas la primera Preview. Está en el paso 7 de `cuentas.md`.
+> - Los commits quedaron con otros nombres; el del CI con Postgres ya estaba en la PR #41.
+
+## PR 2.8 · `test/sync-e2e` (PR #48)
 
 ### Tarea 13: E2E de sincronización
 
 **Archivos:** crear `apps/web/e2e/sync.spec.ts` y `apps/web/playwright.sync.config.ts` (un `webServer` con `wrangler dev`, `DATABASE_DRIVER=pg` y la base de prueba ya migrada). Modificar el job de E2E del CI.
 
-- [ ] **Paso 1: E2E.**
+- [x] **Paso 1: E2E.**
   - Dos contextos con el mismo usuario: marcar un hábito en uno y verlo en el otro en menos de 30 s.
   - Cortar la red (`page.route` que aborta) a mitad de un *push*; al volver, todo llega una sola vez.
   - Un segundo usuario no ve nada del primero.
   - Cerrar sesión en todos los dispositivos deja al otro contexto en "Inicia sesión para sincronizar", sin perder sus pendientes.
-- [ ] **Paso 2: correrlos** local y en el CI.
-- [ ] **Paso 3: commit.** `test(web): add end-to-end sync tests`.
+- [x] **Paso 2: correrlos** local y en el CI.
+- [x] **Paso 3: commit.** `test(web): add end-to-end sync tests`.
+
+> **Al implementarla (PR #48):**
+> - **La prueba 4 encontró un error real:** después de cerrar todas las sesiones, la pantalla de cuenta seguía mostrando la sesión, porque `get-session` respondía desde la cookie en caché (1 hora). Ahora esa pantalla pregunta con `disableCookieCache=true`, y "Cerrar sesión en todos los dispositivos" también cierra la propia. Va en su propio commit (`fix(web): …`).
+> - **El corte de red** se prueba con el caso más difícil: el servidor recibe y aplica el *push*, pero el navegador nunca recibe la respuesta (`route.fetch()` y después `route.abort()`). El reintento no lo duplica.
+> - **Cada navegador manda su propia IP** en `cf-connecting-ip` (`wrangler dev` la deja pasar), para que el límite de intentos de login los trate como dispositivos distintos.
+> - **El servidor lo levanta `apps/api/scripts/e2e-server.mjs`:** borra y crea la base `constancia_e2e` en `TEST_DATABASE_URL`, la migra y escribe un `.wrangler/e2e.vars` con un secreto aleatorio de esa corrida.
+> - **El CI tiene un job aparte (`sync-e2e`)** con su propio Postgres, en vez de modificar el job de E2E: así el E2E de siempre sigue corriendo sin servidor.
 
 ## Cierre de la fase
 
-- **Revisión de seguridad independiente** de la rama completa, por un subagente que no vio el código. Te aviso al lanzarla.
+- [x] **Revisión de seguridad independiente** de la rama completa, por un subagente que no vio el código. Te aviso al lanzarla.
+
+  > **Al hacerla (PR #49):** se hizo el 25-11-2026, sin hallazgos críticos ni altos. Se arreglaron una falla media (cualquiera podía mantener Neon despierto con `get-session`) y cuatro bajas: `/version` volvía a Postgres pasada la hora, un *push* en `text/plain` desde una Preview entraba con tu cookie, el log de errores incluía los parámetros de las consultas, y `sortOrder` no tenía tope. Lo que depende de tus paneles (las ramas del *environment* `production`, las Previews sin clave de Brevo y con el registro cerrado) quedó en `docs/cuentas.md`. Como las Previews quedan con el registro cerrado, el CPU de `scrypt` (Tarea 12, paso 5) se mide en producción, con tu cuenta (paso 7 de `cuentas.md`). Queda sin verificar si Workers Builds construye Previews para las PR desde *forks*. La documentación de Cloudflare no lo dice; lo revisamos en el panel cuando conectes el repo.
 - **Primer *release*:** una PR de `app/habit_tracker` hacia `release/habit-tracker`, que fusionas tú (ADR 0010).
 - **Tu cuenta:** creas la cuenta en producción con `AUTH_SIGNUP_ENABLED=true` y lo vuelves a `false`. Luego instalas la app en el iPhone (la guía de la PWA es de la fase 4 básica).
 - **Resumen para ti** y la etiqueta `phase-2-ok` cuando lo apruebes.

@@ -1,6 +1,7 @@
 import { pushRequestSchema } from '@habit-tracker/shared';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
+import { createMiddleware } from 'hono/factory';
 import type { AppEnv } from '../app';
 import { requireCachedSession, requireSession, withAuth } from '../auth/session';
 import { announce } from './notifier';
@@ -10,11 +11,22 @@ import { push } from './push';
 // A full batch of 200 rows is far below this; anything larger is not a client of ours.
 const MAX_PUSH_BYTES = 1024 * 1024;
 
+// Cross-site requests: workers.dev is a public suffix, so the Previews and any other Worker
+// on the account are the same site as production and get its SameSite=Lax cookie. Without
+// CORS, a page there can only send the simple content types (text/plain and forms), never
+// application/json, so demanding JSON keeps their writes out.
+const jsonOnly = createMiddleware<AppEnv>(async (c, next) => {
+  const type = c.req.header('content-type')?.split(';')[0]?.trim().toLowerCase();
+  if (type !== 'application/json') return c.json({ error: 'unsupported_media_type' }, 415);
+  await next();
+});
+
 export function syncRoutes(): Hono<AppEnv> {
   const sync = new Hono<AppEnv>();
 
   sync.post(
     '/push',
+    jsonOnly,
     bodyLimit({
       maxSize: MAX_PUSH_BYTES,
       onError: (c) => c.json({ error: 'payload_too_large' }, 413),

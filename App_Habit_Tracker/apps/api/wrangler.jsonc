@@ -13,6 +13,9 @@
     "not_found_handling": "single-page-application",
     "run_worker_first": ["/api/*"],
   },
+  // A URL per Preview (`<name>-constancia.<subdomain>.workers.dev`), for every branch but
+  // release/habit-tracker (ADR 0010).
+  "preview_urls": true,
   "observability": {
     "logs": { "enabled": true },
   },

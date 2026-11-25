@@ -75,8 +75,10 @@ export function createAuth(env: AuthEnv, db: Db, requestUrl: string, deps: AuthD
       cookieCache: { enabled: true, maxAge: HOUR },
     },
     // Kept in Postgres: a Worker's memory does not outlive the request. The default rules
-    // allow 3 sign-in attempts per 10 s for each IP.
-    rateLimit: { enabled: true, storage: 'database' },
+    // allow 3 sign-in attempts per 10 s for each IP. get-session is left out: it guesses
+    // nothing, and counting it would let anyone keep Neon awake with one GET every few
+    // minutes (and wake it before every sync check).
+    rateLimit: { enabled: true, storage: 'database', customRules: { '/get-session': false } },
     advanced: {
       ipAddress: { ipAddressHeaders: ['cf-connecting-ip'] },
       useSecureCookies: !isLocalhost(new URL(requestUrl).hostname),
