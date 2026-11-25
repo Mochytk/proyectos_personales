@@ -59,11 +59,20 @@ export function createApp({
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
 
-  // The cause goes to Workers Logs; the response never carries it.
+  // Workers Logs get the error's name and, for a database error, its Postgres code. Never
+  // the message: a failed query's message holds its SQL and every parameter (row contents,
+  // the user id, during sign-in even the password hash). The response carries nothing.
   app.onError((error, c) => {
-    console.error('Unhandled error', error.name, error.message);
+    console.error('Unhandled error', error.name, errorCode(error.cause));
     return c.json({ error: 'internal' }, 500);
   });
 
   return app;
+}
+
+function errorCode(cause: unknown): string {
+  if (typeof cause === 'object' && cause !== null && 'code' in cause) {
+    return typeof cause.code === 'string' ? cause.code : '';
+  }
+  return '';
 }
