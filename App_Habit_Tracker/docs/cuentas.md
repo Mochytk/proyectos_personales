@@ -27,6 +27,8 @@ En el repo `proyectos_personales`:
 1. **Settings → Code security** (en algunas cuentas, "Advanced Security"): activa **Secret scanning**, **Push protection** y **Dependabot alerts**. Son gratis en repos públicos.
 2. **Settings → Environments:** crea los entornos `preview` y `production`.
    - A `production` agrégale **Required reviewers** contigo, para que ninguna migración a producción corra sin tu aprobación.
+   - En `production`, en **Deployment branches and tags**, elige **Selected branches and tags** y agrega solo `app/habit_tracker` y `release/habit-tracker`. El workflow también lo revisa, pero ese chequeo vive en el archivo de cada rama y una rama lo puede borrar; este no.
+   - Al aprobar una migración a producción, mira en la pantalla de aprobación que la rama sea una de esas dos.
    - En cada uno, agrega el secreto **`DATABASE_URL`** con la URL **directa** de la rama de Neon del mismo nombre.
 3. **Recomendado:** en **Settings → Branches**, una regla para `app/habit_tracker` y otra para `release/habit-tracker` que exijan PR y CI en verde antes de fusionar.
 
@@ -91,19 +93,22 @@ Si algún día compras un dominio, conviene autenticarlo en Brevo (SPF y DKIM) p
    Repite el último comando con `BETTER_AUTH_SECRET` (uno distinto del de producción), `AUTH_ALLOWED_HOSTS`, `AUTH_SIGNUP_ENABLED`, `BREVO_API_KEY` y `EMAIL_FROM`. Wrangler te pide cada valor sin mostrarlo ni guardarlo en el historial. Para las Previews:
    - `DATABASE_URL`: la URL **pooled** de la rama `preview` de Neon;
    - `AUTH_ALLOWED_HOSTS`: `*-constancia.<sub>.workers.dev`, porque cada Preview tiene una URL `<rama>-constancia.<sub>.workers.dev`;
-   - `AUTH_SIGNUP_ENABLED`: `true`, porque la base `preview` es solo de prueba.
+   - `AUTH_SIGNUP_ENABLED`: `false`. Cámbialo a `true` solo mientras pruebas el registro en una Preview. Las URL de las Previews son públicas, y con el registro abierto cualquiera que dé con una puede crear cuentas;
+   - `BREVO_API_KEY`: vacío (al pedirlo, solo presiona Enter). El restablecimiento igual responde, pero no manda correos. Así nadie puede usar una Preview para mandar correos a terceros desde tu remitente, y el código de una rama nunca ve tu clave. Si algún día quieres probar el correo en una Preview, crea en Brevo una clave aparte y bórrala después.
+
+   La rama `preview` de Neon es solo de prueba: **nunca la restaures desde `production`** cuando ya tengas datos reales, porque copiaría tus sesiones y tu contraseña cifrada a un entorno que corre el código de cualquier rama.
 
    Los cambios a la configuración base solo llegan a las Previews nuevas.
 
 ## 6. Tu cuenta
 
 1. Abre `https://constancia.<sub>.workers.dev/cuenta`, toca **Crear cuenta** y créala con tu correo y una contraseña de 12 caracteres o más.
-2. En Cloudflare, cambia `AUTH_SIGNUP_ENABLED` a `false`. Desde ahí, nadie más puede registrarse.
+2. En Cloudflare, cambia `AUTH_SIGNUP_ENABLED` a `false`. Desde ahí, nadie más puede registrarse. Como es un secreto, el panel no muestra su valor: para comprobarlo, cierra sesión e intenta crear otra cuenta con un correo inventado. Tiene que decir "El registro está cerrado.".
 3. En el iPhone y en el Mac, inicia sesión en la misma URL. El estado arriba a la derecha pasa a "Sincronizado".
 
 ## 7. Medir el login (una vez)
 
-El plan gratis de Workers da 10 ms de CPU por petición, y el *hash* de contraseñas es lo único que puede pasarse (ADR 0005). En una Preview:
+El plan gratis de Workers da 10 ms de CPU por petición, y el *hash* de contraseñas es lo único que puede pasarse (ADR 0005). En producción, después del paso 6 (las Previews tienen el registro cerrado, así que ahí no hay cuenta con la que entrar):
 
 1. Inicia sesión 10 veces. Espera unos segundos entre intentos, porque el límite es de 3 cada 10 s.
 2. En el Worker, **Observability → Logs**, filtra las peticiones a `/api/auth/sign-in/email` y anota su `cpuTime`.

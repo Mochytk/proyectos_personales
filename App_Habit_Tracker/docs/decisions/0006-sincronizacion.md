@@ -76,6 +76,13 @@ Repetir el mismo *push* deja la base igual, porque la regla de conflicto compara
 
 Una sola transacción de solo lectura (`repeatable read`) lee las seis tablas en cada página del *pull*, para que un *push* que se confirma a mitad de camino no mueva el cursor más allá de filas que esa página no vio.
 
+### Actualización 25-11-2026: cookie renovada y *push* solo JSON
+
+- **Las rutas de sincronización reenvían las cookies que Better Auth renueva al revisar la sesión.** Antes se perdían, así que pasada la primera hora la copia firmada vencía y cada consulta de `/version` iba a Postgres. Ahora el *push*, el *pull* y el propio `/version` dejan una copia nueva, y Neon vuelve a dormir mientras la app solo consulta.
+- **El *push* exige `content-type: application/json` (si no, 415).** `workers.dev` es un sufijo público, así que las Previews y cualquier otro Worker de la cuenta son el mismo sitio que producción y reciben su cookie `SameSite=Lax`. Sin CORS, una página de otro origen solo puede mandar `text/plain` o formularios, nunca JSON. El *pull* y `/version` son lecturas: otro origen no puede leer sus respuestas.
+- **`sortOrder` es un entero de 32 bits** en el esquema compartido, igual que su columna. Uno mayor daba 500 y atascaba la sincronización de ese dispositivo.
+- Quedó implementado en la PR #49.
+
 ## Alternativas
 
 - **Dexie Cloud.** Es el servicio de sincronización de los autores de Dexie. El plan gratis tiene 3 usuarios de producción, autenticación incluida y 10 bases.
