@@ -139,6 +139,36 @@ describe('GET /api/sync/version', () => {
     expect(await response.json()).toEqual({ version: 0 });
   });
 
+  it('hands back a fresh cached session once the old one is gone, so the next poll skips Postgres', async () => {
+    const options = { notifier: () => memoryNotifier() };
+    const alice = await account('renueva@example.com', options);
+    // Only the session token: what the browser holds once the 1-hour cache cookie expires.
+    const token = alice
+      .split('; ')
+      .filter((pair) => pair.includes('session_token='))
+      .join('; ');
+
+    const response = await call(options, '/api/sync/version', { cookie: token });
+    expect(response.status).toBe(200);
+    const renewed = cookies(response);
+    expect(renewed).toContain('session_data=');
+
+    const unusable = new Proxy(
+      {},
+      {
+        get() {
+          throw new Error('The database must not be used');
+        },
+      },
+    ) as Db;
+    const offline: AppOptions = {
+      ...options,
+      connect: () => ({ db: unusable, close: () => Promise.resolve() }),
+    };
+    const next = await call(offline, '/api/sync/version', { cookie: `${token}; ${renewed}` });
+    expect(next.status).toBe(200);
+  });
+
   it('answers 401 without a session', async () => {
     const response = await call({ notifier: () => memoryNotifier() }, '/api/sync/version');
     expect(response.status).toBe(401);

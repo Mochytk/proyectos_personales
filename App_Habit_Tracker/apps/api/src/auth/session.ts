@@ -1,3 +1,4 @@
+import type { Context } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import type { AppEnv } from '../app';
 import { createAuth } from './auth';
@@ -25,25 +26,31 @@ export const withAuth = createMiddleware<AppEnv>(async (c, next) => {
 });
 
 // Need withAuth first. They set c.var.userId; the id comes from the session, never the
-// client.
+// client. Both pass on the cookies Better Auth refreshes while checking (the 1-hour session
+// cache, the daily renewal), which a server-side getSession call would otherwise drop.
+
+async function checkSession(c: Context<AppEnv>, disableCookieCache: boolean): Promise<boolean> {
+  const { headers, response: session } = await c.var.auth.api.getSession({
+    headers: c.req.raw.headers,
+    query: disableCookieCache ? { disableCookieCache: true } : {},
+    returnHeaders: true,
+  });
+  if (!session) return false;
+  c.set('userId', session.user.id);
+  for (const cookie of headers.getSetCookie()) c.header('set-cookie', cookie, { append: true });
+  return true;
+}
 
 // Checks the session in Postgres, so a revoked session stops at once. For anything that
 // reads or writes data.
 export const requireSession = createMiddleware<AppEnv>(async (c, next) => {
-  const session = await c.var.auth.api.getSession({
-    headers: c.req.raw.headers,
-    query: { disableCookieCache: true },
-  });
-  if (!session) return c.json({ error: 'unauthenticated' }, 401);
-  c.set('userId', session.user.id);
+  if (!(await checkSession(c, true))) return c.json({ error: 'unauthenticated' }, 401);
   await next();
 });
 
 // Trusts the signed session cookie cache, up to its maxAge, without touching Postgres.
 // Only for /api/sync/version, which answers a number and nothing else.
 export const requireCachedSession = createMiddleware<AppEnv>(async (c, next) => {
-  const session = await c.var.auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) return c.json({ error: 'unauthenticated' }, 401);
-  c.set('userId', session.user.id);
+  if (!(await checkSession(c, false))) return c.json({ error: 'unauthenticated' }, 401);
   await next();
 });
