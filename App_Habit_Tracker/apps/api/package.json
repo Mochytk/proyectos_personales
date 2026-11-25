@@ -11,7 +11,8 @@
     "test:tz": "TZ=Asia/Tokyo vitest run",
     "db:generate": "drizzle-kit generate",
     "deploy": "wrangler deploy",
-    "deploy:preview": "wrangler preview"
+    "deploy:preview": "wrangler preview",
+    "e2e:server": "node scripts/e2e-server.mjs"
   },
   "dependencies": {
     "@habit-tracker/shared": "workspace:*",
