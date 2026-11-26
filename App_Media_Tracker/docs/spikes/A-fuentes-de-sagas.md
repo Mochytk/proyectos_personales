@@ -23,7 +23,7 @@ Las peticiones salieron con un User-Agent sin datos personales, con pausas de 0,
 | Resultado | Cantidad |
 | --- | --- |
 | Enlazados con Wikidata por el ID de Open Library | 26 de 30 |
-| Con saga y posición | 22 de 30 |
+| Con saga y posición | 22 de 30 (20 con la posición correcta: 20 de 26 enlazados, 77 %) |
 | Con saga padre explícita (saga conjunta) | 5 de 30 |
 | En Wikidata pero sin saga (obras sueltas, o una edición en vez de la obra) | 3 |
 | Sin enlazar | 4 |
@@ -35,7 +35,7 @@ Ejemplos:
   - *Iron Gold* → "Iron Gold Tetralogy #1 ⊂ Red Rising Saga" y "Red Rising Saga #4".
   - *Dark Age* → "Red Rising Saga #5".
 
-  Con esto sale "libro 5 de 7" sin escribir nada a mano.
+  Con esto sale la posición «libro 5» sin escribir nada a mano. El total («de 7») no sale solo: Wikidata cuenta 9 miembros en *Red Rising Saga* (`coverage.txt`), así que la saga guarda un total que propone Wikidata y tú corriges (ADR 0007).
 - **Doble pertenencia:**
   - *Mort* → "Death #1 ⊂ Discworld" y "Discworld #4".
   - *Guards! Guards!* → "Ankh-Morpork City Watch #1" y "Discworld #8".
@@ -67,7 +67,7 @@ Casi todas las sagas de libros tienen etiqueta en español: "Mundodisco", "Nacid
 
 ## Conclusiones para el diseño
 
-1. **Libros:** Open Library → `P648` → `P179`/`P1545` → serie padre. Cubre la mayoría de los libros conocidos, con posición en ~73 % de esta muestra (22 de 30). Para no fallar por el primer resultado de búsqueda, la app usa el ID de la obra que elegiste.
+1. **Libros:** Open Library → `P648` → `P179`/`P1545` → serie padre. Cubre la mayoría de los libros conocidos, con la posición correcta en 20 de los 26 libros enlazados (77 %); otros 2 traían una posición equivocada. Para no fallar por el primer resultado de búsqueda, la app usa el ID de la obra que elegiste.
 2. **Películas y series:** los ID de TMDB (`P4947`/`P4983`) están casi completos en sagas grandes. Las colecciones de TMDB sirven como pista adicional para películas.
 3. **Juegos:** la cobertura de ID de RAWG es baja. Lo normal será armar la saga a mano.
 4. **Siempre se confirma:** hay errores de datos (Dune, El Señor de los Anillos), así que las sugerencias nunca se aplican solas.
