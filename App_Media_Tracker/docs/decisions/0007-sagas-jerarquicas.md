@@ -27,7 +27,8 @@ Es un árbol de colecciones (ADR 0006).
   - no hay ciclos (una saga no puede contenerse a sí misma, ni directa ni indirectamente);
   - la profundidad máxima es 4;
   - no se repite el mismo hijo en la misma saga.
-- **Orden completo:** se recorre el árbol en profundidad, según la posición. Si una saga contiene subsagas y además elementos directos, por ejemplo *Red Rising Saga* con la trilogía en la posición 1 y la tetralogía en la 2, el orden completo es el de las subsagas en su posición. Un elemento que está a la vez en la saga padre (como *Iron Gold*, que es "Red Rising Saga #4") **no se cuenta dos veces**: aparece una sola vez, en la primera posición en que se lo encuentra. Así se obtiene "libro 5 de 7".
+- **Orden completo:** se recorre el árbol en profundidad. Los hijos de una saga se ordenan por `position`, sean elementos o subsagas, y cada subsaga se despliega en su lugar; con la misma posición, va primero la subsaga. Por ejemplo, *Red Rising Saga* tiene la trilogía en la posición 1 y la tetralogía en la 2. Un elemento que está a la vez en la saga padre (como *Iron Gold*, que es "Red Rising Saga #4") **no se cuenta dos veces**: aparece una sola vez, en la primera posición en que se lo encuentra. Así se obtiene la posición «libro 5».
+- **El total («de 7»):** es `plannedCount` de la saga raíz si existe; si no, el número de elementos distintos del árbol que tienes en tu biblioteca. Al confirmar una sugerencia, `plannedCount` se propone con los miembros que conoce Wikidata y lo puedes corregir (Wikidata cuenta 9 en *Red Rising Saga* porque incluye obras que quizá no quieras contar). Si el total no se conoce, la tarjeta dice solo «libro 5».
 
 ### Sugerencias
 

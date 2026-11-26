@@ -29,7 +29,8 @@ Los tres comparten el mismo HTML y los mismos componentes. Cambian las variables
 
 - Los colores completos de cada estilo y modo son los de la página de direcciones de la fase 0 (`docs/diseno/direcciones.html`). Esa página es la referencia para la fase 1.
 - Contraste medido en esa página con la fórmula de WCAG 2.2. El peor caso de cada estilo: Estante 6,09:1, Fotograma 5,31:1 y Portada 6,33:1. En la fase 1 una prueba unitaria recalcula estos valores desde los tokens, para que un cambio de color no rompa el mínimo sin que se note.
-- El componente de progreso tiene una sola API (`units: { state: 'done' | 'now' | 'todo', fraction?, color? }[]`) y un `aria-label` con el resumen ("4 terminados, 1 en curso, 2 pendientes"). Cada estilo solo cambia cómo se dibuja.
+- El componente de progreso dibuja una unidad por paso hasta 40 pasos, como hoy (`MAX_CHECKLIST_STEPS`). Con más pasos, o con páginas o porcentaje, cambia a una barra continua del mismo estilo (el lomo, el fotograma o la portada que se llena), igual que `usesCounter` en la app actual.
+- Tiene una sola API (`units: { state: 'done' | 'now' | 'todo', fraction?, color? }[]`) y un `aria-label` con el resumen ("4 terminados, 1 en curso, 2 pendientes"). Cada estilo solo cambia cómo se dibuja.
 - Las fuentes se autoalojan con Fontsource (`@fontsource-variable/bricolage-grotesque`, `literata`, `archivo` y `schibsted-grotesk`; licencia OFL-1.1, revisadas el 26-11-2026). Cada estilo carga solo las suyas.
 
 ### Elección y rotación

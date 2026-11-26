@@ -58,6 +58,8 @@ Es un requisito de interfaz que se revisa en los E2E:
 
 `MediaTracker/1.0 (uso personal)` en Open Library y Wikidata, sin datos personales. Con ese User-Agent, Open Library permite 1 petición por segundo, que alcanza para una persona. Para subir a 3 hay que incluir un correo de contacto. Eso queda como pregunta: solo se haría con tu permiso, y el correo iría como secreto del Worker (`OPENLIBRARY_CONTACT`), nunca en el repo.
 
+La política de User-Agent de Wikimedia pide un contacto, y los Workers salen por IPs compartidas, así que sin contacto existe el riesgo de recibir 403. Si pasa, la opción es añadir una URL de contacto sin correo (por ejemplo, una página del proyecto). Queda como pregunta de la fase 3.
+
 ## Alternativas
 
 - **Mantener las claves en el dispositivo**, como hoy. En una PWA quedan expuestas a cualquiera que abra las herramientas del navegador. Descartada.

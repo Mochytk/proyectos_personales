@@ -36,6 +36,8 @@ Al terminarla, la app funciona en el navegador sin servidor y con tus datos impo
 | Disfrutando, Biblioteca, Listas (normales e inteligentes) y detalle con progreso y temporadas | `feat/media-core-screens` |
 | E2E de Playwright en Chromium y WebKit, con tamaño iPhone y Mac | `test/media-e2e-core` |
 
+**Pendientes de la revisión de la fase 0 que se resuelven aquí:** reemplazar el `MEDIA_KINDS` provisional de `packages/shared` por los 12 tipos reales.
+
 **Dependencias que se piden al empezar** (se revisa el origen, la licencia, los scripts y los permisos): react, react-dom, react-router, vite, @vitejs/plugin-react, vite-plugin-pwa, dexie, dexie-react-hooks, zod, uuid (v5), @fontsource-variable/{bricolage-grotesque,literata,archivo,schibsted-grotesk} (ADR 0010), @playwright/test, @axe-core/playwright y un escáner de secretos para la CI.
 
 ## Fase 2 · Servidor y metadatos
@@ -48,7 +50,7 @@ Al terminarla, la app funciona en el navegador sin servidor y con tus datos impo
 | Atribución de TMDB y RAWG | `feat/media-attribution` |
 | Guía para crear el Worker, el KV, los secretos y el proyecto de Neon (tú ejecutas los pasos de la cuenta) | `docs/media-cloudflare-setup` |
 
-Hasta la fase 4 (cuenta), el proxy se protege en `preview` con Cloudflare Access o con un token de desarrollo que es secreto del Worker. Se decide en el plan de la fase.
+Hasta la fase 4 (cuenta), el proxy se protege en `preview` con Cloudflare Access o con un token de desarrollo que es secreto del Worker. Si es un token, se escribe en la app al usarla y se guarda solo en ese dispositivo: nunca va dentro del *build* de Vite. Mientras tanto, el límite de peticiones es por token. Se decide en el plan de la fase.
 
 ## Fase 3 · Sagas conjuntas
 
@@ -98,3 +100,4 @@ Hasta la fase 4 (cuenta), el proxy se protege en `preview` con Cloudflare Access
 1. **Fase 2:** ¿generamos claves nuevas de TMDB y RAWG para el Worker, en vez de reutilizar las que estuvieron en el dispositivo? (Recomendado: sí.)
 2. **Fase 2:** ¿se puede usar tu correo como contacto en el User-Agent de Open Library, guardado como secreto del Worker? Sin él, el límite es de 1 petición por segundo, que alcanza. (Recomendado: no, salvo que se note lento.)
 3. **Fase 2:** ¿proteger el `preview` con Cloudflare Access o con un token de desarrollo? (Recomendado: token, porque Access exige configurar una cuenta Zero Trust, aunque sea gratis.)
+4. **Fase 3:** si Wikidata responde 403 por falta de contacto en el User-Agent, ¿qué URL de contacto usamos? Nunca tu correo sin permiso.

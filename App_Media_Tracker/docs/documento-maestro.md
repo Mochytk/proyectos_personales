@@ -69,7 +69,7 @@ La versión actual queda congelada y **no se usa** hasta que la nueva tenga pari
 
 **Biblioteca y progreso**
 
-- HU-1. **Añado por tipo:** el botón + despliega un menú de tipos (Película, Serie, Libro y Videojuego primero; después el resto). Al elegir uno se abre la búsqueda de ese tipo, con "Añadir a mano" como alternativa.
+- HU-1. **Añado por tipo:** el botón + despliega un menú de tipos (Película, Serie, Libro y Videojuego primero, y debajo los demás; los 12 tipos están desde la fase 1). Al elegir uno se abre la búsqueda de ese tipo, con "Añadir a mano" como alternativa. Los audiolibros buscan en Open Library; los tipos sin fuente (juego de mesa, álbum, app, software, evento, tarea y nota) abren directo el formulario a mano.
 - HU-2. **Aviso de duplicados:** si lo que añado ya existe (mismo ID de la fuente, o mismo título normalizado + tipo + año), veo "Ya tienes «X» (en curso)" con **Abrir el existente** o **Añadir igual**. Lo mismo al importar.
 - HU-3. **Posibles duplicados:** una lista con los pares sospechosos de mi biblioteca, donde puedo fusionarlos (eligiendo qué datos quedan) o marcarlos como "no son duplicados". Nada se fusiona solo.
 - HU-4. Registro el progreso por episodio y temporada, página, capítulo, nivel o porcentaje, en 2 toques desde Disfrutando.
@@ -158,7 +158,7 @@ La versión actual queda congelada y **no se usa** hasta que la nueva tenga pari
 
 Lo que hace útil la parte automática es cuánto acierta. Desde la fase 3 hay una evaluación reproducible con **datos sintéticos y públicos** (nunca tu biblioteca real en el repo):
 
-- **Sagas:** un conjunto de 60 obras (libros, películas, juegos) con su saga, saga padre y posición correctas. Métricas: cobertura (cuántas tienen sugerencia), precisión de saga y precisión de posición. Meta: ≥ 70 % de posición correcta en libros enlazados. Línea base del spike: 22 de 30 libros con saga y posición, y errores de datos como *Dune Messiah* "#1" (`docs/spikes/A-fuentes-de-sagas.md`).
+- **Sagas:** un conjunto de 60 obras (libros, películas, juegos) con su saga, saga padre y posición correctas. Métricas: cobertura (cuántas tienen sugerencia), precisión de saga y precisión de posición. Meta: ≥ 70 % de posición correcta en libros enlazados. Línea base del spike: 20 de 26 libros enlazados (77 %) con saga y posición correctas; otros 2 traían posición, pero equivocada (*Dune Messiah* "#1", *Las dos torres* "#2 y #3") (`docs/spikes/A-fuentes-de-sagas.md`).
 - **Duplicados:** 40 pares (duplicados reales, ediciones distintas, remakes, homónimos). Métricas: falsos positivos y falsos negativos. Ningún cambio de reglas se acepta si empeora la evaluación sin tu aprobación y un ADR.
 
 ## 8. Modelo de amenazas
