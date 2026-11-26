@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+*.tsbuildinfo
+.DS_Store
+
+# Secrets: only .env.example is versioned.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+
+# Tool output
+.wrangler/
+release/
