@@ -20,11 +20,12 @@ Diferencias propias de Media Tracker:
   - entrada de saga: `(collectionId, childId)`;
   - entrada de lista: `(listId, itemId)`;
   - descarte de duplicado: el par de IDs ordenado;
-  - ajustes: `userId`.
+  - ajustes: un id fijo, UUID v5 de `'settings'`, que existe antes de tener cuenta; en el servidor la clave es `(userId, id)`;
+  - lo importado de la app actual: elementos, listas y sagas (las reglas están en el ADR 0006).
 
-  El resto usa `crypto.randomUUID()`. Los IDs de los elementos importados de la app actual se conservan (ya son UUID v4), así que importar el mismo respaldo en el iPhone y en el Mac no duplica nada.
+  El resto usa `crypto.randomUUID()`. Como lo importado tiene IDs deterministas, importar el mismo respaldo en el iPhone y en el Mac no duplica nada.
 - **Progreso:** se sincroniza el elemento completo. Si avanzas un episodio en el iPhone sin señal y otro en el Mac, gana la última edición, como hoy. Un registro de eventos de progreso que se pueda fusionar se evalúa en la fase 6, con las relecturas.
-- **La sincronización por carpeta desaparece** en la app nueva. El importador lee esos archivos como si fueran respaldos (ADR 0006).
+- **La sincronización por carpeta desaparece** en la app nueva. El importador lee esos archivos con su propio analizador, porque su formato no es el de los respaldos (ADR 0006).
 
 ## Alternativas
 

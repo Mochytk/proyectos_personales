@@ -33,16 +33,19 @@ Todas las tablas tienen `id`, `createdAt`, `updatedAt`, `deletedAt` y, en el ser
 
 Va en `packages/shared/src/import/legacy.ts` y es una función pura:
 
-1. Lee un respaldo de la app actual (v1 a v5) o un archivo de la carpeta de sincronización.
-2. Lo lleva a v5 con las migraciones trasladadas tal cual desde `store/backup.ts`.
+1. Lee un respaldo de la app actual (`media-tracker-backup`, v1 a v5) o un archivo de la carpeta de sincronización (`media-tracker-sync`, v1). Son formatos distintos: el de sincronización trae `data: { items, lists, deleted }`, sin ajustes, y su versión 1 no tiene relación con la de los respaldos. Cada uno tiene su analizador y su archivo sintético congelado en `tests/fixtures/` (`backups/v1.json` a `v5.json` y `sync/v1.json`).
+2. Lleva el respaldo a v5 con las migraciones trasladadas tal cual desde `store/backup.ts`.
 3. Lo convierte al modelo nuevo:
+   - **IDs:** los de la app actual no siempre son UUID (los respaldos usan `it-movie` o `list-1`). Si ya es UUID, se conserva; si no, pasa a UUID v5 de `'legacy-item:' + id` o `'legacy-list:' + id`, con un espacio de nombres fijo de `shared`. Los `listId` y las papeleras usan la misma conversión. Así importar el mismo archivo en dos dispositivos da los mismos IDs;
    - `listId` pasa a `list_entries`;
-   - `saga: { name, number }` pasa a una `collection` por nombre normalizado (con la misma regla que `sagaKey`) y a su `collection_entry`;
+   - `saga: { name, number }` pasa a una `collection` con id UUID v5 de `'legacy-saga:' + sagaKey(name)`, para que la misma saga importada en el iPhone y en el Mac sea una sola, y a su `collection_entry`;
+   - `progress` se mantiene como fracción de 0 a 1;
+   - `year` se deriva de `releaseDate`, o de un `subtitle` de 4 cifras en las películas;
    - `externalId` pasa a ser el primer valor de `externalKeys`, con el mismo formato (`tmdb:movie:603`, `openlibrary:OL45804W`);
-   - las papeleras se respetan, así que lo borrado no revive.
+   - **lo borrado:** los respaldos no traen papeleras. Importar es una restauración explícita, como hoy (`importData` con `reviveTombstones`), así que lo que viene en el archivo revive aunque estuviera borrado. Las papeleras de un archivo de sincronización se aplican con la regla de hoy (`store/sync.ts`): un registro sobrevive solo si su `updatedAt` es posterior a su borrado.
 4. Devuelve un **plan de importación** con lo que se va a añadir, actualizar y omitir, y con los posibles duplicados (ADR 0008). Ese plan se muestra antes de escribir en Dexie.
 
-Importar nunca borra nada. Los IDs se conservan, de modo que importar dos veces el mismo respaldo no duplica (gana el `updatedAt` más nuevo, como hoy).
+Importar un respaldo nunca borra nada. Los IDs son deterministas, de modo que importar dos veces el mismo respaldo no duplica (gana el `updatedAt` más nuevo, como hoy).
 
 ### Formato de respaldo nuevo
 
