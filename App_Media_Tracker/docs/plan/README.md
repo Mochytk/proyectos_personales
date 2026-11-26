@@ -18,8 +18,8 @@ No se empieza la fase siguiente sin tu "ok". `develop` recibe `app/Media_Tracker
 | Documento maestro, ADRs 0001 a 0009, amenazas, arquitectura, modelo de datos, plan y convenciones | `docs/media-phase-0-adrs` | #52 |
 | Monorepo vacío con CI | `chore/media-monorepo-setup` | #51 |
 | Spike A: fuentes de sagas (Wikidata) | `spike/saga-sources` | #53 |
-| Tres direcciones visuales y tres nombres (página para elegir) | — | — |
-| ADR de identidad visual, cuando elijas | `docs/media-visual-identity` | — |
+| Tres direcciones visuales y nombres (página para elegir) | — | — |
+| ADR 0010 de identidad visual («Al día»; Estante, Fotograma y Portada) y página de referencia `docs/diseno/direcciones.html` | `docs/media-phase-0-adrs` | #52 |
 
 ## Fase 1 · Núcleo local
 
@@ -36,7 +36,7 @@ Al terminarla, la app funciona en el navegador sin servidor y con tus datos impo
 | Disfrutando, Biblioteca, Listas (normales e inteligentes) y detalle con progreso y temporadas | `feat/media-core-screens` |
 | E2E de Playwright en Chromium y WebKit, con tamaño iPhone y Mac | `test/media-e2e-core` |
 
-**Dependencias que se piden al empezar** (se revisa el origen, la licencia, los scripts y los permisos): react, react-dom, react-router, vite, @vitejs/plugin-react, vite-plugin-pwa, dexie, dexie-react-hooks, zod, uuid (v5), @fontsource-* (fuentes del estilo elegido), @playwright/test, @axe-core/playwright y un escáner de secretos para la CI.
+**Dependencias que se piden al empezar** (se revisa el origen, la licencia, los scripts y los permisos): react, react-dom, react-router, vite, @vitejs/plugin-react, vite-plugin-pwa, dexie, dexie-react-hooks, zod, uuid (v5), @fontsource-variable/{bricolage-grotesque,literata,archivo,schibsted-grotesk} (ADR 0010), @playwright/test, @axe-core/playwright y un escáner de secretos para la CI.
 
 ## Fase 2 · Servidor y metadatos
 

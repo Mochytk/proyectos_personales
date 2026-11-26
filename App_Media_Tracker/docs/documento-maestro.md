@@ -118,7 +118,7 @@ La versión actual queda congelada y **no se usa** hasta que la nueva tenga pari
 
 **RF-10 · Escritorio (HU-18).** Electron endurecido que carga el mismo *build* web; menú, atajos, estado de ventana, icono en la barra de menú (lo hecho en la PR #31, trasladado).
 
-**RF-11 · Estilos (HU-17).** Tres estilos con el mismo HTML y distintas variables, más la opción de rotar (ADR 0009 de identidad visual, cuando elijas).
+**RF-11 · Estilos (HU-17).** Tres estilos con el mismo HTML y distintas variables, más la opción de rotar (ADR 0010: Estante, Fotograma y Portada, con rotación semanal).
 
 ## 6. Requisitos no funcionales
 
@@ -226,7 +226,7 @@ Detalle y ramas en `docs/plan/README.md`. Resumen, en el orden acordado (respues
 | 9 | Sagas conjuntas | Sí, para todos los tipos |
 | 10 | Direcciones visuales | Distintas de la actual y de las de Constancia |
 | 11 | Estilos | Rotación entre los tres, aunque cueste más revisión |
-| 12 | Nombre | Proponer nombres nuevos; "Media Tracker" también gusta |
+| 12 | Nombre | Proponer nombres nuevos; "Media Tracker" también gusta. Elegido el 26-11-2026: **Al día** (ADR 0010) |
 | 13 | Accesibilidad | Requisito |
 | 14 | Convenciones | Las del prompt |
 | 15 | Etiquetas | `media-tracker/phase-N-ok` |

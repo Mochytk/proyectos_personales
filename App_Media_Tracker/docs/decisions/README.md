@@ -17,5 +17,4 @@ Esta reescritura usa el stack y el método de Constancia (`App_Habit_Tracker/doc
 | [0007](0007-sagas-jerarquicas.md) | Sagas jerárquicas para todos los tipos | Propuesto |
 | [0008](0008-duplicados.md) | Duplicados: aviso, lista y fusión asistida | Propuesto |
 | [0009](0009-app-de-escritorio.md) | App de escritorio para Mac | Propuesto |
-
-El ADR de identidad visual (nombre y tres estilos) se escribe cuando elijas entre las direcciones propuestas en la fase 0.
+| [0010](0010-identidad-visual.md) | Identidad visual: nombre «Al día» y tres estilos | Propuesto |
