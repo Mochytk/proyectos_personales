@@ -18,7 +18,7 @@
   ```
   App_Media_Tracker/
     apps/web/        React + Vite (PWA), la interfaz
-    apps/server/     Worker de Cloudflare (Hono), API y archivos estáticos
+    apps/api/        Worker de Cloudflare (Hono), API y archivos estáticos
     apps/desktop/    Electron, que carga el build de apps/web
     packages/shared/ tipos, esquemas Zod y lógica pura (progreso, temporadas, sagas, duplicados, importador)
     docs/            documento maestro, ADRs, plan, amenazas, arquitectura
@@ -37,7 +37,7 @@
 
 ## Consecuencias
 
-- Durante la reescritura hay dos apps en el mismo directorio. La CI nueva ignora `MediaTracker/`, y la CI de la app actual sigue igual hasta su retiro.
+- Durante la reescritura hay dos apps en el mismo directorio. La CI nueva ignora `MediaTracker/`. La app actual no tiene CI propia en GitHub; sus pruebas se corren a mano, y no se tocan hasta su retiro.
 - No hay uso diario hasta tener paridad (respuesta 5), así que el orden de las fases prioriza lo que más usas.
 - Lo que se aprenda aquí sirve a las dos apps, y lo de Constancia sirve aquí.
 

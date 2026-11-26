@@ -11,7 +11,8 @@ Resumen del 25-11-2026. Las razones de cada pieza están en `docs/decisions/`.
  │ service      │        │  safeStorage (token)     │
  │ worker       │        │  renderer: apps/web      │
  └──────┬───────┘        └────────────┬─────────────┘
-        │ HTTPS, mismo origen, cookie de sesión
+        │ PWA: HTTPS, mismo origen, cookie de sesión
+        │ Electron: HTTPS desde app://media-tracker, token en safeStorage (ADR 0009)
         ▼                             ▼
  ┌─────────────────────────────────────────────────┐
  │ Worker de Cloudflare "media-tracker" (Hono)      │
@@ -37,7 +38,7 @@ Resumen del 25-11-2026. Las razones de cada pieza están en `docs/decisions/`.
 | --- | --- | --- |
 | `packages/shared` | Esquemas Zod; tipos; lógica pura de progreso, temporadas, completado, fechas, planificador, listas inteligentes, estadísticas, sagas (árbol y orden completo), duplicados (normalización y emparejamiento), barra de menú, importador y migraciones de respaldo | Zod |
 | `apps/web` | Interfaz, Dexie, *outbox*, cliente de sincronización y de metadatos, estilos | `shared` |
-| `apps/server` | Worker: rutas, Drizzle, Better Auth, proxy de metadatos, `SyncNotifier` | `shared` |
+| `apps/api` | Worker: rutas, Drizzle, Better Auth, proxy de metadatos, `SyncNotifier` | `shared` |
 | `apps/desktop` | Proceso principal de Electron y *preload* | `shared` (validación de IPC) |
 
 ## Flujos clave

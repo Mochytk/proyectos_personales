@@ -13,7 +13,7 @@
 
 Igual que Constancia, con un **Worker y una base propios** de Media Tracker:
 
-- **Worker de Cloudflare `media-tracker`** con Hono 4. Sirve los archivos estáticos de `apps/web` y la API `/api/*` en el mismo origen, así que no hay CORS con credenciales ni cookies de terceros. Tiene entornos `dev`, `preview` (por rama) y `production`, y producción se despliega desde la rama de *release* (como el ADR 0010 de Constancia).
+- **Worker de Cloudflare `media-tracker`** con Hono 4. Sirve los archivos estáticos de `apps/web` y la API `/api/*` en el mismo origen, así que la PWA no necesita CORS con credenciales ni cookies de terceros. Electron carga desde `app://media-tracker`, que es otro origen, y usa un token guardado en `safeStorage` (ADR 0009). Tiene entornos `dev`, `preview` (por rama) y `production`, y producción se despliega desde la rama de *release* (como el ADR 0010 de Constancia).
 - **Neon: un proyecto aparte, `media-tracker`**, en `aws-sa-east-1`. El plan Free permite 100 proyectos, cada uno con 100 CU-horas de cómputo al mes, 1 GB de almacenamiento y 10 ramas. Un proyecto propio no le quita cómputo a Constancia. Dentro del proyecto, la rama `production` es para producción y las ramas de *preview* son para las Previews.
 - **Drizzle** para el esquema y las migraciones, con una migración por commit y revisada en la PR.
 - **Better Auth 1.7**, con correo y contraseña (scrypt), sesión en una cookie `HttpOnly`, `Secure` y `SameSite=Lax`, y límite de intentos. El registro queda cerrado con `AUTH_SIGNUP_ENABLED=false` después de crear tu cuenta.
