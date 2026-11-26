@@ -28,6 +28,18 @@ Politica para todos los cambios en este repo (decidida por la autora/autor del p
 - `main` no se actualiza por cada funcion, ni se abren PRs a `main` para cambios normales.
 - Resumen: rama por cambio -> PR a `app/<App>` -> PR a `develop` (pruebas) -> `main` (app completa y probada).
 
+## Convenciones de Media Tracker (desde 2026-11-25)
+
+La reescritura de Media Tracker (`App_Media_Tracker/`) adopta las convenciones de Constancia:
+
+- Ramas por cambio desde `app/Media_Tracker`, en ingles y en minusculas, con prefijo `feat/`, `fix/`, `chore/`, `docs/`, `test/`, `refactor/`, `ci/` o `spike/` (ejemplo: `feat/media-duplicates`). Reemplaza a `feature/<tema>` para esta app.
+- Commits pequenos en ingles con Conventional Commits (`feat:`, `fix:`, `docs:`...), uno por cambio logico, cada uno subido con push. Nunca se reescribe historia ya subida.
+- La descripcion de cada PR va en espanol: que cambia, por que, como se probo, riesgos y rollback. Cada PR trae su documentacion al dia.
+- Desarrollo por fases (`App_Media_Tracker/docs/plan/README.md`); al cerrar cada fase aprobada se crea la etiqueta `media-tracker/phase-N-ok`.
+- Las PR las revisa y fusiona solo la autora/autor del proyecto, nada de auto-merge.
+
+Detalles (comandos, reglas de seguridad) en `App_Media_Tracker/CLAUDE.md`.
+
 ## Historial de referencia
 
 - Hasta 2026-10-23 las ramas por cambio se fusionaban directamente en `develop` (ejemplo: PR #12, portadas en todas partes); desde esa fecha pasan primero por `app/<App>`.

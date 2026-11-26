@@ -8,7 +8,7 @@
 
 **Tech Stack:** Electron (`Tray`, `Menu`, `nativeImage`), TypeScript/React Native Web, Vitest, Pillow (solo para generar los iconos).
 
-**Spec:** `docs/superpowers/specs/2026-10-28-barra-de-menu-design.md`
+**Spec:** `App_Media_Tracker/docs/historial/2026-10-28-barra-de-menu-design.md`
 
 ## Global Constraints
 
